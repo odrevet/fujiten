@@ -1,0 +1,24 @@
+name: japanese_dictionary
+description: Japanese expressions and kanji search
+
+version: 1.0.0+1
+
+environment:
+  sdk: ">=2.7.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  sqflite: ^2.0.0+3
+  shared_preferences: ^2.0.5
+  ruby_text: ^1.0.1
+  package_info: ^2.0.0
+  flutter_localizations:
+    sdk: flutter
+
+flutter:
+  uses-material-design: true
+  assets:
+    - assets/
+    - assets/db/
