@@ -10,10 +10,10 @@ dependencies:
   flutter:
     sdk: flutter
 
-  sqflite: ^2.0.0+3
-  shared_preferences: ^2.0.5
-  ruby_text: ^2.0.0
-  package_info: ^2.0.0
+  sqflite: ^2.0.0+4
+  shared_preferences: ^2.0.8
+  ruby_text: ^3.0.1
+  package_info: ^2.0.2
   flutter_localizations:
     sdk: flutter
 
