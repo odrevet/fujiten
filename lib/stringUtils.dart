@@ -1,4 +1,4 @@
-// @dart=2.9
+
 
 const String regexKanji = '[一-龯]';
 const String regexKana = '[ぁ-んァ-ン]';
@@ -19,10 +19,10 @@ String sqlIn(List<String> input) {
   return res + ')';
 }
 
-String addCharAtPosition(String s, String char, int position,
+String addCharAtPosition(String s, String char, int? position,
     {bool repeat = false}) {
   if (!repeat) {
-    if (s.length < position) {
+    if (s.length < position!) {
       return s;
     }
     String before = s.substring(0, position);
@@ -34,7 +34,7 @@ String addCharAtPosition(String s, String char, int position,
     }
     StringBuffer buffer = new StringBuffer();
     for (int i = 0; i < s.length; i++) {
-      if (i != 0 && i % position == 0) {
+      if (i != 0 && i % position! == 0) {
         buffer.write(char);
       }
       buffer.write(String.fromCharCode(s.runes.elementAt(i)));
