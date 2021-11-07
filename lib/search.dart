@@ -1,3 +1,5 @@
+// @dart=2.9
+
 import 'kanji.dart';
 
 class Search {

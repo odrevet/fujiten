@@ -4,20 +4,20 @@ class Meaning{
   String meaning;
   Lang lang;
 
-  Meaning({this.meaning, this.lang});
+  Meaning({required this.meaning, required this.lang});
 }
 
 class Kanji {
   final String character;
   final int stroke;
-  final List<String> radicals;
-  final List<String> on;
-  final List<String> kun;
-  final List<String> meanings;
+  final List<String>? radicals;
+  final List<String>? on;
+  final List<String>? kun;
+  final List<String>? meanings;
 
   Kanji(
-      {this.character,
-      this.stroke,
+      {required this.character,
+      required this.stroke,
       this.radicals = const [],
       this.on = const [],
       this.kun = const [],

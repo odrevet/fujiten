@@ -1,3 +1,5 @@
+// @dart=2.9
+
 import 'package:sqflite/sqflite.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 

@@ -1,3 +1,5 @@
+// @dart=2.9
+
 const String regexKanji = '[一-龯]';
 const String regexKana = '[ぁ-んァ-ン]';
 const String charKanji = 'Ⓚ';
