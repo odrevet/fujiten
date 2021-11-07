@@ -97,11 +97,23 @@ class RadicalPageState extends State<RadicalPage> {
   }
 
   Widget _radicalButton(Kanji radical) => TextButton(
-      child: Text(radical.character, style: TextStyle(fontSize: 30.0)),
-      /*color: _selectedRadicals.contains(radical.character)
-          ? Theme.of(context).primaryColor
-          : Color.fromARGB(255, 152 + radical.stroke * 6,
-              152 + radical.stroke * 6, 152 + radical.stroke * 6),*/
+      child: Text(radical.character, style: TextStyle(
+        fontSize: 40,
+        color: _selectedRadicals.contains(radical.character)
+            ? Color.fromARGB(255, 255, 0, 0)
+            : Color.fromARGB(255, 0, 0, 255),
+      )),
+      style: ButtonStyle(
+        backgroundColor: MaterialStateProperty.resolveWith<Color>(
+              (Set<MaterialState> states) {
+            if (states.contains(MaterialState.pressed))
+              return Theme.of(context).colorScheme.primary;
+            else if (states.contains(MaterialState.disabled))
+              return Colors.grey;
+            return null; // Use the component's default.
+          },
+        ),
+      ),
       onPressed:
           _validRadicals.isEmpty || _validRadicals.contains(radical.character)
               ? () => _onRadicalButtonPress(radical.character)
