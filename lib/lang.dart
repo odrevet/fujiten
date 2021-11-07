@@ -1,10 +1,10 @@
-// @dart=2.9
+
 
 class Lang {
   String code;
   bool isEnabled;
 
-  Lang({this.code, this.isEnabled});
+  Lang({required this.code, required this.isEnabled});
 
   String get countryFlag {
     switch (code) {
