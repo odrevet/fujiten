@@ -2,11 +2,16 @@
 
 Japanese expressions and kanji search
 
+# Setup
+
+Download and uncompress `expression.db` and `kanji.db` from https://github.com/odrevet/edict_database/releases/tag/v1.0
+to `assets/db`
+
 # Vocabulary 
 
 * Kanji Character: The kanji without related information 
 
-* Kanji: The kanji with informations
+* Kanji: The kanji with information
 
 * Kanji reading: In JMDict, this is the 'keb': A reading of an 
 expression with at least one kanji. 
@@ -15,7 +20,7 @@ expression with at least one kanji.
 
 * Gloss : Translation of an expression 
 
-* POS : Part of Speech are informations on a glosses 
+* POS : Part of Speech are information on a glosses
 
 ## TODO
 
