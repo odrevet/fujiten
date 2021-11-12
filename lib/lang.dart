@@ -1,5 +1,3 @@
-
-
 class Lang {
   String code;
   bool isEnabled;

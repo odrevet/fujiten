@@ -1,6 +1,6 @@
 import 'lang.dart';
 
-class Meaning{
+class Meaning {
   String meaning;
   Lang lang;
 

@@ -1,12 +1,10 @@
-
-
 import 'package:flutter/material.dart';
 import 'package:sqflite/sqflite.dart';
 
-import 'settings.dart';
 import 'queries.dart';
 import 'radicalPage.dart';
 import 'search.dart';
+import 'settings.dart';
 import 'stringUtils.dart';
 
 class LanguageSelect extends StatefulWidget {
@@ -188,8 +186,10 @@ class _MenuBarState extends State<MenuBar> {
               '<${selectedRadicals.join()}>',
               insertPosition);
         } else {
-          widget.textEditingController!.text = widget.textEditingController!.text
-              .replaceRange(matchAtCursor.start, matchAtCursor.end,
+          widget.textEditingController!.text =
+              widget.textEditingController!.text.replaceRange(
+                  matchAtCursor.start,
+                  matchAtCursor.end,
                   '<${selectedRadicals.join()}>');
         }
       }

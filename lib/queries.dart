@@ -1,7 +1,5 @@
-
-
-import 'package:sqflite/sqflite.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:sqflite/sqflite.dart';
 
 import 'kanji.dart';
 import 'search.dart';
@@ -98,7 +96,8 @@ Future<List<ExpressionEntry>> searchExpression(
   int? expressionId;
 
   expressionMaps.forEach((expressionMap) {
-    if (expressionId == null || expressionMap['expression_id'] != expressionId) {
+    if (expressionId == null ||
+        expressionMap['expression_id'] != expressionId) {
       senses = <Sense>[];
       senses.add(
         Sense(

@@ -1,11 +1,9 @@
-
-
 import 'dart:convert';
 
-import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import 'package:package_info/package_info.dart';
 import 'package:adaptive_theme/adaptive_theme.dart';
+import 'package:flutter/material.dart';
+import 'package:package_info/package_info.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import 'lang.dart';
 
@@ -74,7 +72,9 @@ class _AppearancePageState extends State<AppearancePage> {
   }
 
   void _onToggleDarkTheme(bool? value) async {
-    value == true ? AdaptiveTheme.of(context).setDark() : AdaptiveTheme.of(context).setLight();
+    value == true
+        ? AdaptiveTheme.of(context).setDark()
+        : AdaptiveTheme.of(context).setLight();
 
     SharedPreferences prefs = await SharedPreferences.getInstance();
 
@@ -194,14 +194,15 @@ class _LanguagePageState extends State<LanguagePage> {
   }
 
   _onTapLang(Lang lang, bool? isEnabled) async {
-    _langs.firstWhere((element) => element.code == lang.code).isEnabled = isEnabled!;
+    _langs.firstWhere((element) => element.code == lang.code).isEnabled =
+        isEnabled!;
 
     List<String> langsSerialized = <String>[];
     _langs.forEach((lang) {
       langsSerialized.add('${lang.code}:${lang.isEnabled == true ? '1' : '0'}');
     });
     print(langsSerialized.join());
-    
+
     setState(() {
       _sharedPreferences.setStringList('langs', langsSerialized);
     });
@@ -233,7 +234,7 @@ class _LangListTileState extends State<LangListTile> {
           '${widget.lang!.countryFlag} ${widget.lang!.name}',
           style: TextStyle(fontSize: 18),
         ),
-        value : widget.lang!.isEnabled,
+        value: widget.lang!.isEnabled,
         onChanged: _onTap);
   }
 }

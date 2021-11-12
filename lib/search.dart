@@ -1,5 +1,3 @@
-
-
 import 'kanji.dart';
 
 class Search {
@@ -17,7 +15,8 @@ class ExpressionEntry extends Entry {
   String reading;
   List<Sense> senses;
 
-  ExpressionEntry({required this.kanji, required this.reading, required this.senses});
+  ExpressionEntry(
+      {required this.kanji, required this.reading, required this.senses});
 }
 
 class Sense {
