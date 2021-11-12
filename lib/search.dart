@@ -1,4 +1,4 @@
-// @dart=2.9
+
 
 import 'kanji.dart';
 
@@ -7,7 +7,7 @@ class Search {
   int totalResult;
   List<Entry> searchResults = [];
 
-  Search({this.input, this.totalResult = 0});
+  Search({required this.input, this.totalResult = 0});
 }
 
 abstract class Entry {}
@@ -17,7 +17,7 @@ class ExpressionEntry extends Entry {
   String reading;
   List<Sense> senses;
 
-  ExpressionEntry({this.kanji, this.reading, this.senses});
+  ExpressionEntry({required this.kanji, required this.reading, required this.senses});
 }
 
 class Sense {
@@ -25,11 +25,11 @@ class Sense {
   List<String> posses;
   String lang;
 
-  Sense({this.glosses, this.posses, this.lang});
+  Sense({required this.glosses, required this.posses, required this.lang});
 }
 
 class KanjiEntry extends Entry {
   Kanji kanji;
 
-  KanjiEntry({this.kanji});
+  KanjiEntry({required this.kanji});
 }
