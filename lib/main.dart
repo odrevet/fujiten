@@ -24,7 +24,7 @@ class App extends StatelessWidget {
       ),
       initial: AdaptiveThemeMode.light,
       builder: (theme, darkTheme) => MaterialApp(
-        title: 'Adaptive Theme Demo',
+        title: 'Japanese dictionary',
         theme: theme,
         darkTheme: darkTheme,
         home: MainWidget(),

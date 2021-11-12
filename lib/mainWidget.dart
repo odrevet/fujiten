@@ -66,29 +66,6 @@ class _MainWidgetState extends State<MainWidget> {
     super.dispose();
   }
 
-/*
-  _displaySnackBar(String message) {
-    _scaffoldKey.currentState.showSnackBar(SnackBar(
-      content: Text(message),
-    ));
-  }
-
-  String _formatSnackBarMessage() {
-    String searchType = 
-    KotobaButton.kanjiSearch ? 'kanji' : 'expression';
-
-    if (_search.totalResult == 0) {
-      return 'No match found';
-    }
-
-    if (_search.totalResult > 1) searchType += 's';
-
-    int resultsCount = _resultsPerPage > _search.totalResult
-        ? _search.totalResult
-        : _resultsPerPage;
-    return '$resultsCount of ${_search.totalResult} $searchType';
-  }*/
-
   _runSearch(String input) {
     if (_kanjiSearch!) {
       searchKanji(_dbKanji!, input).then((searchResult) => setState(() {
@@ -96,9 +73,7 @@ class _MainWidgetState extends State<MainWidget> {
               if (searchResult.isNotEmpty)
                 _search!.searchResults.addAll(searchResult);
               _isLoading = false;
-              //_displaySnackBar(_formatSnackBarMessage());
             });
-            //_displaySnackBar(_formatSnackBarMessage());
           }));
     } else {
       searchExpression(
@@ -108,7 +83,6 @@ class _MainWidgetState extends State<MainWidget> {
           if (searchResult.isNotEmpty)
             _search!.searchResults.addAll(searchResult);
           _isLoading = false;
-          //_displaySnackBar(_formatSnackBarMessage());
         });
       });
     }
