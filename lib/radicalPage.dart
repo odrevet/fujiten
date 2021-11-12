@@ -102,8 +102,8 @@ class RadicalPageState extends State<RadicalPage> {
       child: Text(radical.character, style: TextStyle(
         fontSize: 40,
         color: _selectedRadicals.contains(radical.character)
-            ? Color.fromARGB(255, 255, 0, 0)
-            : Color.fromARGB(255, 0, 0, 255),
+            ? Theme.of(context).colorScheme.primary
+            : Theme.of(context).colorScheme.secondary,
       )),
       style: ButtonStyle(
         backgroundColor: MaterialStateProperty.resolveWith<Color?>(
