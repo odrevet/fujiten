@@ -53,7 +53,7 @@ Future<List<KanjiEntry>> searchKanji(Database dbKanji, String input) async {
 }
 
 Future<List<ExpressionEntry>> searchExpression(
-    Database dbExpression, String input, String lang,
+    Database dbExpression, String input, String/*!*/ lang,
     [resultsPerPage = 10, currentPage = 0]) async {
   List<ExpressionEntry> entries = [];
 
@@ -95,7 +95,7 @@ Future<List<ExpressionEntry>> searchExpression(
   }
 
   List<Sense> senses;
-  int expressionId;
+  int/*!*/ expressionId;
 
   expressionMaps.forEach((expressionMap) {
     if (expressionMap['expression_id'] != expressionId) {
