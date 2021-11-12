@@ -1,4 +1,4 @@
-// @dart=2.9
+
 
 import 'dart:convert';
 
@@ -63,7 +63,7 @@ class AppearancePage extends StatefulWidget {
 }
 
 class _AppearancePageState extends State<AppearancePage> {
-  bool _isDarkTheme;
+  bool? _isDarkTheme;
 
   @override
   void initState() {
@@ -72,12 +72,12 @@ class _AppearancePageState extends State<AppearancePage> {
     super.initState();
   }
 
-  void _onToggleDarkTheme(bool value) async {
+  void _onToggleDarkTheme(bool? value) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
 
     setState(() {
       _isDarkTheme = value;
-      prefs.setBool('darkTheme', value);
+      prefs.setBool('darkTheme', value!);
     });
   }
 
@@ -108,12 +108,12 @@ class DatasetPage extends StatefulWidget {
 }
 
 class _DatasetPageState extends State<DatasetPage> {
-  Map<String, dynamic> _databases;
+  Map<String, dynamic>? _databases;
 
   @override
   void initState() {
     _getDatabasesList().then((assets) {
-      assets.removeWhere((key, value) => !key.startsWith('assets/db'));
+      assets!.removeWhere((key, value) => !key.startsWith('assets/db'));
       setState(() => _databases = assets);
     });
     super.initState();
@@ -127,17 +127,17 @@ class _DatasetPageState extends State<DatasetPage> {
             separatorBuilder: (context, index) {
               return Divider();
             },
-            itemCount: _databases.length,
+            itemCount: _databases!.length,
             itemBuilder: (BuildContext context, int index) {
-              String key = _databases.keys.elementAt(index);
+              String key = _databases!.keys.elementAt(index);
               return ListTile(title: Text(key));
             }));
   }
 
-  Future<Map<String, dynamic>> _getDatabasesList() async {
+  Future<Map<String, dynamic>?> _getDatabasesList() async {
     final manifestContent =
         await DefaultAssetBundle.of(context).loadString('AssetManifest.json');
-    final Map<String, dynamic> manifestMap = json.decode(manifestContent);
+    final Map<String, dynamic>? manifestMap = json.decode(manifestContent);
     return manifestMap;
   }
 }
@@ -148,8 +148,8 @@ class LanguagePage extends StatefulWidget {
 }
 
 class _LanguagePageState extends State<LanguagePage> {
-  SharedPreferences _sharedPreferences;
-  List<Lang> _langs;
+  late SharedPreferences _sharedPreferences;
+  late List<Lang> _langs;
 
   @override
   initState() {
@@ -190,8 +190,8 @@ class _LanguagePageState extends State<LanguagePage> {
                 LangListTile(lang: _langs[index], onTap: _onTapLang)));
   }
 
-  _onTapLang(Lang lang, bool isEnabled) async {
-    _langs.firstWhere((element) => element.code == lang.code).isEnabled = isEnabled;
+  _onTapLang(Lang lang, bool? isEnabled) async {
+    _langs.firstWhere((element) => element.code == lang.code).isEnabled = isEnabled!;
 
     List<String> langsSerialized = <String>[];
     _langs.forEach((lang) {
@@ -206,8 +206,8 @@ class _LanguagePageState extends State<LanguagePage> {
 }
 
 class LangListTile extends StatefulWidget {
-  final Lang lang;
-  final dynamic Function(Lang, bool) onTap;
+  final Lang? lang;
+  final dynamic Function(Lang, bool?)? onTap;
 
   LangListTile({this.lang, this.onTap});
 
@@ -216,21 +216,21 @@ class LangListTile extends StatefulWidget {
 }
 
 class _LangListTileState extends State<LangListTile> {
-  _onTap(bool value) {
+  _onTap(bool? value) {
     setState(() {
-      widget.lang.isEnabled = value;
+      widget.lang!.isEnabled = value!;
     });
-    widget.onTap(widget.lang, value);
+    widget.onTap!(widget.lang!, value);
   }
 
   @override
   Widget build(BuildContext context) {
     return CheckboxListTile(
         title: Text(
-          '${widget.lang.countryFlag} ${widget.lang.name}',
+          '${widget.lang!.countryFlag} ${widget.lang!.name}',
           style: TextStyle(fontSize: 18),
         ),
-        value : widget.lang.isEnabled,
+        value : widget.lang!.isEnabled,
         onChanged: _onTap);
   }
 }

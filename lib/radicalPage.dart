@@ -1,4 +1,4 @@
-// @dart=2.9
+
 
 import 'package:flutter/material.dart';
 import 'package:sqflite/sqflite.dart';
@@ -7,10 +7,10 @@ import 'kanji.dart';
 import 'queries.dart' show getRadicals;
 
 class RadicalPage extends StatefulWidget {
-  final Database _dbKanji;
+  final Database? _dbKanji;
   final List<String> _selectedRadicals;
 
-  RadicalPage(this._dbKanji, this._selectedRadicals, {Key key})
+  RadicalPage(this._dbKanji, this._selectedRadicals, {Key? key})
       : super(key: key);
 
   @override
@@ -18,9 +18,9 @@ class RadicalPage extends StatefulWidget {
 }
 
 class RadicalPageState extends State<RadicalPage> {
-  Future<List<Kanji>> _radicals;
+  Future<List<Kanji>>? _radicals;
   List<String> _selectedRadicals = [];
-  List<String> _validRadicals = [];
+  List<String?> _validRadicals = [];
 
   RadicalPageState(List<String> initialRadicals) {
     initialRadicals.forEach((String radical) => _selectedRadicals.add(radical));
@@ -28,7 +28,7 @@ class RadicalPageState extends State<RadicalPage> {
 
   @override
   void initState() {
-    _radicals = getRadicals(widget._dbKanji);
+    _radicals = getRadicals(widget._dbKanji!);
 
     if (_selectedRadicals.isNotEmpty)
       _getRadicalsForSelection().then(
@@ -41,7 +41,7 @@ class RadicalPageState extends State<RadicalPage> {
     return FutureBuilder<List<Kanji>>(
       future: _radicals,
       builder: (context, snapshot) {
-        if (snapshot.hasError) return Center(child: Text(snapshot.error));
+        if (snapshot.hasError) return Center(child: Text(snapshot.error as String));
 
         return Scaffold(
             appBar: AppBar(
@@ -51,7 +51,7 @@ class RadicalPageState extends State<RadicalPage> {
                     onPressed: () =>
                         Navigator.pop(context, _selectedRadicals))),
             body: snapshot.hasData
-                ? Center(child: radicalGridView(snapshot.data))
+                ? Center(child: radicalGridView(snapshot.data!))
                 : Center(child: CircularProgressIndicator()));
       },
     );
@@ -106,7 +106,7 @@ class RadicalPageState extends State<RadicalPage> {
             : Color.fromARGB(255, 0, 0, 255),
       )),
       style: ButtonStyle(
-        backgroundColor: MaterialStateProperty.resolveWith<Color>(
+        backgroundColor: MaterialStateProperty.resolveWith<Color?>(
               (Set<MaterialState> states) {
             if (states.contains(MaterialState.pressed))
               return Theme.of(context).colorScheme.primary;
@@ -121,7 +121,7 @@ class RadicalPageState extends State<RadicalPage> {
               ? () => _onRadicalButtonPress(radical.character)
               : null);
 
-  Future<List<String>> _getRadicalsForSelection() async {
+  Future<List<String?>> _getRadicalsForSelection() async {
     String sql = 'SELECT DISTINCT id_radical FROM kanji_radical WHERE id_kanji IN (';
 
     _selectedRadicals.asMap().forEach((i, radical) {
@@ -132,7 +132,7 @@ class RadicalPageState extends State<RadicalPage> {
     sql += ')';
 
     final List<Map<String, dynamic>> radicalIdMaps =
-        await widget._dbKanji.rawQuery(sql);
+        await widget._dbKanji!.rawQuery(sql);
 
     return List.generate(radicalIdMaps.length, (i) {
       return radicalIdMaps[i]['id_radical'];

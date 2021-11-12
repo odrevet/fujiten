@@ -1,4 +1,4 @@
-// @dart=2.9
+
 
 import 'package:flutter/material.dart';
 import 'package:sqflite/sqflite.dart';
@@ -12,29 +12,29 @@ import 'searchInput.dart';
 import 'stringUtils.dart';
 
 class MainWidget extends StatefulWidget {
-  final String title;
+  final String? title;
   final TextEditingController _textEditingController = TextEditingController();
 
-  MainWidget({Key key, this.title}) : super(key: key);
+  MainWidget({Key? key, this.title}) : super(key: key);
 
   @override
   _MainWidgetState createState() => _MainWidgetState();
 }
 
 class _MainWidgetState extends State<MainWidget> {
-  Database _dbKanji;
-  Database _dbExpression;
+  Database? _dbKanji;
+  late Database _dbExpression;
 
-  Search _search;
+  Search? _search;
 
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
-  int _resultsPerPage;
-  int _currentPage;
-  bool _isLoading;
+  int? _resultsPerPage;
+  int _currentPage = 0;
+  bool? _isLoading;
   int _cursorPosition = -1;
-  bool _kanjiSearch;
-  String _lang;
+  bool? _kanjiSearch;
+  late String _lang;
 
   _initDb() async {
     await installDb('kanji.db');
@@ -46,13 +46,13 @@ class _MainWidgetState extends State<MainWidget> {
 
   _disposeDb() async {
     await _dbExpression.close();
-    await _dbKanji.close();
+    await _dbKanji!.close();
   }
 
   @override
   initState() {
     _initDb();
-    _search = Search(totalResult: 0);
+    _search = Search(totalResult: 0, input: '');
     _resultsPerPage = 20;
     _currentPage = 0;
     _isLoading = false;
@@ -92,11 +92,11 @@ class _MainWidgetState extends State<MainWidget> {
   }*/
 
   _runSearch(String input) {
-    if (_kanjiSearch) {
-      searchKanji(_dbKanji, input).then((searchResult) => setState(() {
+    if (_kanjiSearch!) {
+      searchKanji(_dbKanji!, input).then((searchResult) => setState(() {
             setState(() {
               if (searchResult.isNotEmpty)
-                _search.searchResults.addAll(searchResult);
+                _search!.searchResults.addAll(searchResult);
               _isLoading = false;
               //_displaySnackBar(_formatSnackBarMessage());
             });
@@ -108,7 +108,7 @@ class _MainWidgetState extends State<MainWidget> {
           .then((searchResult) {
         setState(() {
           if (searchResult.isNotEmpty)
-            _search.searchResults.addAll(searchResult);
+            _search!.searchResults.addAll(searchResult);
           _isLoading = false;
           //_displaySnackBar(_formatSnackBarMessage());
         });
@@ -118,7 +118,7 @@ class _MainWidgetState extends State<MainWidget> {
 
   _searchTypeToggle() async {
     setState(() {
-      _kanjiSearch = !_kanjiSearch;
+      _kanjiSearch = !_kanjiSearch!;
     });
   }
 
@@ -128,16 +128,16 @@ class _MainWidgetState extends State<MainWidget> {
     setState(() {
       _isLoading = true;
       _currentPage = 0;
-      _search.totalResult = 0;
-      _search.input = input;
-      _search.searchResults.clear();
+      _search!.totalResult = 0;
+      _search!.input = input;
+      _search!.searchResults.clear();
     });
 
     _runSearch(input);
   }
 
-  _onLanguageSelect(String lang) => setState(() {
-        _lang = lang;
+  _onLanguageSelect(String? lang) => setState(() {
+        _lang = lang!;
       });
 
   void _onFocusChanged(bool hasFocus) async {
@@ -150,7 +150,7 @@ class _MainWidgetState extends State<MainWidget> {
     setState(() {
       _currentPage++;
     });
-    _runSearch(_search.input);
+    _runSearch(_search!.input);
   }
 
   Widget _body() {
@@ -193,20 +193,20 @@ class _MainWidgetState extends State<MainWidget> {
     var exp = RegExp(r'<(.*?)>');
     Iterable<RegExpMatch> matches = exp.allMatches(input);
 
-    List<String> radicalList = await getRadicalsCharacter(_dbKanji);
+    List<String?> radicalList = await getRadicalsCharacter(_dbKanji!);
     String radicalsString = radicalList.join();
 
-    await Future.forEach(matches, (match) async {
+    await Future.forEach(matches, (dynamic match) async {
       String radicals = match[1];
       //remove all characters that are not a radical
       radicals = radicals.replaceAll(RegExp('[^$radicalsString]'), '');
 
-      kanjis.add(await getKanjiFromRadicals(_dbKanji, radicals));
+      kanjis.add(await getKanjiFromRadicals(_dbKanji!, radicals));
     });
 
     int index = 0;
     input = input.replaceAllMapped(exp, (Match m) {
-      if (kanjis[index] == '') return m.group(0);
+      if (kanjis[index] == '') return m.group(0)!;
       return '[${kanjis[index++]}]';
     });
 

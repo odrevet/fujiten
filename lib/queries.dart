@@ -1,4 +1,4 @@
-// @dart=2.9
+
 
 import 'package:sqflite/sqflite.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -53,7 +53,7 @@ Future<List<KanjiEntry>> searchKanji(Database dbKanji, String input) async {
 }
 
 Future<List<ExpressionEntry>> searchExpression(
-    Database dbExpression, String input, String/*!*/ lang,
+    Database dbExpression, String input, String lang,
     [resultsPerPage = 10, currentPage = 0]) async {
   List<ExpressionEntry> entries = [];
 
@@ -64,7 +64,7 @@ Future<List<ExpressionEntry>> searchExpression(
   else {
     SharedPreferences _sharedPreferences =
         await SharedPreferences.getInstance();
-    List<String> prefLangs = _sharedPreferences.getStringList('langs');
+    List<String> prefLangs = _sharedPreferences.getStringList('langs')!;
 
     List<String> enabledLangs = <String>[];
     prefLangs.forEach((prefLang) {
@@ -94,11 +94,11 @@ Future<List<ExpressionEntry>> searchExpression(
     throw ('ERROR $e');
   }
 
-  List<Sense> senses;
-  int/*!*/ expressionId;
+  late List<Sense> senses;
+  int? expressionId;
 
   expressionMaps.forEach((expressionMap) {
-    if (expressionMap['expression_id'] != expressionId) {
+    if (expressionId == null || expressionMap['expression_id'] != expressionId) {
       senses = <Sense>[];
       senses.add(
         Sense(
@@ -107,17 +107,17 @@ Future<List<ExpressionEntry>> searchExpression(
             lang: expressionMap['lang']),
       );
       entries.add(ExpressionEntry(
-          kanji: expressionMap['kanji'],
+          kanji: expressionMap['kanji'] ?? '',
           reading: expressionMap['reading'],
           senses: senses));
-    } else
+    } else {
       senses.add(
         Sense(
             glosses: expressionMap['glosses'],
             posses: expressionMap['pos'].replaceAll(RegExp(' '), '').split(','),
             lang: expressionMap['lang']),
       );
-
+    }
     expressionId = expressionMap['expression_id'];
   });
 
@@ -186,7 +186,7 @@ Future<List<Kanji>> getRadicals(Database dbKanji) async {
   });
 }
 
-Future<List<String>> getRadicalsCharacter(Database dbKanji) async {
+Future<List<String?>> getRadicalsCharacter(Database dbKanji) async {
   final List<Map<String, dynamic>> radicalMaps =
       await dbKanji.rawQuery('SELECT id FROM radical');
 

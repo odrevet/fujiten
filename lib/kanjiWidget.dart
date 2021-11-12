@@ -1,4 +1,4 @@
-// @dart=2.9
+
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -6,12 +6,12 @@ import 'package:flutter/services.dart';
 import 'kanji.dart';
 
 class KanjiCharacteriWidget extends StatelessWidget {
-  final Kanji kanji;
+  final Kanji? kanji;
   final onTap;
   final bool displayFurigana;
-  final String furigana;
-  final TextStyle style;
-  final TextStyle styleFurigana;
+  final String? furigana;
+  final TextStyle? style;
+  final TextStyle? styleFurigana;
 
   KanjiCharacteriWidget(
       {this.kanji,
@@ -28,33 +28,33 @@ class KanjiCharacteriWidget extends StatelessWidget {
         child: furigana != null && displayFurigana
             ? Column(
                 children: <Widget>[
-                  Text(furigana, style: styleFurigana),
-                  Expanded(child: Text(kanji.character, style: style))
+                  Text(furigana!, style: styleFurigana),
+                  Expanded(child: Text(kanji!.character, style: style))
                 ],
               )
-            : Text(kanji.character, style: style));
+            : Text(kanji!.character, style: style));
   }
 }
 
 class KanjiWidget extends StatelessWidget {
-  final Kanji kanji;
+  final Kanji? kanji;
 
   KanjiWidget(this.kanji);
 
   @override
   Widget build(BuildContext context) {
-    String stroke = '${kanji.stroke.toString()} '
-        'stroke${kanji.stroke > 1 ? 's' : ''}';
-    String on = kanji.on == null ? '' : kanji.on.join('・');
-    String kun = kanji.kun == null ? '' : kanji.kun.join('・');
-    String radicals = kanji.radicals == null ? '' : kanji.radicals.join('');
-    String meaning = kanji.meanings == null ? '' : kanji.meanings.join(', ');
+    String stroke = '${kanji!.stroke.toString()} '
+        'stroke${kanji!.stroke > 1 ? 's' : ''}';
+    String on = kanji!.on == null ? '' : kanji!.on!.join('・');
+    String kun = kanji!.kun == null ? '' : kanji!.kun!.join('・');
+    String radicals = kanji!.radicals == null ? '' : kanji!.radicals!.join('');
+    String meaning = kanji!.meanings == null ? '' : kanji!.meanings!.join(', ');
 
     return ListTile(
         leading: KanjiCharacteriWidget(
             kanji: kanji,
             onTap: () =>
-                Clipboard.setData(ClipboardData(text: kanji.character)),
+                Clipboard.setData(ClipboardData(text: kanji!.character)),
             style: TextStyle(fontSize: 50.0)),
         title: Table(children: <TableRow>[
           TableRow(children: <Widget>[Text(stroke)]),

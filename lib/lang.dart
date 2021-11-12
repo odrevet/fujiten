@@ -4,7 +4,7 @@ class Lang {
   String code;
   bool isEnabled;
 
-  Lang({required this.code, required this.isEnabled});
+  Lang({required this.code, this.isEnabled = false});
 
   String get countryFlag {
     switch (code) {

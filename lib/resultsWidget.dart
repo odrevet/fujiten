@@ -1,4 +1,4 @@
-// @dart=2.9
+
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -13,10 +13,10 @@ import 'search.dart';
 import 'stringUtils.dart';
 
 class ResultsWidget extends StatefulWidget {
-  final Database _dbKanji;
-  final Search _search;
+  final Database? _dbKanji;
+  final Search? _search;
   final Function _onEndReached;
-  final bool _isLoading;
+  final bool? _isLoading;
 
   ResultsWidget(
       this._dbKanji, this._search, this._onEndReached, this._isLoading);
@@ -26,13 +26,13 @@ class ResultsWidget extends StatefulWidget {
 }
 
 class _ResultsWidgetState extends State<ResultsWidget> {
-  ScrollController _scrollController;
-  TextStyle _styleFieldInformation;
+  ScrollController? _scrollController;
+  TextStyle? _styleFieldInformation;
 
   @override
   initState() {
     _scrollController = ScrollController();
-    _scrollController.addListener(_scrollListener);
+    _scrollController!.addListener(_scrollListener);
 
     _styleFieldInformation = TextStyle(
         fontSize: 11, fontStyle: FontStyle.italic, color: Colors.blue);
@@ -42,15 +42,15 @@ class _ResultsWidgetState extends State<ResultsWidget> {
 
   @override
   void dispose() {
-    _scrollController.dispose();
+    _scrollController!.dispose();
     super.dispose();
   }
 
   _scrollListener() {
-    if (_scrollController.offset >=
-            _scrollController.position.maxScrollExtent &&
-        !_scrollController.position.outOfRange &&
-        !widget._isLoading) {
+    if (_scrollController!.offset >=
+            _scrollController!.position.maxScrollExtent &&
+        !_scrollController!.position.outOfRange &&
+        !widget._isLoading!) {
       widget._onEndReached();
     }
   }
@@ -76,9 +76,9 @@ class _ResultsWidgetState extends State<ResultsWidget> {
           );
 
     //group glosses by pos
-    Map sensesGroupedByPosses = Map<String, List<Sense>>();
+    Map sensesGroupedByPosses = Map<String?, List<Sense>>();
     searchResult.senses.forEach((sense) {
-      String posString = sense.posses.join(', ');
+      String? posString = sense.posses.join(', ');
       if (!sensesGroupedByPosses.containsKey(posString))
         sensesGroupedByPosses[posString] = <Sense>[];
       sensesGroupedByPosses[posString].add(sense);
@@ -101,7 +101,7 @@ class _ResultsWidgetState extends State<ResultsWidget> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: sensesGroupedByPosses.entries.map((glossesGroupedByPos) {
-              String pos = glossesGroupedByPos.key;
+              String? pos = glossesGroupedByPos.key;
               List<Sense> senses = glossesGroupedByPos.value;
 
               return Padding(
@@ -136,7 +136,7 @@ class _ResultsWidgetState extends State<ResultsWidget> {
     }
 
     return FutureBuilder<List<Kanji>>(
-        future: getKanjiFromCharacters(this.widget._dbKanji, kanjis),
+        future: getKanjiFromCharacters(this.widget._dbKanji!, kanjis),
         builder: (context, snapshot) {
           if (snapshot.hasData) {
             if (snapshot.data == null)
@@ -147,9 +147,9 @@ class _ResultsWidgetState extends State<ResultsWidget> {
                   separatorBuilder: (context, index) {
                     return Divider();
                   },
-                  itemCount: snapshot.data.length,
+                  itemCount: snapshot.data!.length,
                   itemBuilder: (BuildContext context, int index) {
-                    return KanjiWidget(snapshot.data.firstWhere(
+                    return KanjiWidget(snapshot.data!.firstWhere(
                         (kanji) => kanji.character == kanjiReading[index]));
                   });
           } else if (snapshot.hasError) {
@@ -191,22 +191,22 @@ class _ResultsWidgetState extends State<ResultsWidget> {
   @override
   Widget build(BuildContext context) {
     return Expanded(
-        child: widget._isLoading
+        child: widget._isLoading!
             ? Center(child: CircularProgressIndicator())
             : ListView.separated(
                 separatorBuilder: (context, index) {
                   return Divider();
                 },
                 controller: _scrollController,
-                itemCount: widget._search.searchResults.length,
+                itemCount: widget._search!.searchResults.length,
                 itemBuilder: (BuildContext context, int index) {
-                  if (widget._search.searchResults[index] is KanjiEntry) {
+                  if (widget._search!.searchResults[index] is KanjiEntry) {
                     KanjiEntry searchResult =
-                        widget._search.searchResults[index];
+                        widget._search!.searchResults[index] as KanjiEntry;
                     return _buildResultKanji(searchResult);
                   } else {
                     return _buildResultExpression(
-                        widget._search.searchResults[index]);
+                        widget._search!.searchResults[index]);
                   }
                 }));
   }
