@@ -5,6 +5,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:package_info/package_info.dart';
+import 'package:adaptive_theme/adaptive_theme.dart';
 
 import 'lang.dart';
 
@@ -73,6 +74,8 @@ class _AppearancePageState extends State<AppearancePage> {
   }
 
   void _onToggleDarkTheme(bool? value) async {
+    value == true ? AdaptiveTheme.of(context).setDark() : AdaptiveTheme.of(context).setLight();
+
     SharedPreferences prefs = await SharedPreferences.getInstance();
 
     setState(() {

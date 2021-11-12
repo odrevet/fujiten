@@ -14,6 +14,7 @@ dependencies:
   shared_preferences: ^2.0.8
   ruby_text: ^3.0.1
   package_info: ^2.0.2
+  adaptive_theme: ^2.3.0
   flutter_localizations:
     sdk: flutter
 
