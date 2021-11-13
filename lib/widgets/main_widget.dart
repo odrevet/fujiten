@@ -2,12 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:sqflite/sqflite.dart';
 
 import '../db.dart';
-import 'menuBar.dart';
+import 'menu_bar.dart';
 import '../queries.dart';
-import 'resultsWidget.dart';
+import 'results_widget.dart';
 import '../search.dart';
-import 'searchInput.dart';
-import '../stringUtils.dart';
+import 'search_input.dart';
+import '../string_utils.dart';
 
 class MainWidget extends StatefulWidget {
   final String? title;

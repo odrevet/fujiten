@@ -3,7 +3,7 @@ import 'package:sqflite/sqflite.dart';
 
 import 'kanji.dart';
 import 'search.dart';
-import 'stringUtils.dart';
+import 'string_utils.dart';
 
 Future<List<KanjiEntry>> searchKanji(Database dbKanji, String input) async {
   String where;

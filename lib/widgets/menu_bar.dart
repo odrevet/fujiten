@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:sqflite/sqflite.dart';
 
 import '../queries.dart';
-import 'radicalPage.dart';
+import 'radical_page.dart';
 import '../search.dart';
 import 'settings.dart';
-import '../stringUtils.dart';
+import '../string_utils.dart';
 
 class LanguageSelect extends StatefulWidget {
   final void Function(String?)? onLanguageSelect;
