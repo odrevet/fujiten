@@ -3,8 +3,8 @@
 import 'package:flutter/material.dart';
 import 'package:sqflite/sqflite.dart';
 
-import 'kanji.dart';
-import 'queries.dart' show getRadicals;
+import '../kanji.dart';
+import '../queries.dart' show getRadicals;
 
 class RadicalPage extends StatefulWidget {
   final Database? _dbKanji;

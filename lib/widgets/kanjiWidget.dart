@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-import 'kanji.dart';
+import '../kanji.dart';
 
 class KanjiCharacteriWidget extends StatelessWidget {
   final Kanji? kanji;

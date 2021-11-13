@@ -5,12 +5,12 @@ import 'package:flutter/services.dart';
 import 'package:ruby_text/ruby_text.dart';
 import 'package:sqflite/sqflite.dart';
 
-import 'kanji.dart';
+import '../kanji.dart';
 import 'kanjiWidget.dart';
-import 'lang.dart';
-import 'queries.dart';
-import 'search.dart';
-import 'stringUtils.dart' show kanaKit;
+import '../lang.dart';
+import '../queries.dart';
+import '../search.dart';
+import '../stringUtils.dart' show kanaKit;
 
 class ResultsWidget extends StatefulWidget {
   final Database? _dbKanji;

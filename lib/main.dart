@@ -1,7 +1,7 @@
 import 'package:adaptive_theme/adaptive_theme.dart';
 import 'package:flutter/material.dart';
 
-import 'mainWidget.dart';
+import 'widgets/mainWidget.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
