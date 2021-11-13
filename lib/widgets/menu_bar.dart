@@ -133,10 +133,6 @@ class _MenuBarState extends State<MenuBar> {
             popupMenuButtonInsert,
             widget.convertButton,
             widget.kanjiKotobaButton,
-            VerticalDivider(
-              color: Colors.white,
-              thickness: 1.0,
-            ),
             IconButton(
                 icon: Icon(Icons.clear),
                 onPressed: () {
