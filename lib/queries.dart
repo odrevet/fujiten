@@ -62,7 +62,7 @@ Future<List<ExpressionEntry>> searchExpression(
   else {
     SharedPreferences _sharedPreferences =
         await SharedPreferences.getInstance();
-    List<String> prefLangs = _sharedPreferences.getStringList('langs')!;
+    /*List<String> prefLangs = _sharedPreferences.getStringList('langs')!;
 
     List<String> enabledLangs = <String>[];
     prefLangs.forEach((prefLang) {
@@ -71,8 +71,9 @@ Future<List<ExpressionEntry>> searchExpression(
       if (prefLangParsed[1] == '1') {
         enabledLangs.add(prefLangParsed[0]);
       }
-    });
+    });*/
 
+    List<String> enabledLangs = <String>['eng'];
     where =
         'WHERE (kanji REGEXP "$input" OR reading REGEXP "$input") AND lang IN ${sqlIn(enabledLangs)}';
   }
