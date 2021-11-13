@@ -8,19 +8,19 @@ import 'stringUtils.dart';
 Future<List<KanjiEntry>> searchKanji(Database dbKanji, String input) async {
   String where;
 
-  if (isHiraganaString(input))
+  if (kanaKit.isHiragana(input))
     where = '''WHERE kanji.id IN (SELECT kanji.id
         FROM kanji 
         INNER JOIN kun_yomi ON kun_yomi.id_kanji = kanji.id 
         WHERE REPLACE(kun_yomi.reading,'.','') = "$input"
         GROUP BY kanji.id)''';
-  else if (isKatakanaString(input))
+  else if (kanaKit.isKatakana(input))
     where = '''WHERE kanji.id IN (SELECT kanji.id
         FROM kanji 
         INNER JOIN on_yomi ON on_yomi.id_kanji = kanji.id 
         WHERE on_yomi.reading = "$input"
         GROUP BY kanji.id)''';
-  else if (isLatinString(input))
+  else if (kanaKit.isRomaji(input))
     where = '''WHERE kanji.id IN (SELECT kanji.id
         FROM kanji 
         LEFT JOIN meaning ON meaning.id_kanji = kanji.id
@@ -57,7 +57,7 @@ Future<List<ExpressionEntry>> searchExpression(
 
   String where;
 
-  if (isLatinString(input))
+  if (kanaKit.isRomaji(input))
     where = 'WHERE glosses REGEXP ".*$input.*" AND lang="$lang"';
   else {
     SharedPreferences _sharedPreferences =

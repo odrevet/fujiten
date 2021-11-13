@@ -10,7 +10,7 @@ import 'kanjiWidget.dart';
 import 'lang.dart';
 import 'queries.dart';
 import 'search.dart';
-import 'stringUtils.dart';
+import 'stringUtils.dart' show kanaKit;
 
 class ResultsWidget extends StatefulWidget {
   final Database? _dbKanji;
@@ -130,7 +130,7 @@ class _ResultsWidgetState extends State<ResultsWidget> {
     /// filter reading to keep only kanji characters
     List<String> kanjis = [];
     for (int i = 0; i < kanjiReading.length; i++) {
-      if (isKanjiCharacter(kanjiReading[i])) {
+      if (kanaKit.isKanji(kanjiReading[i])) {
         kanjis.add(kanjiReading[i]);
       }
     }

@@ -1,4 +1,6 @@
+import 'package:kana_kit/kana_kit.dart';
 
+const kanaKit = KanaKit();
 
 const String regexKanji = '[一-龯]';
 const String regexKana = '[ぁ-んァ-ン]';
@@ -42,41 +44,3 @@ String addCharAtPosition(String s, String char, int? position,
     return buffer.toString();
   }
 }
-
-bool isKanjiCharacter(String character) => RegExp('[一-龯]').hasMatch(character);
-
-bool isHiraganaCharacter(String character) =>
-    RegExp('[ぁ-ん]').hasMatch(character);
-
-bool isHiraganaString(String string) {
-  for (int i = 0; i < string.length; i++) {
-    if (!isHiraganaCharacter(string[i])) return false;
-  }
-  return true;
-}
-
-bool isKatakanaCharacter(String character) =>
-    RegExp('[ァ-ン]').hasMatch(character);
-
-bool isKatakanaString(String string) {
-  for (int i = 0; i < string.length; i++) {
-    if (!isKatakanaCharacter(string[i])) return false;
-  }
-  return true;
-}
-
-bool isJapaneseCharacter(String character) =>
-    isKanjiCharacter(character) ||
-    isHiraganaCharacter(character) ||
-    isKatakanaCharacter(character);
-
-bool isJapaneseString(String string) {
-  for (int i = 0; i < string.length; i++) {
-    if (!isJapaneseCharacter(string[i])) return false;
-  }
-  return true;
-}
-
-bool isLatinString(String string) => RegExp(r'^[\w ]*$').hasMatch(string);
-
-
