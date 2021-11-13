@@ -57,6 +57,7 @@ class MenuBar extends StatefulWidget {
   final VoidCallback? onSearch;
   final void Function(String?)? onLanguageSelect;
   final kanjiKotobaButton;
+  final convertButton;
   final int? insertPosition;
 
   MenuBar(
@@ -65,6 +66,7 @@ class MenuBar extends StatefulWidget {
       this.textEditingController,
       this.onSearch,
       this.onLanguageSelect,
+      this.convertButton,
       this.kanjiKotobaButton,
       this.insertPosition});
 
@@ -129,6 +131,7 @@ class _MenuBarState extends State<MenuBar> {
               onLanguageSelect: widget.onLanguageSelect,
             ),*/
             popupMenuButtonInsert,
+            widget.convertButton,
             widget.kanjiKotobaButton,
             VerticalDivider(
               color: Colors.white,
@@ -220,6 +223,26 @@ class _KanjiKotobaButtonState extends State<KanjiKotobaButton> {
               widget.kanjiSearch == true ? '漢字' : '言葉',
               style: TextStyle(fontSize: 23.0, color: Colors.white),
             ),
+            onPressed: widget.onPressed as void Function()?));
+  }
+}
+
+class ConvertButton extends StatefulWidget {
+  final Function? onPressed;
+
+  ConvertButton({this.onPressed});
+
+  @override
+  _ConvertButtonState createState() => _ConvertButtonState();
+}
+
+class _ConvertButtonState extends State<ConvertButton> {
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+        width: 70,
+        child: IconButton(
+            icon: const Icon(Icons.translate),
             onPressed: widget.onPressed as void Function()?));
   }
 }
