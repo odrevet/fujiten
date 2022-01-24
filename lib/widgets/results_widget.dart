@@ -1,16 +1,14 @@
-
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:ruby_text/ruby_text.dart';
 import 'package:sqflite/sqflite.dart';
 
 import '../kanji.dart';
-import 'kanji_widget.dart';
 import '../lang.dart';
 import '../queries.dart';
 import '../search.dart';
 import '../string_utils.dart' show kanaKit;
+import 'kanji_widget.dart';
 
 class ResultsWidget extends StatefulWidget {
   final Database? _dbKanji;
@@ -88,8 +86,12 @@ class _ResultsWidgetState extends State<ResultsWidget> {
         title: Column(
       children: <Widget>[
         InkWell(
-          onTap: () =>
-              _showDialog(_kanjiDialogContent(searchResult.kanji), context),
+          onTap: () => showDialog(
+              context: context,
+              builder: (_) => AlertDialog(
+                    title: Text('Kanji'),
+                    content: _kanjiDialogContent(searchResult.kanji),
+                  )),
           onDoubleTap: () => Clipboard.setData(ClipboardData(
               text: searchResult.kanji == null
                   ? searchResult.reading
@@ -135,56 +137,36 @@ class _ResultsWidgetState extends State<ResultsWidget> {
       }
     }
 
-    return FutureBuilder<List<Kanji>>(
-        future: getKanjiFromCharacters(this.widget._dbKanji!, kanjis),
-        builder: (context, snapshot) {
-          if (snapshot.hasData) {
-            if (snapshot.data == null)
-              return ListTile(title: Text('Cannot get kanji details'));
-            else
-              return ListView.separated(
-                  shrinkWrap: true,
-                  separatorBuilder: (context, index) {
-                    return Divider();
-                  },
-                  itemCount: snapshot.data!.length,
-                  itemBuilder: (BuildContext context, int index) {
-                    return KanjiWidget(snapshot.data!.firstWhere(
-                        (kanji) => kanji.character == kanjiReading[index]));
-                  });
-          } else if (snapshot.hasError) {
-            return ListTile(title: Text("${snapshot.error}"));
-          }
+    return Container(
+      width: double.maxFinite,
+      child: FutureBuilder<List<Kanji>>(
+          future: getKanjiFromCharacters(this.widget._dbKanji!, kanjis),
+          builder: (context, snapshot) {
+            if (snapshot.hasData) {
+              if (snapshot.data == null)
+                return ListTile(title: Text('Cannot get kanji details'));
+              else
+                return ListView.separated(
+                    shrinkWrap: true,
+                    separatorBuilder: (context, index) {
+                      return Divider();
+                    },
+                    itemCount: snapshot.data!.length,
+                    itemBuilder: (BuildContext context, int index) {
+                      return KanjiWidget(snapshot.data!.firstWhere(
+                          (kanji) => kanji.character == kanjiReading[index]));
+                    });
+            } else if (snapshot.hasError) {
+              return ListTile(title: Text("${snapshot.error}"));
+            }
 
-          return ListView(
-            children: [
-              ListTile(title: Center(child: CircularProgressIndicator()))
-            ],
-            shrinkWrap: true,
-          );
-        });
-  }
-
-  _showDialog(Widget content, BuildContext context) {
-    showDialog<void>(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.all(Radius.circular(20.0))),
-          content: content,
-          actions: <Widget>[
-            TextButton(
-              child: Icon(
-                Icons.done,
-              ),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-            ),
-          ],
-        );
-      },
+            return ListView(
+              children: [
+                ListTile(title: Center(child: CircularProgressIndicator()))
+              ],
+              shrinkWrap: true,
+            );
+          }),
     );
   }
 
