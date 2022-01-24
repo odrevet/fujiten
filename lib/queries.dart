@@ -60,9 +60,9 @@ Future<List<ExpressionEntry>> searchExpression(
   if (kanaKit.isRomaji(input))
     where = 'WHERE glosses REGEXP ".*$input.*" AND lang="$lang"';
   else {
-    SharedPreferences _sharedPreferences =
+    /*SharedPreferences _sharedPreferences =
         await SharedPreferences.getInstance();
-    /*List<String> prefLangs = _sharedPreferences.getStringList('langs')!;
+    List<String> prefLangs = _sharedPreferences.getStringList('langs')!;
 
     List<String> enabledLangs = <String>[];
     prefLangs.forEach((prefLang) {
