@@ -53,7 +53,7 @@ class KanjiWidget extends StatelessWidget {
             kanji: kanji,
             onTap: () =>
                 Clipboard.setData(ClipboardData(text: kanji!.character)),
-            style: TextStyle(fontSize: 50.0)),
+            style: TextStyle(fontSize: 40.0)),
         title: Table(children: <TableRow>[
           TableRow(children: <Widget>[Text(stroke)]),
           TableRow(children: <Widget>[
