@@ -1,6 +1,5 @@
 import 'dart:convert';
 
-import 'package:adaptive_theme/adaptive_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -13,13 +12,6 @@ class SettingsPage extends StatelessWidget {
     return Scaffold(
         appBar: AppBar(title: Text('Menu')),
         body: ListView(children: [
-          ListTile(
-              leading: Icon(Icons.palette),
-              title: Text("Appearance"),
-              onTap: () => Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => AppearancePage()),
-                  )),
           ListTile(
               leading: Icon(Icons.language),
               title: Text("Languages"),
@@ -47,61 +39,12 @@ class SettingsPage extends StatelessWidget {
                           applicationName: appName,
                           applicationVersion: version,
                           applicationLegalese:
-                              '''2020 Olivier Drevet All right reserved
+                              '''2022 Olivier Drevet All right reserved
 This software uses data from JMDict, Kanjidic2, Radkfile by the Electronic Dictionary Research and Development Group
 under the Creative Commons Attribution-ShareAlike Licence (V3.0)''');
                     })
                   })
         ]));
-  }
-}
-
-class AppearancePage extends StatefulWidget {
-  @override
-  _AppearancePageState createState() => _AppearancePageState();
-}
-
-class _AppearancePageState extends State<AppearancePage> {
-  bool? _isDarkTheme;
-
-  @override
-  void initState() {
-    _isDarkTheme = false;
-    _loadSettings();
-    super.initState();
-  }
-
-  void _onToggleDarkTheme(bool? value) async {
-    value == true
-        ? AdaptiveTheme.of(context).setDark()
-        : AdaptiveTheme.of(context).setLight();
-
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-
-    setState(() {
-      _isDarkTheme = value;
-      prefs.setBool('darkTheme', value!);
-    });
-  }
-
-  _loadSettings() async {
-    final prefs = await SharedPreferences.getInstance();
-    setState(() {
-      _isDarkTheme = prefs.getBool('darkTheme') ?? false;
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-        appBar: AppBar(title: Text('Appearance')),
-        body: Center(
-            child: ListView(children: [
-          CheckboxListTile(
-              title: Text('Dark theme'),
-              value: _isDarkTheme,
-              onChanged: _onToggleDarkTheme),
-        ])));
   }
 }
 

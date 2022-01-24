@@ -1,4 +1,3 @@
-import 'package:adaptive_theme/adaptive_theme.dart';
 import 'package:flutter/material.dart';
 
 import 'widgets/main_widget.dart';
@@ -11,24 +10,14 @@ void main() async {
 class App extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return AdaptiveTheme(
-      light: ThemeData(
-        brightness: Brightness.light,
-        primarySwatch: Colors.red,
-        accentColor: Colors.amber,
+    return MaterialApp(
+      title: "Japanese Dictionary",
+      theme: ThemeData(
+        colorScheme: ColorScheme.fromSwatch().copyWith(
+          secondary: Colors.black, // Your accent color
+        ),
       ),
-      dark: ThemeData(
-        brightness: Brightness.dark,
-        primarySwatch: Colors.red,
-        accentColor: Colors.amber,
-      ),
-      initial: AdaptiveThemeMode.light,
-      builder: (theme, darkTheme) => MaterialApp(
-        title: 'Japanese dictionary',
-        theme: theme,
-        darkTheme: darkTheme,
-        home: MainWidget(),
-      ),
+      home: MainWidget(),
     );
   }
 }
