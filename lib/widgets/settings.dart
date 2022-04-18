@@ -10,25 +10,25 @@ class SettingsPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: AppBar(title: Text('Menu')),
+        appBar: AppBar(title: const Text('Menu')),
         body: ListView(children: [
           ListTile(
-              leading: Icon(Icons.language),
-              title: Text("Languages"),
+              leading: const Icon(Icons.language),
+              title: const Text("Languages"),
               onTap: () => Navigator.push(
                     context,
                     MaterialPageRoute(builder: (context) => LanguagePage()),
                   )),
           ListTile(
-              leading: Icon(Icons.data_usage),
-              title: Text("Databases"),
+              leading: const Icon(Icons.data_usage),
+              title: const Text("Databases"),
               onTap: () => Navigator.push(
                     context,
                     MaterialPageRoute(builder: (context) => DatasetPage()),
                   )),
           ListTile(
-              leading: Icon(Icons.info),
-              title: Text("About"),
+              leading: const Icon(Icons.info),
+              title: const Text("About"),
               onTap: () => {
                     PackageInfo.fromPlatform().then((PackageInfo packageInfo) {
                       String appName = packageInfo.appName;
@@ -68,10 +68,10 @@ class _DatasetPageState extends State<DatasetPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: AppBar(title: Text('Databases')),
+        appBar: AppBar(title: const Text('Databases')),
         body: ListView.separated(
             separatorBuilder: (context, index) {
-              return Divider();
+              return const Divider();
             },
             itemCount: _databases!.length,
             itemBuilder: (BuildContext context, int index) {
@@ -116,20 +116,20 @@ class _LanguagePageState extends State<LanguagePage> {
             'swe:0'
           ];
 
-      prefLangs.forEach((prefLang) {
+      for (var prefLang in prefLangs) {
         List<String> prefLangParsed = prefLang.split(':');
         setState(() {
           _langs.add(Lang(
               code: prefLangParsed[0], isEnabled: prefLangParsed[1] == '1'));
         });
-      });
+      }
     });
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: AppBar(title: Text('Language')),
+        appBar: AppBar(title: const Text('Language')),
         body: ListView.builder(
             itemCount: _langs.length,
             itemBuilder: (BuildContext context, int index) =>
@@ -141,9 +141,9 @@ class _LanguagePageState extends State<LanguagePage> {
         isEnabled!;
 
     List<String> langsSerialized = <String>[];
-    _langs.forEach((lang) {
+    for (var lang in _langs) {
       langsSerialized.add('${lang.code}:${lang.isEnabled == true ? '1' : '0'}');
-    });
+    }
     print(langsSerialized.join());
 
     setState(() {
@@ -156,7 +156,7 @@ class LangListTile extends StatefulWidget {
   final Lang? lang;
   final dynamic Function(Lang, bool?)? onTap;
 
-  LangListTile({this.lang, this.onTap});
+  const LangListTile({this.lang, this.onTap});
 
   @override
   _LangListTileState createState() => _LangListTileState();
@@ -175,7 +175,7 @@ class _LangListTileState extends State<LangListTile> {
     return CheckboxListTile(
         title: Text(
           '${widget.lang!.countryFlag} ${widget.lang!.name}',
-          style: TextStyle(fontSize: 18),
+          style: const TextStyle(fontSize: 18),
         ),
         value: widget.lang!.isEnabled,
         onChanged: _onTap);

@@ -34,7 +34,7 @@ String addCharAtPosition(String s, String char, int? position,
     if (position == 0) {
       return s;
     }
-    StringBuffer buffer = new StringBuffer();
+    StringBuffer buffer = StringBuffer();
     for (int i = 0; i < s.length; i++) {
       if (i != 0 && i % position! == 0) {
         buffer.write(char);

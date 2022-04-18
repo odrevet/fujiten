@@ -7,7 +7,7 @@ class SearchInput extends StatefulWidget {
   final void Function(bool) onFocusChanged;
   final TextEditingController textEditingController;
 
-  SearchInput(
+  const SearchInput(
       this.textEditingController, this.onSubmitted, this.onFocusChanged);
 
   @override
@@ -38,10 +38,10 @@ class _SearchInputState extends State<SearchInput> {
       child: TextField(
         onSubmitted: (_) => widget.onSubmitted(),
         textInputAction: TextInputAction.search,
-        style: TextStyle(fontSize: 32.0),
+        style: const TextStyle(fontSize: 32.0),
         controller: widget.textEditingController,
         focusNode: _focusNode,
-        decoration: InputDecoration(hintText: 'Enter a search term'),
+        decoration: const InputDecoration(hintText: 'Enter a search term'),
       ),
     );
   }

@@ -70,8 +70,9 @@ class _MainWidgetState extends State<MainWidget> {
     if (_kanjiSearch!) {
       searchKanji(_dbKanji!, input).then((searchResult) => setState(() {
             setState(() {
-              if (searchResult.isNotEmpty)
+              if (searchResult.isNotEmpty) {
                 _search!.searchResults.addAll(searchResult);
+              }
               _isLoading = false;
             });
           }));
@@ -80,8 +81,9 @@ class _MainWidgetState extends State<MainWidget> {
               _dbExpression, input, _lang, _resultsPerPage, _currentPage)
           .then((searchResult) {
         setState(() {
-          if (searchResult.isNotEmpty)
+          if (searchResult.isNotEmpty) {
             _search!.searchResults.addAll(searchResult);
+          }
           _isLoading = false;
         });
       });
@@ -149,7 +151,7 @@ class _MainWidgetState extends State<MainWidget> {
     return Scaffold(
         key: _scaffoldKey,
         appBar: PreferredSize(
-          preferredSize: Size.fromHeight(56),
+          preferredSize: const Size.fromHeight(56),
           child: Builder(
             builder: (context) => MenuBar(
                 dbKanji: _dbKanji,

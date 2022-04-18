@@ -34,6 +34,7 @@ class Kanji {
     );
   }
 
+  @override
   String toString() {
     return character;
   }

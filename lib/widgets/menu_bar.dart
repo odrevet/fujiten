@@ -10,7 +10,7 @@ import '../string_utils.dart';
 class LanguageSelect extends StatefulWidget {
   final void Function(String?)? onLanguageSelect;
 
-  LanguageSelect({Key? key, this.onLanguageSelect}) : super(key: key);
+  const LanguageSelect({Key? key, this.onLanguageSelect}) : super(key: key);
 
   @override
   _LanguageSelectState createState() => _LanguageSelectState();
@@ -23,7 +23,7 @@ class _LanguageSelectState extends State<LanguageSelect> {
   Widget build(BuildContext context) {
     return DropdownButton<String>(
       value: dropdownValue,
-      icon: Icon(Icons.language),
+      icon: const Icon(Icons.language),
       onChanged: (String? lang) {
         widget.onLanguageSelect!(lang);
         setState(() {
@@ -60,7 +60,7 @@ class MenuBar extends StatefulWidget {
   final convertButton;
   final int? insertPosition;
 
-  MenuBar(
+  const MenuBar(
       {this.dbKanji,
       this.search,
       this.textEditingController,
@@ -78,7 +78,7 @@ class _MenuBarState extends State<MenuBar> {
   @override
   Widget build(BuildContext context) {
     var popupMenuButtonInsert = PopupMenuButton(
-      icon: Icon(Icons.input),
+      icon: const Icon(Icons.input),
       onSelected: (dynamic result) {
         switch (result) {
           case 0:
@@ -93,8 +93,9 @@ class _MenuBarState extends State<MenuBar> {
               widget.textEditingController!.selection =
                   TextSelection.fromPosition(
                       TextPosition(offset: widget.insertPosition! + 1));
-            } else
+            } else {
               widget.textEditingController!.text += charKanji;
+            }
             break;
           case 2:
             if (widget.insertPosition! >= 0) {
@@ -105,22 +106,23 @@ class _MenuBarState extends State<MenuBar> {
               widget.textEditingController!.selection =
                   TextSelection.fromPosition(
                       TextPosition(offset: widget.insertPosition! + 1));
-            } else
+            } else {
               widget.textEditingController!.text += charKana;
+            }
             break;
         }
       },
       itemBuilder: (context) => [
-        PopupMenuItem(child: Text('<> Radicals'), value: 0),
-        PopupMenuItem(child: Text('$charKanji Kanji'), value: 1),
-        PopupMenuItem(child: Text('$charKana Kana'), value: 2),
+        const PopupMenuItem(child: Text('<> Radicals'), value: 0),
+        const PopupMenuItem(child: Text('$charKanji Kanji'), value: 1),
+        const PopupMenuItem(child: Text('$charKana Kana'), value: 2),
       ],
     );
 
     return AppBar(
       title: Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
         IconButton(
-            icon: Icon(Icons.menu),
+            icon: const Icon(Icons.menu),
             onPressed: () => Navigator.push(
                   context,
                   MaterialPageRoute(builder: (context) => SettingsPage()),
@@ -134,13 +136,13 @@ class _MenuBarState extends State<MenuBar> {
             widget.convertButton,
             widget.kanjiKotobaButton,
             IconButton(
-                icon: Icon(Icons.clear),
+                icon: const Icon(Icons.clear),
                 onPressed: () {
                   widget.textEditingController!.clear();
                   widget.search!.searchResults.clear();
                 }),
             IconButton(
-              icon: Icon(Icons.search),
+              icon: const Icon(Icons.search),
               onPressed: () => widget.onSearch!(),
             )
           ],
@@ -203,7 +205,7 @@ class KanjiKotobaButton extends StatefulWidget {
   final Function? onPressed;
   final bool? kanjiSearch;
 
-  KanjiKotobaButton({this.onPressed, this.kanjiSearch});
+  const KanjiKotobaButton({this.onPressed, this.kanjiSearch});
 
   @override
   _KanjiKotobaButtonState createState() => _KanjiKotobaButtonState();
@@ -217,7 +219,7 @@ class _KanjiKotobaButtonState extends State<KanjiKotobaButton> {
         child: TextButton(
             child: Text(
               widget.kanjiSearch == true ? '漢字' : '言葉',
-              style: TextStyle(fontSize: 23.0, color: Colors.white),
+              style: const TextStyle(fontSize: 23.0, color: Colors.white),
             ),
             onPressed: widget.onPressed as void Function()?));
   }
@@ -226,7 +228,7 @@ class _KanjiKotobaButtonState extends State<KanjiKotobaButton> {
 class ConvertButton extends StatefulWidget {
   final Function? onPressed;
 
-  ConvertButton({this.onPressed});
+  const ConvertButton({this.onPressed});
 
   @override
   _ConvertButtonState createState() => _ConvertButtonState();

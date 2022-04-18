@@ -10,29 +10,32 @@ class RadicalPage extends StatefulWidget {
   final Database? _dbKanji;
   final List<String> _selectedRadicals;
 
-  RadicalPage(this._dbKanji, this._selectedRadicals, {Key? key})
+  const RadicalPage(this._dbKanji, this._selectedRadicals, {Key? key})
       : super(key: key);
 
   @override
-  RadicalPageState createState() => RadicalPageState(this._selectedRadicals);
+  RadicalPageState createState() => RadicalPageState(_selectedRadicals);
 }
 
 class RadicalPageState extends State<RadicalPage> {
   Future<List<Kanji>>? _radicals;
-  List<String> _selectedRadicals = [];
+  final List<String> _selectedRadicals = [];
   List<String?> _validRadicals = [];
 
   RadicalPageState(List<String> initialRadicals) {
-    initialRadicals.forEach((String radical) => _selectedRadicals.add(radical));
+    for (var radical in initialRadicals) {
+      _selectedRadicals.add(radical);
+    }
   }
 
   @override
   void initState() {
     _radicals = getRadicals(widget._dbKanji!);
 
-    if (_selectedRadicals.isNotEmpty)
+    if (_selectedRadicals.isNotEmpty) {
       _getRadicalsForSelection().then(
           (validRadicals) => setState(() => _validRadicals = validRadicals));
+    }
     super.initState();
   }
 
@@ -45,14 +48,14 @@ class RadicalPageState extends State<RadicalPage> {
 
         return Scaffold(
             appBar: AppBar(
-                title: Text('Radicals'),
+                title: const Text('Radicals'),
                 leading: IconButton(
-                    icon: Icon(Icons.arrow_back),
+                    icon: const Icon(Icons.arrow_back),
                     onPressed: () =>
                         Navigator.pop(context, _selectedRadicals))),
             body: snapshot.hasData
                 ? Center(child: radicalGridView(snapshot.data!))
-                : Center(child: CircularProgressIndicator()));
+                : const Center(child: CircularProgressIndicator()));
       },
     );
   }
@@ -60,7 +63,7 @@ class RadicalPageState extends State<RadicalPage> {
   Widget radicalGridView(List<Kanji> radicals) {
     return GridView.builder(
         gridDelegate:
-            SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 5),
+            const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 5),
         itemCount: radicals.length,
         itemBuilder: (BuildContext context, int index) {
           if (index == 0 ||
@@ -82,8 +85,9 @@ class RadicalPageState extends State<RadicalPage> {
                 ]),
               ],
             );
-          } else
+          } else {
             return _radicalButton(radicals[index]);
+          }
         });
   }
 
@@ -108,10 +112,11 @@ class RadicalPageState extends State<RadicalPage> {
       style: ButtonStyle(
         backgroundColor: MaterialStateProperty.resolveWith<Color?>(
               (Set<MaterialState> states) {
-            if (states.contains(MaterialState.pressed))
+            if (states.contains(MaterialState.pressed)) {
               return Theme.of(context).colorScheme.primary;
-            else if (states.contains(MaterialState.disabled))
+            } else if (states.contains(MaterialState.disabled)) {
               return Colors.grey;
+            }
             return null; // Use the component's default.
           },
         ),

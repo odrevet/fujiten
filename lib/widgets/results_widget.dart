@@ -16,7 +16,7 @@ class ResultsWidget extends StatefulWidget {
   final Function _onEndReached;
   final bool? _isLoading;
 
-  ResultsWidget(
+  const ResultsWidget(
       this._dbKanji, this._search, this._onEndReached, this._isLoading);
 
   @override
@@ -32,7 +32,7 @@ class _ResultsWidgetState extends State<ResultsWidget> {
     _scrollController = ScrollController();
     _scrollController!.addListener(_scrollListener);
 
-    _styleFieldInformation = TextStyle(
+    _styleFieldInformation = const TextStyle(
         fontSize: 11, fontStyle: FontStyle.italic, color: Colors.blue);
 
     super.initState();
@@ -61,24 +61,25 @@ class _ResultsWidgetState extends State<ResultsWidget> {
     var japaneseReading = searchResult.kanji == null
         ? Text(
             searchResult.reading,
-            style: TextStyle(fontSize: 26.0),
+            style: const TextStyle(fontSize: 26.0),
           )
         : RubyText(
             [
               RubyTextData(
                 searchResult.kanji,
                 ruby: searchResult.reading ?? '',
-                style: TextStyle(fontSize: 26.0),
+                style: const TextStyle(fontSize: 26.0),
               )
             ],
           );
 
     //group glosses by pos
-    Map sensesGroupedByPosses = Map<String?, List<Sense>>();
+    Map sensesGroupedByPosses = <String?, List<Sense>>{};
     searchResult.senses.forEach((sense) {
       String? posString = sense.posses.join(', ');
-      if (!sensesGroupedByPosses.containsKey(posString))
+      if (!sensesGroupedByPosses.containsKey(posString)) {
         sensesGroupedByPosses[posString] = <Sense>[];
+      }
       sensesGroupedByPosses[posString].add(sense);
     });
 
@@ -89,13 +90,11 @@ class _ResultsWidgetState extends State<ResultsWidget> {
           onTap: () => showDialog(
               context: context,
               builder: (_) => AlertDialog(
-                    title: Text('Kanji'),
+                    title: const Text('Kanji'),
                     content: _kanjiDialogContent(searchResult.kanji),
                   )),
           onDoubleTap: () => Clipboard.setData(ClipboardData(
-              text: searchResult.kanji == null
-                  ? searchResult.reading
-                  : searchResult.kanji)),
+              text: searchResult.kanji ?? searchResult.reading)),
           child: japaneseReading,
         ),
         Align(
@@ -137,31 +136,32 @@ class _ResultsWidgetState extends State<ResultsWidget> {
       }
     }
 
-    return Container(
+    return SizedBox(
       width: double.maxFinite,
       child: FutureBuilder<List<Kanji>>(
-          future: getKanjiFromCharacters(this.widget._dbKanji!, kanjis),
+          future: getKanjiFromCharacters(widget._dbKanji!, kanjis),
           builder: (context, snapshot) {
             if (snapshot.hasData) {
-              if (snapshot.data == null)
-                return ListTile(title: Text('Cannot get kanji details'));
-              else
+              if (snapshot.data == null) {
+                return const ListTile(title: Text('Cannot get kanji details'));
+              } else {
                 return ListView.separated(
                     shrinkWrap: true,
                     separatorBuilder: (context, index) {
-                      return Divider();
+                      return const Divider();
                     },
                     itemCount: snapshot.data!.length,
                     itemBuilder: (BuildContext context, int index) {
                       return KanjiWidget(snapshot.data!.firstWhere(
                           (kanji) => kanji.character == kanjiReading[index]));
                     });
+              }
             } else if (snapshot.hasError) {
               return ListTile(title: Text("${snapshot.error}"));
             }
 
             return ListView(
-              children: [
+              children: const [
                 ListTile(title: Center(child: CircularProgressIndicator()))
               ],
               shrinkWrap: true,
@@ -174,10 +174,10 @@ class _ResultsWidgetState extends State<ResultsWidget> {
   Widget build(BuildContext context) {
     return Expanded(
         child: widget._isLoading!
-            ? Center(child: CircularProgressIndicator())
+            ? const Center(child: CircularProgressIndicator())
             : ListView.separated(
                 separatorBuilder: (context, index) {
-                  return Divider();
+                  return const Divider();
                 },
                 controller: _scrollController,
                 itemCount: widget._search!.searchResults.length,

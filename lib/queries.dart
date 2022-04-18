@@ -8,26 +8,27 @@ import 'string_utils.dart';
 Future<List<KanjiEntry>> searchKanji(Database dbKanji, String input) async {
   String where;
 
-  if (kanaKit.isHiragana(input))
+  if (kanaKit.isHiragana(input)) {
     where = '''WHERE kanji.id IN (SELECT kanji.id
         FROM kanji 
         INNER JOIN kun_yomi ON kun_yomi.id_kanji = kanji.id 
         WHERE REPLACE(kun_yomi.reading,'.','') = "$input"
         GROUP BY kanji.id)''';
-  else if (kanaKit.isKatakana(input))
+  } else if (kanaKit.isKatakana(input)) {
     where = '''WHERE kanji.id IN (SELECT kanji.id
         FROM kanji 
         INNER JOIN on_yomi ON on_yomi.id_kanji = kanji.id 
         WHERE on_yomi.reading = "$input"
         GROUP BY kanji.id)''';
-  else if (kanaKit.isRomaji(input))
+  } else if (kanaKit.isRomaji(input)) {
     where = '''WHERE kanji.id IN (SELECT kanji.id
         FROM kanji 
         LEFT JOIN meaning ON meaning.id_kanji = kanji.id
         WHERE meaning.meaning REGEXP ".*$input.*"
         GROUP BY kanji.id)''';
-  else
+  } else {
     where = 'WHERE kanji.id REGEXP "$input"';
+  }
 
   String sql = '''SELECT kanji.*,
         GROUP_CONCAT(DISTINCT kanji_radical.id_radical) as radicals,
@@ -57,9 +58,9 @@ Future<List<ExpressionEntry>> searchExpression(
 
   String where;
 
-  if (kanaKit.isRomaji(input))
+  if (kanaKit.isRomaji(input)) {
     where = 'WHERE glosses REGEXP ".*$input.*" AND lang="$lang"';
-  else {
+  } else {
     /*SharedPreferences _sharedPreferences =
         await SharedPreferences.getInstance();
     List<String> prefLangs = _sharedPreferences.getStringList('langs')!;
@@ -96,7 +97,7 @@ Future<List<ExpressionEntry>> searchExpression(
   late List<Sense> senses;
   int? expressionId;
 
-  expressionMaps.forEach((expressionMap) {
+  for (var expressionMap in expressionMaps) {
     if (expressionId == null ||
         expressionMap['expression_id'] != expressionId) {
       senses = <Sense>[];
@@ -119,7 +120,7 @@ Future<List<ExpressionEntry>> searchExpression(
       );
     }
     expressionId = expressionMap['expression_id'];
-  });
+  }
 
   return entries;
 }

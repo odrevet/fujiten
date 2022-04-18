@@ -11,7 +11,7 @@ class KanjiCharacteriWidget extends StatelessWidget {
   final TextStyle? style;
   final TextStyle? styleFurigana;
 
-  KanjiCharacteriWidget(
+  const KanjiCharacteriWidget(
       {this.kanji,
       this.onTap,
       this.displayFurigana = true,
@@ -37,7 +37,7 @@ class KanjiCharacteriWidget extends StatelessWidget {
 class KanjiWidget extends StatelessWidget {
   final Kanji? kanji;
 
-  KanjiWidget(this.kanji);
+  const KanjiWidget(this.kanji);
 
   @override
   Widget build(BuildContext context) {
@@ -53,7 +53,7 @@ class KanjiWidget extends StatelessWidget {
             kanji: kanji,
             onTap: () =>
                 Clipboard.setData(ClipboardData(text: kanji!.character)),
-            style: TextStyle(fontSize: 40.0)),
+            style: const TextStyle(fontSize: 40.0)),
         title: Table(children: <TableRow>[
           TableRow(children: <Widget>[Text(stroke)]),
           TableRow(children: <Widget>[
