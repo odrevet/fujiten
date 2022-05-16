@@ -4,17 +4,19 @@ import 'widgets/main_widget.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  runApp(App());
+  runApp(const App());
 }
 
 class App extends StatelessWidget {
+  const App({Key? key}) : super(key: key);
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       title: "Japanese Dictionary",
       theme: ThemeData(
         colorScheme: ColorScheme.fromSwatch().copyWith(
-          secondary: Colors.black, // Your accent color
+          secondary: Colors.black,
         ),
       ),
       home: MainWidget(),

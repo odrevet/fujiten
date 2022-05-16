@@ -1,5 +1,3 @@
-
-
 import 'package:flutter/material.dart';
 import 'package:sqflite/sqflite.dart';
 
@@ -44,7 +42,9 @@ class RadicalPageState extends State<RadicalPage> {
     return FutureBuilder<List<Kanji>>(
       future: _radicals,
       builder: (context, snapshot) {
-        if (snapshot.hasError) return Center(child: Text(snapshot.error as String));
+        if (snapshot.hasError) {
+          return Center(child: Text(snapshot.error as String));
+        }
 
         return Scaffold(
             appBar: AppBar(
@@ -105,7 +105,7 @@ class RadicalPageState extends State<RadicalPage> {
   Widget _radicalButton(Kanji radical) => TextButton(
       style: ButtonStyle(
         backgroundColor: MaterialStateProperty.resolveWith<Color?>(
-              (Set<MaterialState> states) {
+          (Set<MaterialState> states) {
             if (states.contains(MaterialState.pressed)) {
               return Theme.of(context).colorScheme.primary;
             } else if (states.contains(MaterialState.disabled)) {
@@ -119,18 +119,21 @@ class RadicalPageState extends State<RadicalPage> {
           _validRadicals.isEmpty || _validRadicals.contains(radical.character)
               ? () => _onRadicalButtonPress(radical.character)
               : null,
-      child: Text(radical.character, style: TextStyle(
-        fontSize: 40,
-        color: _selectedRadicals.contains(radical.character)
-            ? Theme.of(context).colorScheme.primary
-            : Theme.of(context).colorScheme.secondary,
-      )));
+      child: Text(radical.character,
+          style: TextStyle(
+            fontSize: 40,
+            color: _selectedRadicals.contains(radical.character)
+                ? Theme.of(context).colorScheme.primary
+                : Theme.of(context).colorScheme.secondary,
+          )));
 
   Future<List<String?>> _getRadicalsForSelection() async {
-    String sql = 'SELECT DISTINCT id_radical FROM kanji_radical WHERE id_kanji IN (';
+    String sql =
+        'SELECT DISTINCT id_radical FROM kanji_radical WHERE id_kanji IN (';
 
     _selectedRadicals.asMap().forEach((i, radical) {
-      sql += 'SELECT DISTINCT id_kanji FROM kanji_radical WHERE id_radical = "$radical"';
+      sql +=
+          'SELECT DISTINCT id_kanji FROM kanji_radical WHERE id_radical = "$radical"';
       if (i < _selectedRadicals.length - 1) sql += ' INTERSECT ';
     });
 

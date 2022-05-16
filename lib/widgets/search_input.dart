@@ -1,5 +1,3 @@
-
-
 import 'package:flutter/material.dart';
 
 class SearchInput extends StatefulWidget {
@@ -8,10 +6,12 @@ class SearchInput extends StatefulWidget {
   final TextEditingController textEditingController;
 
   const SearchInput(
-      this.textEditingController, this.onSubmitted, this.onFocusChanged);
+      this.textEditingController, this.onSubmitted, this.onFocusChanged,
+      {Key? key})
+      : super(key: key);
 
   @override
-  _SearchInputState createState() => _SearchInputState();
+  State<SearchInput> createState() => _SearchInputState();
 }
 
 class _SearchInputState extends State<SearchInput> {

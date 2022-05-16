@@ -2,12 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:sqflite/sqflite.dart';
 
 import '../db.dart';
-import 'menu_bar.dart';
 import '../queries.dart';
-import 'results_widget.dart';
 import '../search.dart';
-import 'search_input.dart';
 import '../string_utils.dart';
+import 'menu_bar.dart';
+import 'results_widget.dart';
+import 'search_input.dart';
 
 class MainWidget extends StatefulWidget {
   final String? title;
@@ -16,7 +16,7 @@ class MainWidget extends StatefulWidget {
   MainWidget({Key? key, this.title}) : super(key: key);
 
   @override
-  _MainWidgetState createState() => _MainWidgetState();
+  State<MainWidget> createState() => _MainWidgetState();
 }
 
 class _MainWidgetState extends State<MainWidget> {
@@ -98,10 +98,9 @@ class _MainWidgetState extends State<MainWidget> {
 
   _convert() async {
     String input = widget._textEditingController.text;
-    if(kanaKit.isRomaji(input)){
+    if (kanaKit.isRomaji(input)) {
       widget._textEditingController.text = kanaKit.toHiragana(input);
-    }
-    else{
+    } else {
       widget._textEditingController.text = kanaKit.toKana(input);
     }
   }
@@ -159,7 +158,9 @@ class _MainWidgetState extends State<MainWidget> {
                 textEditingController: widget._textEditingController,
                 onSearch: _onSearch,
                 onLanguageSelect: _onLanguageSelect,
-                convertButton: ConvertButton(onPressed: _convert,),
+                convertButton: ConvertButton(
+                  onPressed: _convert,
+                ),
                 kanjiKotobaButton: KanjiKotobaButton(
                     onPressed: _searchTypeToggle, kanjiSearch: _kanjiSearch),
                 insertPosition: _cursorPosition),

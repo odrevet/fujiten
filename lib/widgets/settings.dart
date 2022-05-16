@@ -7,6 +7,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../lang.dart';
 
 class SettingsPage extends StatelessWidget {
+  const SettingsPage({Key? key}) : super(key: key);
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -17,14 +19,16 @@ class SettingsPage extends StatelessWidget {
               title: const Text("Languages"),
               onTap: () => Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (context) => LanguagePage()),
+                    MaterialPageRoute(
+                        builder: (context) => const LanguagePage()),
                   )),
           ListTile(
               leading: const Icon(Icons.data_usage),
               title: const Text("Databases"),
               onTap: () => Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (context) => DatasetPage()),
+                    MaterialPageRoute(
+                        builder: (context) => const DatasetPage()),
                   )),
           ListTile(
               leading: const Icon(Icons.info),
@@ -49,8 +53,10 @@ under the Creative Commons Attribution-ShareAlike Licence (V3.0)''');
 }
 
 class DatasetPage extends StatefulWidget {
+  const DatasetPage({Key? key}) : super(key: key);
+
   @override
-  _DatasetPageState createState() => _DatasetPageState();
+  State<DatasetPage> createState() => _DatasetPageState();
 }
 
 class _DatasetPageState extends State<DatasetPage> {
@@ -89,8 +95,10 @@ class _DatasetPageState extends State<DatasetPage> {
 }
 
 class LanguagePage extends StatefulWidget {
+  const LanguagePage({Key? key}) : super(key: key);
+
   @override
-  _LanguagePageState createState() => _LanguagePageState();
+  State<LanguagePage> createState() => _LanguagePageState();
 }
 
 class _LanguagePageState extends State<LanguagePage> {
@@ -155,10 +163,10 @@ class LangListTile extends StatefulWidget {
   final Lang? lang;
   final dynamic Function(Lang, bool?)? onTap;
 
-  const LangListTile({this.lang, this.onTap});
+  const LangListTile({this.lang, this.onTap, Key? key}) : super(key: key);
 
   @override
-  _LangListTileState createState() => _LangListTileState();
+  State<LangListTile> createState() => _LangListTileState();
 }
 
 class _LangListTileState extends State<LangListTile> {

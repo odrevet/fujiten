@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:sqflite/sqflite.dart';
 
 import '../queries.dart';
-import 'radical_page.dart';
 import '../search.dart';
-import 'settings.dart';
 import '../string_utils.dart';
+import 'radical_page.dart';
+import 'settings.dart';
 
 class LanguageSelect extends StatefulWidget {
   final void Function(String?)? onLanguageSelect;
@@ -13,7 +13,7 @@ class LanguageSelect extends StatefulWidget {
   const LanguageSelect({Key? key, this.onLanguageSelect}) : super(key: key);
 
   @override
-  _LanguageSelectState createState() => _LanguageSelectState();
+  State<LanguageSelect> createState() => _LanguageSelectState();
 }
 
 class _LanguageSelectState extends State<LanguageSelect> {
@@ -56,22 +56,24 @@ class MenuBar extends StatefulWidget {
   final TextEditingController? textEditingController;
   final VoidCallback? onSearch;
   final void Function(String?)? onLanguageSelect;
-  final kanjiKotobaButton;
-  final convertButton;
+  final KanjiKotobaButton kanjiKotobaButton;
+  final ConvertButton convertButton;
   final int? insertPosition;
 
   const MenuBar(
-      {this.dbKanji,
-      this.search,
-      this.textEditingController,
-      this.onSearch,
-      this.onLanguageSelect,
-      this.convertButton,
-      this.kanjiKotobaButton,
-      this.insertPosition});
+      {required this.dbKanji,
+      required this.search,
+      required this.textEditingController,
+      required this.onSearch,
+      required this.onLanguageSelect,
+      required this.convertButton,
+      required this.kanjiKotobaButton,
+      required this.insertPosition,
+      Key? key})
+      : super(key: key);
 
   @override
-  _MenuBarState createState() => _MenuBarState();
+  State<MenuBar> createState() => _MenuBarState();
 }
 
 class _MenuBarState extends State<MenuBar> {
@@ -125,7 +127,7 @@ class _MenuBarState extends State<MenuBar> {
             icon: const Icon(Icons.menu),
             onPressed: () => Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => SettingsPage()),
+                  MaterialPageRoute(builder: (context) => const SettingsPage()),
                 )),
         Row(
           children: <Widget>[
@@ -175,6 +177,7 @@ class _MenuBarState extends State<MenuBar> {
     List<String?> radicalsFromDb = await getRadicalsCharacter(widget.dbKanji!);
     radicals.removeWhere((String radical) => !radicalsFromDb.contains(radical));
 
+    if (!mounted) return;
     Navigator.push(
       context,
       MaterialPageRoute(
@@ -205,10 +208,11 @@ class KanjiKotobaButton extends StatefulWidget {
   final Function? onPressed;
   final bool? kanjiSearch;
 
-  const KanjiKotobaButton({this.onPressed, this.kanjiSearch});
+  const KanjiKotobaButton({this.onPressed, this.kanjiSearch, Key? key})
+      : super(key: key);
 
   @override
-  _KanjiKotobaButtonState createState() => _KanjiKotobaButtonState();
+  State<KanjiKotobaButton> createState() => _KanjiKotobaButtonState();
 }
 
 class _KanjiKotobaButtonState extends State<KanjiKotobaButton> {
@@ -228,10 +232,10 @@ class _KanjiKotobaButtonState extends State<KanjiKotobaButton> {
 class ConvertButton extends StatefulWidget {
   final Function? onPressed;
 
-  const ConvertButton({this.onPressed});
+  const ConvertButton({this.onPressed, Key? key}) : super(key: key);
 
   @override
-  _ConvertButtonState createState() => _ConvertButtonState();
+  State<ConvertButton> createState() => _ConvertButtonState();
 }
 
 class _ConvertButtonState extends State<ConvertButton> {

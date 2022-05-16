@@ -5,19 +5,21 @@ import '../kanji.dart';
 
 class KanjiCharacteriWidget extends StatelessWidget {
   final Kanji? kanji;
-  final onTap;
+  final VoidCallback onTap;
   final bool displayFurigana;
   final String? furigana;
   final TextStyle? style;
   final TextStyle? styleFurigana;
 
   const KanjiCharacteriWidget(
-      {this.kanji,
-      this.onTap,
+      {required this.kanji,
+      required this.onTap,
       this.displayFurigana = true,
       this.furigana,
-      this.style,
-      this.styleFurigana});
+      required this.style,
+      this.styleFurigana,
+      Key? key})
+      : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -37,7 +39,7 @@ class KanjiCharacteriWidget extends StatelessWidget {
 class KanjiWidget extends StatelessWidget {
   final Kanji? kanji;
 
-  const KanjiWidget(this.kanji);
+  const KanjiWidget(this.kanji, {Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {

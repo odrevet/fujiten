@@ -17,10 +17,12 @@ class ResultsWidget extends StatefulWidget {
   final bool? _isLoading;
 
   const ResultsWidget(
-      this._dbKanji, this._search, this._onEndReached, this._isLoading);
+      this._dbKanji, this._search, this._onEndReached, this._isLoading,
+      {Key? key})
+      : super(key: key);
 
   @override
-  _ResultsWidgetState createState() => _ResultsWidgetState();
+  State<ResultsWidget> createState() => _ResultsWidgetState();
 }
 
 class _ResultsWidgetState extends State<ResultsWidget> {
@@ -93,8 +95,8 @@ class _ResultsWidgetState extends State<ResultsWidget> {
                     title: const Text('Kanji'),
                     content: _kanjiDialogContent(searchResult.kanji),
                   )),
-          onDoubleTap: () => Clipboard.setData(ClipboardData(
-              text: searchResult.kanji ?? searchResult.reading)),
+          onDoubleTap: () => Clipboard.setData(
+              ClipboardData(text: searchResult.kanji ?? searchResult.reading)),
           child: japaneseReading,
         ),
         Align(
