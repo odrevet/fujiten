@@ -144,7 +144,6 @@ class _LanguagePageState extends State<LanguagePage> {
     for (var lang in _langs) {
       langsSerialized.add('${lang.code}:${lang.isEnabled == true ? '1' : '0'}');
     }
-    print(langsSerialized.join());
 
     setState(() {
       _sharedPreferences.setStringList('langs', langsSerialized);

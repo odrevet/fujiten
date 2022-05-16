@@ -18,7 +18,7 @@ String sqlIn(List<String> input) {
     if (i < input.length - 1) res += ',';
   });
 
-  return res + ')';
+  return '$res)';
 }
 
 String addCharAtPosition(String s, String char, int? position,

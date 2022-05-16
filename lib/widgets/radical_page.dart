@@ -103,12 +103,6 @@ class RadicalPageState extends State<RadicalPage> {
   }
 
   Widget _radicalButton(Kanji radical) => TextButton(
-      child: Text(radical.character, style: TextStyle(
-        fontSize: 40,
-        color: _selectedRadicals.contains(radical.character)
-            ? Theme.of(context).colorScheme.primary
-            : Theme.of(context).colorScheme.secondary,
-      )),
       style: ButtonStyle(
         backgroundColor: MaterialStateProperty.resolveWith<Color?>(
               (Set<MaterialState> states) {
@@ -124,7 +118,13 @@ class RadicalPageState extends State<RadicalPage> {
       onPressed:
           _validRadicals.isEmpty || _validRadicals.contains(radical.character)
               ? () => _onRadicalButtonPress(radical.character)
-              : null);
+              : null,
+      child: Text(radical.character, style: TextStyle(
+        fontSize: 40,
+        color: _selectedRadicals.contains(radical.character)
+            ? Theme.of(context).colorScheme.primary
+            : Theme.of(context).colorScheme.secondary,
+      )));
 
   Future<List<String?>> _getRadicalsForSelection() async {
     String sql = 'SELECT DISTINCT id_radical FROM kanji_radical WHERE id_kanji IN (';

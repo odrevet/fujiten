@@ -161,10 +161,10 @@ class _ResultsWidgetState extends State<ResultsWidget> {
             }
 
             return ListView(
+              shrinkWrap: true,
               children: const [
                 ListTile(title: Center(child: CircularProgressIndicator()))
               ],
-              shrinkWrap: true,
             );
           }),
     );

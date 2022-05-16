@@ -113,9 +113,9 @@ class _MenuBarState extends State<MenuBar> {
         }
       },
       itemBuilder: (context) => [
-        const PopupMenuItem(child: Text('<> Radicals'), value: 0),
-        const PopupMenuItem(child: Text('$charKanji Kanji'), value: 1),
-        const PopupMenuItem(child: Text('$charKana Kana'), value: 2),
+        const PopupMenuItem(value: 0, child: Text('<> Radicals')),
+        const PopupMenuItem(value: 1, child: Text('$charKanji Kanji')),
+        const PopupMenuItem(value: 2, child: Text('$charKana Kana')),
       ],
     );
 
@@ -217,11 +217,11 @@ class _KanjiKotobaButtonState extends State<KanjiKotobaButton> {
     return SizedBox(
         width: 70,
         child: TextButton(
+            onPressed: widget.onPressed as void Function()?,
             child: Text(
               widget.kanjiSearch == true ? '漢字' : '言葉',
               style: const TextStyle(fontSize: 23.0, color: Colors.white),
-            ),
-            onPressed: widget.onPressed as void Function()?));
+            )));
   }
 }
 
