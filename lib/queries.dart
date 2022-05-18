@@ -59,7 +59,7 @@ Future<List<ExpressionEntry>> searchExpression(
   String where;
 
   if (kanaKit.isRomaji(input)) {
-    where = 'WHERE glosses REGEXP ".*$input.*" AND lang="$lang"';
+    where = 'WHERE glosses REGEXP "$input" AND lang="$lang"';
   } else {
     /*SharedPreferences _sharedPreferences =
         await SharedPreferences.getInstance();
