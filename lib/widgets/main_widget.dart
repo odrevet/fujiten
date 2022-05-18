@@ -7,7 +7,7 @@ import '../search.dart';
 import '../string_utils.dart';
 import 'menu_bar.dart';
 import 'results_widget.dart';
-import 'search_input.dart';
+import '../search_input.dart';
 
 class MainWidget extends StatefulWidget {
   final String? title;
