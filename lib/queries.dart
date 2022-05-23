@@ -54,12 +54,11 @@ Future<List<KanjiEntry>> searchKanji(Database dbKanji, String input) async {
 Future<List<ExpressionEntry>> searchExpression(
     Database dbExpression, String input, String lang,
     [resultsPerPage = 10, currentPage = 0]) async {
-  List<ExpressionEntry> entries = [];
-
   String where;
 
   if (kanaKit.isRomaji(input)) {
-    where = 'WHERE glosses REGEXP "$input" AND lang="$lang"';
+    where =
+        'WHERE expression.id IN (SELECT sense.id_expression FROM sense JOIN gloss ON gloss.id_sense = sense.id WHERE gloss.gloss REGEXP "$input") AND gloss.lang="$lang"';
   } else {
     /*SharedPreferences _sharedPreferences =
         await SharedPreferences.getInstance();
@@ -79,48 +78,52 @@ Future<List<ExpressionEntry>> searchExpression(
         'WHERE (kanji REGEXP "$input" OR reading REGEXP "$input") AND lang IN ${sqlIn(enabledLangs)}';
   }
 
-  String sql =
-      '''SELECT e.id as expression_id, e.kanji, e.reading, s.glosses, s.pos, s.lang
-      FROM expression e
-      JOIN sense s ON s.id_expression = e.id
-      $where
-      ORDER BY LENGTH(kanji)
-      LIMIT $resultsPerPage OFFSET ${currentPage * resultsPerPage}''';
+  String sql = '''SELECT expression.id as expression_id,
+                  sense.id as sense_id, 
+                  expression.kanji, 
+                  expression.reading, 
+                  sense.pos, 
+                  gloss.gloss, 
+                  gloss.lang
+                  FROM expression
+                  JOIN sense ON id_expression = expression.id
+                  JOIN gloss ON id_sense = sense.id
+                  $where
+                  ORDER BY expression.id''';
 
-  List<Map<String, dynamic>> expressionMaps;
+  List<Map<String, dynamic>> queryResults;
   try {
-    expressionMaps = await dbExpression.rawQuery(sql);
+    queryResults = await dbExpression.rawQuery(sql);
   } catch (e) {
-    throw ('ERROR $e');
+    //throw ('ERROR $e');
+    return [];
   }
 
-  late List<Sense> senses;
   int? expressionId;
+  int? senseId;
+  List<ExpressionEntry> entries = [];
+  List<String> glosses = [];
+  List<Sense> senses = [];
 
-  for (var expressionMap in expressionMaps) {
-    if (expressionId == null ||
-        expressionMap['expression_id'] != expressionId) {
-      senses = <Sense>[];
-      senses.add(
-        Sense(
-            glosses: expressionMap['glosses'],
-            posses: expressionMap['pos'].replaceAll(RegExp(' '), '').split(','),
-            lang: expressionMap['lang']),
-      );
+  for (var queryResult in queryResults) {
+    if (queryResult['expression_id'] != expressionId) {
+      senses = [];
       entries.add(ExpressionEntry(
-          kanji: expressionMap['kanji'] ?? '',
-          reading: expressionMap['reading'],
+          kanji: queryResult['kanji'],
+          reading: queryResult['reading'],
           senses: senses));
-    } else {
-      senses.add(
-        Sense(
-            glosses: expressionMap['glosses'],
-            posses: expressionMap['pos'].replaceAll(RegExp(' '), '').split(','),
-            lang: expressionMap['lang']),
-      );
+      expressionId = queryResult['expression_id'];
     }
-    expressionId = expressionMap['expression_id'];
+
+    if (queryResult['sense_id'] != senseId) {
+      glosses = [];
+      senseId = queryResult['sense_id'];
+      senses.add(Sense(glosses: glosses, posses: [], lang: "eng"));
+    }
+
+    glosses.add(queryResult['gloss']);
   }
+
 
   return entries;
 }

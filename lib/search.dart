@@ -11,16 +11,16 @@ class Search {
 abstract class Entry {}
 
 class ExpressionEntry extends Entry {
-  String kanji;
+  String? kanji;
   String reading;
   List<Sense> senses;
 
   ExpressionEntry(
-      {required this.kanji, required this.reading, required this.senses});
+      {this.kanji, required this.reading, required this.senses});
 }
 
 class Sense {
-  String glosses;
+  List<String> glosses;
   List<String> posses;
   String lang;
 
