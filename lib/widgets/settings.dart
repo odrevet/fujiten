@@ -14,14 +14,14 @@ class SettingsPage extends StatelessWidget {
     return Scaffold(
         appBar: AppBar(title: const Text('Menu')),
         body: ListView(children: [
-          ListTile(
+          /*ListTile(
               leading: const Icon(Icons.language),
               title: const Text("Languages"),
               onTap: () => Navigator.push(
                     context,
                     MaterialPageRoute(
                         builder: (context) => const LanguagePage()),
-                  )),
+                  )),*/
           ListTile(
               leading: const Icon(Icons.data_usage),
               title: const Text("Databases"),
@@ -64,10 +64,6 @@ class _DatasetPageState extends State<DatasetPage> {
 
   @override
   void initState() {
-    _getDatabasesList().then((assets) {
-      assets!.removeWhere((key, value) => !key.startsWith('assets/db'));
-      setState(() => _databases = assets);
-    });
     super.initState();
   }
 
@@ -75,22 +71,7 @@ class _DatasetPageState extends State<DatasetPage> {
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: AppBar(title: const Text('Databases')),
-        body: ListView.separated(
-            separatorBuilder: (context, index) {
-              return const Divider();
-            },
-            itemCount: _databases!.length,
-            itemBuilder: (BuildContext context, int index) {
-              String key = _databases!.keys.elementAt(index);
-              return ListTile(title: Text(key));
-            }));
-  }
-
-  Future<Map<String, dynamic>?> _getDatabasesList() async {
-    final manifestContent =
-        await DefaultAssetBundle.of(context).loadString('AssetManifest.json');
-    final Map<String, dynamic>? manifestMap = json.decode(manifestContent);
-    return manifestMap;
+        body: ListView(children: const [Text("Expression")],));
   }
 }
 
