@@ -35,8 +35,8 @@ class _MainWidgetState extends State<MainWidget> {
   late String _lang;
 
   _initDb() async {
-    await installDb('kanji.db');
-    await installDb('expression.db');
+    //await installDb('kanji.db');
+    //await installDb('expression.db');
 
     _dbKanji = await openDb('kanji.db');
     _dbExpression = await openDb('expression.db');

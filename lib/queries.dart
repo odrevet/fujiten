@@ -58,24 +58,10 @@ Future<List<ExpressionEntry>> searchExpression(
 
   if (kanaKit.isRomaji(input)) {
     where =
-        'WHERE expression.id IN (SELECT sense.id_expression FROM sense JOIN gloss ON gloss.id_sense = sense.id WHERE gloss.gloss REGEXP "$input") AND gloss.lang="$lang"';
+        'WHERE expression.id IN (SELECT sense.id_expression FROM sense JOIN gloss ON gloss.id_sense = sense.id WHERE gloss.gloss REGEXP "$input")';
   } else {
-    /*SharedPreferences _sharedPreferences =
-        await SharedPreferences.getInstance();
-    List<String> prefLangs = _sharedPreferences.getStringList('langs')!;
-
-    List<String> enabledLangs = <String>[];
-    prefLangs.forEach((prefLang) {
-      var prefLangParsed = prefLang.split(':');
-
-      if (prefLangParsed[1] == '1') {
-        enabledLangs.add(prefLangParsed[0]);
-      }
-    });*/
-
-    List<String> enabledLangs = <String>['eng'];
     where =
-        'WHERE (kanji REGEXP "$input" OR reading REGEXP "$input") AND lang IN ${sqlIn(enabledLangs)}';
+        'WHERE (kanji REGEXP "$input" OR reading REGEXP "$input")';
   }
 
   String sql = '''SELECT expression.id as expression_id,
@@ -83,8 +69,7 @@ Future<List<ExpressionEntry>> searchExpression(
                   expression.kanji, 
                   expression.reading, 
                   sense.pos, 
-                  gloss.gloss, 
-                  gloss.lang
+                  gloss.gloss
                   FROM expression
                   JOIN sense ON id_expression = expression.id
                   JOIN gloss ON id_sense = sense.id

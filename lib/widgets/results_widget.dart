@@ -115,10 +115,10 @@ class _ResultsWidgetState extends State<ResultsWidget> {
                         style: _styleFieldInformation,
                         children: List.generate(
                             glossesGroupedByPos.value.length, (i) {
-                          final lang = Lang(code: senses[i].lang);
+                          //final lang = Lang(code: senses[i].lang);
                           return TextSpan(
                               text:
-                                  '${lang.countryFlag} ${senses[i].glosses} \n',
+                                  '${senses[i].glosses} \n',
                               style: Theme.of(context).textTheme.bodyText2);
                         })),
                   ));
