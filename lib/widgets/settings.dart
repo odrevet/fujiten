@@ -1,8 +1,8 @@
-import 'dart:convert';
-
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:file_picker/file_picker.dart';
 
 import '../lang.dart';
 
@@ -71,9 +71,34 @@ class _DatasetPageState extends State<DatasetPage> {
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: AppBar(title: const Text('Databases')),
-        body: ListView(children: const [Text("Expression")],));
+        body: ListView(
+          children: [
+            Text("Expression"),
+            ElevatedButton(
+              onPressed: () => _pickFiles(),
+              child: Text('Pick file'),
+            )
+          ],
+        ));
+  }
+
+  void _pickFiles() async {
+    try {
+      var paths = (await FilePicker.platform.pickFiles(
+        type: FileType.any,
+        allowMultiple: false,
+        onFileLoading: (FilePickerStatus status) => print(status),
+      ))
+          ?.files;
+    } on PlatformException catch (e) {
+      print('Unsupported operation' + e.toString());
+    } catch (e) {
+      print(e.toString());
+    }
   }
 }
+
+
 
 class LanguagePage extends StatefulWidget {
   const LanguagePage({Key? key}) : super(key: key);
