@@ -62,9 +62,14 @@ class DatasetPage extends StatefulWidget {
 
 class _DatasetPageState extends State<DatasetPage> {
   Map<String, dynamic>? _databases;
+  late SharedPreferences _sharedPreferences;
 
   @override
   void initState() {
+    SharedPreferences.getInstance().then((sharedPreferences) {
+      _sharedPreferences = sharedPreferences;
+    });
+
     super.initState();
   }
 
@@ -76,15 +81,17 @@ class _DatasetPageState extends State<DatasetPage> {
           children: [
             ListTile(
               title: const Text("Expression"),
+              subtitle: Text(_sharedPreferences.getString("expression_path") ?? 'no value'),
               trailing: ElevatedButton(
-                onPressed: () => _pickFiles().then((value) => print(value![0].path)),
+                onPressed: () => _pickFiles().then((value) => _sharedPreferences.setString("expression_path", value![0].path!)),
                 child: const Text('Pick file'),
               ),
             ),
             ListTile(
               title: const Text("Kanji"),
+              subtitle: Text(_sharedPreferences.getString("kanji_path") ?? 'no value'),
               trailing: ElevatedButton(
-                onPressed: () => _pickFiles().then((value) => print(value![0].path)),
+                onPressed: () => _pickFiles().then((value) => _sharedPreferences.setString("kanji_path", value![0].path!)),
                 child: const Text('Pick file'),
               ),
             )
@@ -95,8 +102,7 @@ class _DatasetPageState extends State<DatasetPage> {
   Future<List<PlatformFile>?> _pickFiles() async {
     try {
       return (await FilePicker.platform.pickFiles(
-        type: FileType.custom,
-        allowedExtensions: ['db'],
+        type: FileType.any,
         allowMultiple: false,
         onFileLoading: (FilePickerStatus status) => print(status),
       ))

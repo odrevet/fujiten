@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sqflite/sqflite.dart';
 
 import '../db.dart';
@@ -34,12 +35,19 @@ class _MainWidgetState extends State<MainWidget> {
   bool? _kanjiSearch;
   late String _lang;
 
-  _initDb() async {
-    //await installDb('kanji.db');
-    //await installDb('expression.db');
+  final Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
 
-    _dbKanji = await openDb('kanji.db');
-    _dbExpression = await openDb('expression.db');
+  _initDb() async {
+    _prefs.then((SharedPreferences prefs) async {
+      String? path = prefs.getString("expression_path");
+      if(path != null)_dbExpression = await openDb(path);
+    });
+
+
+    _prefs.then((SharedPreferences prefs) async {
+      String? path = prefs.getString("kanji_path");
+      if(path != null)_dbKanji = await openDb(path);
+    });
   }
 
   _disposeDb() async {
@@ -68,7 +76,8 @@ class _MainWidgetState extends State<MainWidget> {
 
   _runSearch(String input) {
     if (_kanjiSearch!) {
-      searchKanji(_dbKanji!, input).then((searchResult) => setState(() {
+      searchKanji(_dbKanji!, input).then((searchResult) =>
+          setState(() {
             setState(() {
               if (searchResult.isNotEmpty) {
                 _search!.searchResults.addAll(searchResult);
@@ -78,7 +87,7 @@ class _MainWidgetState extends State<MainWidget> {
           }));
     } else {
       searchExpression(
-              _dbExpression, input, _lang, _resultsPerPage, _currentPage)
+          _dbExpression, input, _lang, _resultsPerPage, _currentPage)
           .then((searchResult) {
         setState(() {
           if (searchResult.isNotEmpty) {
@@ -119,7 +128,8 @@ class _MainWidgetState extends State<MainWidget> {
     _runSearch(input);
   }
 
-  _onLanguageSelect(String? lang) => setState(() {
+  _onLanguageSelect(String? lang) =>
+      setState(() {
         _lang = lang!;
       });
 
@@ -152,18 +162,20 @@ class _MainWidgetState extends State<MainWidget> {
         appBar: PreferredSize(
           preferredSize: const Size.fromHeight(56),
           child: Builder(
-            builder: (context) => MenuBar(
-                dbKanji: _dbKanji,
-                search: _search,
-                textEditingController: widget._textEditingController,
-                onSearch: _onSearch,
-                onLanguageSelect: _onLanguageSelect,
-                convertButton: ConvertButton(
-                  onPressed: _convert,
-                ),
-                kanjiKotobaButton: KanjiKotobaButton(
-                    onPressed: _searchTypeToggle, kanjiSearch: _kanjiSearch),
-                insertPosition: _cursorPosition),
+            builder: (context) =>
+                MenuBar(
+                    dbKanji: _dbKanji,
+                    search: _search,
+                    textEditingController: widget._textEditingController,
+                    onSearch: _onSearch,
+                    onLanguageSelect: _onLanguageSelect,
+                    convertButton: ConvertButton(
+                      onPressed: _convert,
+                    ),
+                    kanjiKotobaButton: KanjiKotobaButton(
+                        onPressed: _searchTypeToggle,
+                        kanjiSearch: _kanjiSearch),
+                    insertPosition: _cursorPosition),
           ),
         ),
         body: _body());
