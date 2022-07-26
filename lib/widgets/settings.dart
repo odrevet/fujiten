@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:japanese_dictionary/db.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:file_picker/file_picker.dart';
@@ -73,19 +74,29 @@ class _DatasetPageState extends State<DatasetPage> {
         appBar: AppBar(title: const Text('Databases')),
         body: ListView(
           children: [
-            Text("Expression"),
-            ElevatedButton(
-              onPressed: () => _pickFiles(),
-              child: Text('Pick file'),
+            ListTile(
+              title: const Text("Expression"),
+              trailing: ElevatedButton(
+                onPressed: () => _pickFiles().then((value) => print(value![0].path)),
+                child: const Text('Pick file'),
+              ),
+            ),
+            ListTile(
+              title: const Text("Kanji"),
+              trailing: ElevatedButton(
+                onPressed: () => _pickFiles().then((value) => print(value![0].path)),
+                child: const Text('Pick file'),
+              ),
             )
           ],
         ));
   }
 
-  void _pickFiles() async {
+  Future<List<PlatformFile>?> _pickFiles() async {
     try {
-      var paths = (await FilePicker.platform.pickFiles(
-        type: FileType.any,
+      return (await FilePicker.platform.pickFiles(
+        type: FileType.custom,
+        allowedExtensions: ['db'],
         allowMultiple: false,
         onFileLoading: (FilePickerStatus status) => print(status),
       ))
@@ -95,10 +106,9 @@ class _DatasetPageState extends State<DatasetPage> {
     } catch (e) {
       print(e.toString());
     }
+    return null;
   }
 }
-
-
 
 class LanguagePage extends StatefulWidget {
   const LanguagePage({Key? key}) : super(key: key);
