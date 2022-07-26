@@ -66,11 +66,23 @@ class _DatasetPageState extends State<DatasetPage> {
     });
   }
 
-  Future<void> _setPath(subject, path) async {
+  Future<void> _setPathExpression(String path) async {
     final SharedPreferences prefs = await _prefs;
     setState(() {
-      _expressionPath = path;
-      prefs.setString('${subject}_path', path);
+      _expressionPath =
+          prefs.setString('expression_path', path).then((bool success) {
+            return path;
+          });
+    });
+  }
+
+  Future<void> _setPathKanji(String path) async {
+    final SharedPreferences prefs = await _prefs;
+    setState(() {
+      _kanjiPath =
+          prefs.setString('kanji_path', path).then((bool success) {
+            return path;
+          });
     });
   }
 
@@ -80,7 +92,8 @@ class _DatasetPageState extends State<DatasetPage> {
         appBar: AppBar(title: const Text('Databases')),
         body: FutureBuilder<List<String>>(
             future: Future.wait([_expressionPath, _kanjiPath]),
-            builder: (BuildContext context, AsyncSnapshot<List<String>> snapshot) {
+            builder:
+                (BuildContext context, AsyncSnapshot<List<String>> snapshot) {
               switch (snapshot.connectionState) {
                 case ConnectionState.waiting:
                   return const CircularProgressIndicator();
@@ -94,7 +107,8 @@ class _DatasetPageState extends State<DatasetPage> {
                           title: const Text("Expression"),
                           subtitle: Text(snapshot.data![0] ?? "no value"),
                           trailing: ElevatedButton(
-                            onPressed: () => _pickFiles().then((value) => _setPath('expression', value![0].path!)),
+                            onPressed: () => _pickFiles().then((value) =>
+                                _setPathExpression(value![0].path!)),
                             child: const Text('Pick file'),
                           ),
                         ),
@@ -102,7 +116,8 @@ class _DatasetPageState extends State<DatasetPage> {
                           title: const Text("Kanji"),
                           subtitle: Text(snapshot.data![1] ?? "no value"),
                           trailing: ElevatedButton(
-                            onPressed: () => _pickFiles().then((value) => _setPath('kanji', value![0].path!)),
+                            onPressed: () => _pickFiles().then(
+                                (value) => _setPathKanji(value![0].path!)),
                             child: const Text('Pick file'),
                           ),
                         ),
