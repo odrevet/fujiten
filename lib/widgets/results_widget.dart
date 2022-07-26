@@ -4,7 +4,6 @@ import 'package:ruby_text/ruby_text.dart';
 import 'package:sqflite/sqflite.dart';
 
 import '../kanji.dart';
-import '../lang.dart';
 import '../queries.dart';
 import '../search.dart';
 import '../string_utils.dart' show kanaKit;

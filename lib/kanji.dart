@@ -1,10 +1,7 @@
-import 'lang.dart';
-
 class Meaning {
   String meaning;
-  Lang lang;
 
-  Meaning({required this.meaning, required this.lang});
+  Meaning({required this.meaning});
 }
 
 class Kanji {

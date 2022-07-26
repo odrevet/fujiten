@@ -1,11 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:japanese_dictionary/db.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:file_picker/file_picker.dart';
-
-import '../lang.dart';
 
 class SettingsPage extends StatelessWidget {
   const SettingsPage({Key? key}) : super(key: key);
@@ -15,14 +12,6 @@ class SettingsPage extends StatelessWidget {
     return Scaffold(
         appBar: AppBar(title: const Text('Menu')),
         body: ListView(children: [
-          /*ListTile(
-              leading: const Icon(Icons.language),
-              title: const Text("Languages"),
-              onTap: () => Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) => const LanguagePage()),
-                  )),*/
           ListTile(
               leading: const Icon(Icons.data_usage),
               title: const Text("Databases"),
@@ -61,42 +50,67 @@ class DatasetPage extends StatefulWidget {
 }
 
 class _DatasetPageState extends State<DatasetPage> {
-  Map<String, dynamic>? _databases;
-  late SharedPreferences _sharedPreferences;
+  final Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
+  late Future<String> _expressionPath;
+  late Future<String> _kanjiPath;
 
   @override
   void initState() {
-    SharedPreferences.getInstance().then((sharedPreferences) {
-      _sharedPreferences = sharedPreferences;
+    super.initState();
+    _expressionPath = _prefs.then((SharedPreferences prefs) {
+      return prefs.getString('expression_path') ?? "";
     });
 
-    super.initState();
+    _kanjiPath = _prefs.then((SharedPreferences prefs) {
+      return prefs.getString('kanji_path') ?? "";
+    });
+  }
+
+  Future<void> _setPath(subject, path) async {
+    final SharedPreferences prefs = await _prefs;
+    setState(() {
+      _expressionPath = path;
+      prefs.setString('${subject}_path', path);
+    });
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: AppBar(title: const Text('Databases')),
-        body: ListView(
-          children: [
-            ListTile(
-              title: const Text("Expression"),
-              subtitle: Text(_sharedPreferences.getString("expression_path") ?? 'no value'),
-              trailing: ElevatedButton(
-                onPressed: () => _pickFiles().then((value) => _sharedPreferences.setString("expression_path", value![0].path!)),
-                child: const Text('Pick file'),
-              ),
-            ),
-            ListTile(
-              title: const Text("Kanji"),
-              subtitle: Text(_sharedPreferences.getString("kanji_path") ?? 'no value'),
-              trailing: ElevatedButton(
-                onPressed: () => _pickFiles().then((value) => _sharedPreferences.setString("kanji_path", value![0].path!)),
-                child: const Text('Pick file'),
-              ),
-            )
-          ],
-        ));
+        body: FutureBuilder<List<String>>(
+            future: Future.wait([_expressionPath, _kanjiPath]),
+            builder: (BuildContext context, AsyncSnapshot<List<String>> snapshot) {
+              switch (snapshot.connectionState) {
+                case ConnectionState.waiting:
+                  return const CircularProgressIndicator();
+                default:
+                  if (snapshot.hasError) {
+                    return Text('Error: ${snapshot.error}');
+                  } else {
+                    return ListView(
+                      children: [
+                        ListTile(
+                          title: const Text("Expression"),
+                          subtitle: Text(snapshot.data![0] ?? "no value"),
+                          trailing: ElevatedButton(
+                            onPressed: () => _pickFiles().then((value) => _setPath('expression', value![0].path!)),
+                            child: const Text('Pick file'),
+                          ),
+                        ),
+                        ListTile(
+                          title: const Text("Kanji"),
+                          subtitle: Text(snapshot.data![1] ?? "no value"),
+                          trailing: ElevatedButton(
+                            onPressed: () => _pickFiles().then((value) => _setPath('kanji', value![0].path!)),
+                            child: const Text('Pick file'),
+                          ),
+                        ),
+                      ],
+                    );
+                  }
+              }
+            }));
   }
 
   Future<List<PlatformFile>?> _pickFiles() async {
@@ -113,100 +127,5 @@ class _DatasetPageState extends State<DatasetPage> {
       print(e.toString());
     }
     return null;
-  }
-}
-
-class LanguagePage extends StatefulWidget {
-  const LanguagePage({Key? key}) : super(key: key);
-
-  @override
-  State<LanguagePage> createState() => _LanguagePageState();
-}
-
-class _LanguagePageState extends State<LanguagePage> {
-  late SharedPreferences _sharedPreferences;
-  late List<Lang> _langs;
-
-  @override
-  initState() {
-    super.initState();
-    _langs = <Lang>[];
-    SharedPreferences.getInstance().then((sharedPreferences) {
-      _sharedPreferences = sharedPreferences;
-
-      List<String> prefLangs = _sharedPreferences.getStringList('langs') ??
-          [
-            'eng:1',
-            'fre:0',
-            'spa:0',
-            'rus:0',
-            'ger:0',
-            'dut:0',
-            'slv:0',
-            'swe:0'
-          ];
-
-      for (var prefLang in prefLangs) {
-        List<String> prefLangParsed = prefLang.split(':');
-        setState(() {
-          _langs.add(Lang(
-              code: prefLangParsed[0], isEnabled: prefLangParsed[1] == '1'));
-        });
-      }
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-        appBar: AppBar(title: const Text('Language')),
-        body: ListView.builder(
-            itemCount: _langs.length,
-            itemBuilder: (BuildContext context, int index) =>
-                LangListTile(lang: _langs[index], onTap: _onTapLang)));
-  }
-
-  _onTapLang(Lang lang, bool? isEnabled) async {
-    _langs.firstWhere((element) => element.code == lang.code).isEnabled =
-        isEnabled!;
-
-    List<String> langsSerialized = <String>[];
-    for (var lang in _langs) {
-      langsSerialized.add('${lang.code}:${lang.isEnabled == true ? '1' : '0'}');
-    }
-
-    setState(() {
-      _sharedPreferences.setStringList('langs', langsSerialized);
-    });
-  }
-}
-
-class LangListTile extends StatefulWidget {
-  final Lang? lang;
-  final dynamic Function(Lang, bool?)? onTap;
-
-  const LangListTile({this.lang, this.onTap, Key? key}) : super(key: key);
-
-  @override
-  State<LangListTile> createState() => _LangListTileState();
-}
-
-class _LangListTileState extends State<LangListTile> {
-  _onTap(bool? value) {
-    setState(() {
-      widget.lang!.isEnabled = value!;
-    });
-    widget.onTap!(widget.lang!, value);
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return CheckboxListTile(
-        title: Text(
-          '${widget.lang!.countryFlag} ${widget.lang!.name}',
-          style: const TextStyle(fontSize: 18),
-        ),
-        value: widget.lang!.isEnabled,
-        onChanged: _onTap);
   }
 }
