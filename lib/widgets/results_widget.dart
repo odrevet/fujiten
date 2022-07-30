@@ -114,10 +114,9 @@ class _ResultsWidgetState extends State<ResultsWidget> {
                         style: _styleFieldInformation,
                         children: List.generate(
                             glossesGroupedByPos.value.length, (i) {
-                          //final lang = Lang(code: senses[i].lang);
                           return TextSpan(
                               text:
-                                  '${senses[i].glosses} \n',
+                                  '${senses[i].glosses} ${senses[i].dial} ${senses[i].misc}\n',
                               style: Theme.of(context).textTheme.bodyText2);
                         })),
                   ));

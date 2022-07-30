@@ -51,8 +51,7 @@ Future<List<KanjiEntry>> searchKanji(Database dbKanji, String input) async {
   });
 }
 
-Future<List<ExpressionEntry>> searchExpression(
-    Database dbExpression, String input, String lang,
+Future<List<ExpressionEntry>> searchExpression(Database dbExpression, String input, String lang,
     [resultsPerPage = 10, currentPage = 0]) async {
   String where;
 
@@ -60,8 +59,7 @@ Future<List<ExpressionEntry>> searchExpression(
     where =
         "WHERE entry.id IN (SELECT sense.id_entry FROM sense JOIN gloss ON gloss.id_sense = sense.id WHERE gloss.gloss REGEXP '$input')";
   } else {
-    where =
-        'WHERE (kanji REGEXP "$input" OR reading REGEXP "$input")';
+    where = 'WHERE (kanji REGEXP "$input" OR reading REGEXP "$input")';
   }
 
   String sql = '''SELECT entry.id as entry_id,
@@ -69,14 +67,20 @@ Future<List<ExpressionEntry>> searchExpression(
                   GROUP_CONCAT(DISTINCT kanji.kanji) kanjis, 
                   GROUP_CONCAT(DISTINCT reading.reading) readings, 
                   GROUP_CONCAT(DISTINCT gloss.gloss) gloss_group,
-                  GROUP_CONCAT(DISTINCT pos.name) pos_group
+                  GROUP_CONCAT(DISTINCT pos.name) pos_group,
+                  GROUP_CONCAT(DISTINCT dial.name) dial_group,
+                  GROUP_CONCAT(DISTINCT misc.name) misc_group
                   FROM entry
                   JOIN sense ON sense.id_entry = entry.id
                   JOIN gloss ON gloss.id_sense = sense.id
-                  JOIN kanji ON kanji.id_entry = entry.id
-                  JOIN reading ON reading.id_entry = entry.id
-                  JOIN sense_pos on sense.id = sense_pos.id_sense 
-                  JOIN pos on sense_pos.id_pos = pos.id
+                  LEFT JOIN kanji ON kanji.id_entry = entry.id
+                  LEFT JOIN reading ON reading.id_entry = entry.id
+                  LEFT JOIN sense_pos on sense.id = sense_pos.id_sense 
+                  LEFT JOIN pos on sense_pos.id_pos = pos.id
+                  LEFT JOIN sense_dial on sense.id = sense_dial.id_sense 
+                  LEFT JOIN dial on sense_dial.id_dial = dial.id
+                  LEFT JOIN sense_misc on sense.id = sense_misc.id_sense 
+                  LEFT JOIN misc on sense_misc.id_misc = misc.id
                   $where
                   GROUP BY sense.id
                   ORDER BY entry.id''';
@@ -99,21 +103,23 @@ Future<List<ExpressionEntry>> searchExpression(
     if (queryResult['entry_id'] != entryId) {
       senses = [];
       entries.add(ExpressionEntry(
-          kanji: queryResult['kanjis'],
-          reading: queryResult['readings'],
-          senses: senses));
+          kanji: queryResult['kanjis'], reading: queryResult['readings'], senses: senses));
       entryId = queryResult['entry_id'];
     }
 
     if (queryResult['sense_id'] != senseId) {
       glosses = [];
       senseId = queryResult['sense_id'];
-      senses.add(Sense(glosses: glosses, posses: queryResult['pos_group'].split(';'), lang: "eng"));
+      senses.add(Sense(
+          glosses: glosses,
+          posses: queryResult['pos_group'].split(';'),
+          dial: queryResult['dial_group'] != null ? queryResult['dial_group'].split(';') : [],
+          misc: queryResult['misc_group'] != null ? queryResult['misc_group'].split(';') : [],
+          lang: "eng"));
     }
 
     glosses.add(queryResult['gloss_group']);
   }
-
 
   return entries;
 }
@@ -135,8 +141,7 @@ Future<Kanji> getKanjiFromCharacter(Database dbKanji, String character) async {
   return Kanji.fromMap(kanjiMaps.first);
 }
 
-Future<List<Kanji>> getKanjiFromCharacters(
-    Database dbKanji, List<String> characters) async {
+Future<List<Kanji>> getKanjiFromCharacters(Database dbKanji, List<String> characters) async {
   String sqlKanji = '''SELECT kanji.*,
         GROUP_CONCAT(DISTINCT kanji_radical.id_radical) as radicals,
         GROUP_CONCAT(DISTINCT on_yomi.reading) AS on_reading,
@@ -181,8 +186,7 @@ Future<List<Kanji>> getRadicals(Database dbKanji) async {
 }
 
 Future<List<String?>> getRadicalsCharacter(Database dbKanji) async {
-  final List<Map<String, dynamic>> radicalMaps =
-      await dbKanji.rawQuery('SELECT id FROM radical');
+  final List<Map<String, dynamic>> radicalMaps = await dbKanji.rawQuery('SELECT id FROM radical');
 
   return List.generate(radicalMaps.length, (i) {
     return radicalMaps[i]['id'];

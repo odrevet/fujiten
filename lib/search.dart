@@ -15,16 +15,22 @@ class ExpressionEntry extends Entry {
   String reading;
   List<Sense> senses;
 
-  ExpressionEntry(
-      {this.kanji, required this.reading, required this.senses});
+  ExpressionEntry({this.kanji, required this.reading, required this.senses});
 }
 
 class Sense {
   List<String> glosses;
   List<String> posses;
+  List<String> dial;
+  List<String> misc;
   String lang;
 
-  Sense({required this.glosses, required this.posses, required this.lang});
+  Sense(
+      {required this.glosses,
+      required this.posses,
+      required this.dial,
+      required this.misc,
+      this.lang = "eng"});
 }
 
 class KanjiEntry extends Entry {

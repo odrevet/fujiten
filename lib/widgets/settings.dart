@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:package_info_plus/package_info_plus.dart';
@@ -132,14 +133,17 @@ class _DatasetPageState extends State<DatasetPage> {
     try {
       return (await FilePicker.platform.pickFiles(
         type: FileType.any,
-        allowMultiple: false,
-        onFileLoading: (FilePickerStatus status) => print(status),
+        allowMultiple: false
       ))
           ?.files;
     } on PlatformException catch (e) {
-      print('Unsupported operation' + e.toString());
+      if (kDebugMode) {
+        print('Unsupported operation $e');
+      }
     } catch (e) {
-      print(e.toString());
+      if (kDebugMode) {
+        print(e.toString());
+      }
     }
     return null;
   }
