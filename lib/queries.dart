@@ -58,23 +58,25 @@ Future<List<ExpressionEntry>> searchExpression(
 
   if (kanaKit.isRomaji(input)) {
     where =
-        'WHERE expression.id IN (SELECT sense.id_expression FROM sense JOIN gloss ON gloss.id_sense = sense.id WHERE gloss.gloss REGEXP "$input")';
+        "WHERE entry.id IN (SELECT sense.id_entry FROM sense JOIN gloss ON gloss.id_sense = sense.id WHERE gloss.gloss REGEXP '$input')";
   } else {
     where =
         'WHERE (kanji REGEXP "$input" OR reading REGEXP "$input")';
   }
 
-  String sql = '''SELECT expression.id as expression_id,
+  String sql = '''SELECT entry.id as entry_id,
                   sense.id as sense_id, 
-                  expression.kanji, 
-                  expression.reading, 
-                  sense.pos, 
+                  GROUP_CONCAT(DISTINCT kanji.kanji) kanjis, 
+                  GROUP_CONCAT(DISTINCT reading.reading) readings, 
                   gloss.gloss
-                  FROM expression
-                  JOIN sense ON id_expression = expression.id
-                  JOIN gloss ON id_sense = sense.id
+                  FROM entry
+                  JOIN sense ON sense.id_entry = entry.id
+                  JOIN gloss ON gloss.id_sense = sense.id
+                  JOIN kanji ON kanji.id_entry = entry.id
+                  JOIN reading ON reading.id_entry = entry.id
                   $where
-                  ORDER BY expression.id''';
+                  GROUP BY gloss.id
+                  ORDER BY entry.id''';
 
   List<Map<String, dynamic>> queryResults;
   try {
@@ -84,20 +86,20 @@ Future<List<ExpressionEntry>> searchExpression(
     return [];
   }
 
-  int? expressionId;
+  int? entryId;
   int? senseId;
   List<ExpressionEntry> entries = [];
   List<String> glosses = [];
   List<Sense> senses = [];
 
   for (var queryResult in queryResults) {
-    if (queryResult['expression_id'] != expressionId) {
+    if (queryResult['entry_id'] != entryId) {
       senses = [];
       entries.add(ExpressionEntry(
-          kanji: queryResult['kanji'],
-          reading: queryResult['reading'],
+          kanji: queryResult['kanjis'],
+          reading: queryResult['readings'],
           senses: senses));
-      expressionId = queryResult['expression_id'];
+      entryId = queryResult['entry_id'];
     }
 
     if (queryResult['sense_id'] != senseId) {

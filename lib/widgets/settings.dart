@@ -105,7 +105,7 @@ class _DatasetPageState extends State<DatasetPage> {
                       children: [
                         ListTile(
                           title: const Text("Expression"),
-                          subtitle: Text(snapshot.data![0] ?? "no value"),
+                          subtitle: Text(snapshot.data![0]),
                           trailing: ElevatedButton(
                             onPressed: () => _pickFiles().then((value) =>
                                 _setPathExpression(value![0].path!)),
@@ -114,7 +114,7 @@ class _DatasetPageState extends State<DatasetPage> {
                         ),
                         ListTile(
                           title: const Text("Kanji"),
-                          subtitle: Text(snapshot.data![1] ?? "no value"),
+                          subtitle: Text(snapshot.data![1]),
                           trailing: ElevatedButton(
                             onPressed: () => _pickFiles().then(
                                 (value) => _setPathKanji(value![0].path!)),
