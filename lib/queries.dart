@@ -81,9 +81,14 @@ Future<List<ExpressionEntry>> searchExpression(Database dbExpression, String inp
                   LEFT JOIN dial on sense_dial.id_dial = dial.id
                   LEFT JOIN sense_misc on sense.id = sense_misc.id_sense 
                   LEFT JOIN misc on sense_misc.id_misc = misc.id
+                  LEFT JOIN priority priority_kanji on kanji.id_priority = priority_kanji.id
+                  LEFT JOIN priority priority_reading on reading.id_priority = priority_reading.id
                   $where
                   GROUP BY sense.id
-                  ORDER BY entry.id''';
+                  ORDER BY priority_kanji.news, priority_reading.news, 
+                           priority_kanji.ichi, priority_reading.ichi, 
+                           priority_kanji.gai, priority_reading.gai, 
+                           priority_kanji.nf, priority_reading.nf''';
 
   List<Map<String, dynamic>> queryResults;
   try {
