@@ -68,14 +68,16 @@ Future<List<ExpressionEntry>> searchExpression(
                   sense.id as sense_id, 
                   GROUP_CONCAT(DISTINCT kanji.kanji) kanjis, 
                   GROUP_CONCAT(DISTINCT reading.reading) readings, 
-                  gloss.gloss
+                  GROUP_CONCAT(DISTINCT gloss.gloss) gloss_group
                   FROM entry
                   JOIN sense ON sense.id_entry = entry.id
                   JOIN gloss ON gloss.id_sense = sense.id
                   JOIN kanji ON kanji.id_entry = entry.id
                   JOIN reading ON reading.id_entry = entry.id
+                  JOIN sense_pos on sense.id = sense_pos.id_sense 
+                  JOIN pos on sense_pos.id_pos = pos.id
                   $where
-                  GROUP BY gloss.id
+                  GROUP BY sense.id
                   ORDER BY entry.id''';
 
   List<Map<String, dynamic>> queryResults;
@@ -108,7 +110,7 @@ Future<List<ExpressionEntry>> searchExpression(
       senses.add(Sense(glosses: glosses, posses: [], lang: "eng"));
     }
 
-    glosses.add(queryResult['gloss']);
+    glosses.add(queryResult['gloss_group']);
   }
 
 
