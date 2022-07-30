@@ -42,7 +42,7 @@ Future<List<KanjiEntry>> searchKanji(Database dbKanji, String input) async {
         LEFT JOIN meaning ON meaning.id_kanji = kanji.id
         $where
         GROUP BY kanji.id
-        ORDER BY kanji.stroke''';
+        ORDER BY kanji.freq NULLS LAST, kanji.stroke''';
 
   final List<Map<String, dynamic>> kanjiMaps = await dbKanji.rawQuery(sql);
 
@@ -88,7 +88,8 @@ Future<List<ExpressionEntry>> searchExpression(Database dbExpression, String inp
                   ORDER BY priority_kanji.news, priority_reading.news, 
                            priority_kanji.ichi, priority_reading.ichi, 
                            priority_kanji.gai, priority_reading.gai, 
-                           priority_kanji.nf, priority_reading.nf''';
+                           priority_kanji.nf, priority_reading.nf 
+                           NULLS LAST''';
 
   List<Map<String, dynamic>> queryResults;
   try {
