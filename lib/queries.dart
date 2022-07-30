@@ -68,7 +68,8 @@ Future<List<ExpressionEntry>> searchExpression(
                   sense.id as sense_id, 
                   GROUP_CONCAT(DISTINCT kanji.kanji) kanjis, 
                   GROUP_CONCAT(DISTINCT reading.reading) readings, 
-                  GROUP_CONCAT(DISTINCT gloss.gloss) gloss_group
+                  GROUP_CONCAT(DISTINCT gloss.gloss) gloss_group,
+                  GROUP_CONCAT(DISTINCT pos.name) pos_group
                   FROM entry
                   JOIN sense ON sense.id_entry = entry.id
                   JOIN gloss ON gloss.id_sense = sense.id
@@ -107,7 +108,7 @@ Future<List<ExpressionEntry>> searchExpression(
     if (queryResult['sense_id'] != senseId) {
       glosses = [];
       senseId = queryResult['sense_id'];
-      senses.add(Sense(glosses: glosses, posses: [], lang: "eng"));
+      senses.add(Sense(glosses: glosses, posses: queryResult['pos_group'].split(';'), lang: "eng"));
     }
 
     glosses.add(queryResult['gloss_group']);
