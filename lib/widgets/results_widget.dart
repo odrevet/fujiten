@@ -15,9 +15,7 @@ class ResultsWidget extends StatefulWidget {
   final Function _onEndReached;
   final bool? _isLoading;
 
-  const ResultsWidget(
-      this._dbKanji, this._search, this._onEndReached, this._isLoading,
-      {Key? key})
+  const ResultsWidget(this._dbKanji, this._search, this._onEndReached, this._isLoading, {Key? key})
       : super(key: key);
 
   @override
@@ -33,8 +31,8 @@ class _ResultsWidgetState extends State<ResultsWidget> {
     _scrollController = ScrollController();
     _scrollController!.addListener(_scrollListener);
 
-    _styleFieldInformation = const TextStyle(
-        fontSize: 11, fontStyle: FontStyle.italic, color: Colors.blue);
+    _styleFieldInformation =
+        const TextStyle(fontSize: 12, fontStyle: FontStyle.italic, color: Colors.blue);
 
     super.initState();
   }
@@ -46,8 +44,7 @@ class _ResultsWidgetState extends State<ResultsWidget> {
   }
 
   _scrollListener() {
-    if (_scrollController!.offset >=
-            _scrollController!.position.maxScrollExtent &&
+    if (_scrollController!.offset >= _scrollController!.position.maxScrollExtent &&
         !_scrollController!.position.outOfRange &&
         !widget._isLoading!) {
       widget._onEndReached();
@@ -94,8 +91,8 @@ class _ResultsWidgetState extends State<ResultsWidget> {
                     title: const Text('Kanji'),
                     content: _kanjiDialogContent(searchResult.kanji),
                   )),
-          onDoubleTap: () => Clipboard.setData(
-              ClipboardData(text: searchResult.kanji ?? searchResult.reading)),
+          onDoubleTap: () =>
+              Clipboard.setData(ClipboardData(text: searchResult.kanji ?? searchResult.reading)),
           child: japaneseReading,
         ),
         Align(
@@ -112,12 +109,19 @@ class _ResultsWidgetState extends State<ResultsWidget> {
                     text: TextSpan(
                         text: '• $pos\n',
                         style: _styleFieldInformation,
-                        children: List.generate(
-                            glossesGroupedByPos.value.length, (i) {
+                        children: List.generate(glossesGroupedByPos.value.length, (i) {
                           return TextSpan(
-                              text:
-                                  '${senses[i].glosses} ${senses[i].dial} ${senses[i].misc}\n',
-                              style: Theme.of(context).textTheme.bodyText2);
+                              text: senses[i].glosses.join(","),
+                              style: Theme.of(context).textTheme.bodyText2,
+                              children: [
+                                TextSpan(
+                                    text: " ${senses[i].dial.join(",")}",
+                                    style: _styleFieldInformation),
+                                TextSpan(
+                                    text: " ${senses[i].misc.join(",")}",
+                                    style: _styleFieldInformation),
+                                const TextSpan(text: "\n")
+                              ]);
                         })),
                   ));
             }).toList(),
@@ -152,8 +156,8 @@ class _ResultsWidgetState extends State<ResultsWidget> {
                     },
                     itemCount: snapshot.data!.length,
                     itemBuilder: (BuildContext context, int index) {
-                      return KanjiWidget(snapshot.data!.firstWhere(
-                          (kanji) => kanji.character == kanjiReading[index]));
+                      return KanjiWidget(snapshot.data!
+                          .firstWhere((kanji) => kanji.character == kanjiReading[index]));
                     });
               }
             } else if (snapshot.hasError) {
@@ -162,9 +166,7 @@ class _ResultsWidgetState extends State<ResultsWidget> {
 
             return ListView(
               shrinkWrap: true,
-              children: const [
-                ListTile(title: Center(child: CircularProgressIndicator()))
-              ],
+              children: const [ListTile(title: Center(child: CircularProgressIndicator()))],
             );
           }),
     );
@@ -183,12 +185,10 @@ class _ResultsWidgetState extends State<ResultsWidget> {
                 itemCount: widget._search!.searchResults.length,
                 itemBuilder: (BuildContext context, int index) {
                   if (widget._search!.searchResults[index] is KanjiEntry) {
-                    KanjiEntry searchResult =
-                        widget._search!.searchResults[index] as KanjiEntry;
+                    KanjiEntry searchResult = widget._search!.searchResults[index] as KanjiEntry;
                     return _buildResultKanji(searchResult);
                   } else {
-                    return _buildResultExpression(
-                        widget._search!.searchResults[index]);
+                    return _buildResultExpression(widget._search!.searchResults[index]);
                   }
                 }));
   }
