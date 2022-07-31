@@ -21,8 +21,7 @@ String sqlIn(List<String> input) {
   return '$res)';
 }
 
-String addCharAtPosition(String s, String char, int? position,
-    {bool repeat = false}) {
+String addCharAtPosition(String s, String char, int? position, {bool repeat = false}) {
   if (!repeat) {
     if (s.length < position!) {
       return s;

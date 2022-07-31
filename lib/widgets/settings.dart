@@ -1,14 +1,16 @@
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:file_picker/file_picker.dart';
 
 class SettingsPage extends StatelessWidget {
   final Future<void> Function(String) setExpressionDb;
+  final Future<void> Function(String) setKanjiDb;
 
-  const SettingsPage({Key? key, required this.setExpressionDb}) : super(key: key);
+  const SettingsPage({Key? key, required this.setExpressionDb, required this.setKanjiDb})
+      : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -20,7 +22,9 @@ class SettingsPage extends StatelessWidget {
               title: const Text("Databases"),
               onTap: () => Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (context) => DatasetPage(setExpressionDb: setExpressionDb)),
+                    MaterialPageRoute(
+                        builder: (context) =>
+                            DatasetPage(setExpressionDb: setExpressionDb, setKanjiDb: setKanjiDb)),
                   )),
           ListTile(
               leading: const Icon(Icons.info),
@@ -45,8 +49,10 @@ under the Creative Commons Attribution-ShareAlike Licence (V3.0)''');
 
 class DatasetPage extends StatefulWidget {
   final Future<void> Function(String) setExpressionDb;
+  final Future<void> Function(String) setKanjiDb;
 
-  const DatasetPage({Key? key, required this.setExpressionDb}) : super(key: key);
+  const DatasetPage({Key? key, required this.setExpressionDb, required this.setKanjiDb})
+      : super(key: key);
 
   @override
   State<DatasetPage> createState() => _DatasetPageState();
@@ -119,8 +125,11 @@ class _DatasetPageState extends State<DatasetPage> {
                           title: const Text("Kanji"),
                           subtitle: Text(snapshot.data![1]),
                           trailing: ElevatedButton(
-                            onPressed: () =>
-                                _pickFiles().then((value) => _setPathKanji(value![0].path!)),
+                            onPressed: () => _pickFiles().then((value) async {
+                              String path = value![0].path!;
+                              _setPathExpression(path);
+                              await widget.setKanjiDb(path);
+                            }),
                             child: const Text('Pick file'),
                           ),
                         ),

@@ -34,8 +34,7 @@ class FieldInformation {
       'fem': "female term or language",
       'food': "food term",
       'geom': "geometry term",
-      'gikun':
-          "gikun (meaning as reading) or jukujikun (special kanji reading)",
+      'gikun': "gikun (meaning as reading) or jukujikun (special kanji reading)",
       'hon': "honorific or respectful (sonkeigo) language",
       'hum': "humble (kenjougo) language",
       'iK': "word containing irregular kanji usage",
@@ -153,8 +152,7 @@ class FieldInformation {
       'v2m-s': "Nidan verb (lower class) with `mu' ending (archaic)",
       'v2y-s': "Nidan verb (lower class) with `yu' ending (archaic)",
       'v2r-s': "Nidan verb (lower class) with `ru' ending (archaic)",
-      'v2w-s':
-          "Nidan verb (lower class) with `u' ending and `we' conjugation (archaic)",
+      'v2w-s': "Nidan verb (lower class) with `u' ending and `we' conjugation (archaic)",
       'archit': "architecture term",
       'astron': "astronomy, etc. term",
       'baseb': "baseball term",

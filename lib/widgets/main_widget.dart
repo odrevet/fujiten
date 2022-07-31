@@ -2,13 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sqflite/sqflite.dart';
 
-import '../db.dart';
 import '../queries.dart';
 import '../search.dart';
+import '../search_input.dart';
 import '../string_utils.dart';
 import 'menu_bar.dart';
 import 'results_widget.dart';
-import '../search_input.dart';
 
 class MainWidget extends StatefulWidget {
   final String? title;
@@ -40,18 +39,19 @@ class _MainWidgetState extends State<MainWidget> {
   _initDb() async {
     _prefs.then((SharedPreferences prefs) async {
       String? path = prefs.getString("expression_path");
-      if(path != null)_dbExpression = await openDb(path);
+      if (path != null) await setExpressionDb(path);
     });
-
 
     _prefs.then((SharedPreferences prefs) async {
       String? path = prefs.getString("kanji_path");
-      if(path != null)_dbKanji = await openDb(path);
+      if (path != null) await setKanjiDb(path);
     });
   }
 
   Future<void> setExpressionDb(String path) async =>
-      _dbExpression = await openDb(path);
+      _dbExpression = await openDatabase(path, readOnly: true);
+
+  Future<void> setKanjiDb(String path) async => _dbKanji = await openDatabase(path, readOnly: true);
 
   _disposeDb() async {
     await _dbExpression.close();
@@ -79,8 +79,7 @@ class _MainWidgetState extends State<MainWidget> {
 
   _runSearch(String input) {
     if (_kanjiSearch!) {
-      searchKanji(_dbKanji!, input).then((searchResult) =>
-          setState(() {
+      searchKanji(_dbKanji!, input).then((searchResult) => setState(() {
             setState(() {
               if (searchResult.isNotEmpty) {
                 _search!.searchResults.addAll(searchResult);
@@ -89,8 +88,7 @@ class _MainWidgetState extends State<MainWidget> {
             });
           }));
     } else {
-      searchExpression(
-          _dbExpression, input, _lang, _resultsPerPage, _currentPage)
+      searchExpression(_dbExpression, input, _lang, _resultsPerPage, _currentPage)
           .then((searchResult) {
         setState(() {
           if (searchResult.isNotEmpty) {
@@ -131,8 +129,7 @@ class _MainWidgetState extends State<MainWidget> {
     _runSearch(input);
   }
 
-  _onLanguageSelect(String? lang) =>
-      setState(() {
+  _onLanguageSelect(String? lang) => setState(() {
         _lang = lang!;
       });
 
@@ -165,21 +162,20 @@ class _MainWidgetState extends State<MainWidget> {
         appBar: PreferredSize(
           preferredSize: const Size.fromHeight(56),
           child: Builder(
-            builder: (context) =>
-                MenuBar(
-                    setExpressionDb: setExpressionDb,
-                    dbKanji: _dbKanji,
-                    search: _search,
-                    textEditingController: widget._textEditingController,
-                    onSearch: _onSearch,
-                    onLanguageSelect: _onLanguageSelect,
-                    convertButton: ConvertButton(
-                      onPressed: _convert,
-                    ),
-                    kanjiKotobaButton: KanjiKotobaButton(
-                        onPressed: _searchTypeToggle,
-                        kanjiSearch: _kanjiSearch),
-                    insertPosition: _cursorPosition),
+            builder: (context) => MenuBar(
+                setExpressionDb: setExpressionDb,
+                setKanjiDb: setKanjiDb,
+                dbKanji: _dbKanji,
+                search: _search,
+                textEditingController: widget._textEditingController,
+                onSearch: _onSearch,
+                onLanguageSelect: _onLanguageSelect,
+                convertButton: ConvertButton(
+                  onPressed: _convert,
+                ),
+                kanjiKotobaButton:
+                    KanjiKotobaButton(onPressed: _searchTypeToggle, kanjiSearch: _kanjiSearch),
+                insertPosition: _cursorPosition),
           ),
         ),
         body: _body());

@@ -30,17 +30,8 @@ class _LanguageSelectState extends State<LanguageSelect> {
           dropdownValue = lang;
         });
       },
-      items: <String>[
-        'eng',
-        'fre',
-        'rus',
-        'swe',
-        'spa',
-        'slv',
-        'ger',
-        'dut',
-        'hun'
-      ].map<DropdownMenuItem<String>>((String value) {
+      items: <String>['eng', 'fre', 'rus', 'swe', 'spa', 'slv', 'ger', 'dut', 'hun']
+          .map<DropdownMenuItem<String>>((String value) {
         return DropdownMenuItem<String>(
           value: value,
           child: Text(value),
@@ -57,6 +48,7 @@ class MenuBar extends StatefulWidget {
   final VoidCallback? onSearch;
   final void Function(String?)? onLanguageSelect;
   final Future<void> Function(String) setExpressionDb;
+  final Future<void> Function(String) setKanjiDb;
   final KanjiKotobaButton kanjiKotobaButton;
   final ConvertButton convertButton;
   final int? insertPosition;
@@ -71,6 +63,7 @@ class MenuBar extends StatefulWidget {
       required this.kanjiKotobaButton,
       required this.insertPosition,
       required this.setExpressionDb,
+      required this.setKanjiDb,
       Key? key})
       : super(key: key);
 
@@ -91,12 +84,9 @@ class _MenuBarState extends State<MenuBar> {
           case 1:
             if (widget.insertPosition! >= 0) {
               widget.textEditingController!.text = addCharAtPosition(
-                  widget.textEditingController!.text,
-                  charKanji,
-                  widget.insertPosition);
+                  widget.textEditingController!.text, charKanji, widget.insertPosition);
               widget.textEditingController!.selection =
-                  TextSelection.fromPosition(
-                      TextPosition(offset: widget.insertPosition! + 1));
+                  TextSelection.fromPosition(TextPosition(offset: widget.insertPosition! + 1));
             } else {
               widget.textEditingController!.text += charKanji;
             }
@@ -104,12 +94,9 @@ class _MenuBarState extends State<MenuBar> {
           case 2:
             if (widget.insertPosition! >= 0) {
               widget.textEditingController!.text = addCharAtPosition(
-                  widget.textEditingController!.text,
-                  charKana,
-                  widget.insertPosition);
+                  widget.textEditingController!.text, charKana, widget.insertPosition);
               widget.textEditingController!.selection =
-                  TextSelection.fromPosition(
-                      TextPosition(offset: widget.insertPosition! + 1));
+                  TextSelection.fromPosition(TextPosition(offset: widget.insertPosition! + 1));
             } else {
               widget.textEditingController!.text += charKana;
             }
@@ -129,7 +116,9 @@ class _MenuBarState extends State<MenuBar> {
             icon: const Icon(Icons.menu),
             onPressed: () => Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => SettingsPage(setExpressionDb: widget.setExpressionDb)),
+                  MaterialPageRoute(
+                      builder: (context) => SettingsPage(
+                          setExpressionDb: widget.setExpressionDb, setKanjiDb: widget.setKanjiDb)),
                 )),
         Row(
           children: <Widget>[
@@ -158,8 +147,7 @@ class _MenuBarState extends State<MenuBar> {
   _displayRadicalWidget(BuildContext context) async {
     //send the radicals inside < > to the radical page
     var exp = RegExp(r'<(.*?)>');
-    Iterable<RegExpMatch> matches =
-        exp.allMatches(widget.textEditingController!.text);
+    Iterable<RegExpMatch> matches = exp.allMatches(widget.textEditingController!.text);
     Match? matchAtCursor;
     for (Match m in matches) {
       if (widget.insertPosition! > m.start && widget.insertPosition! < m.end) {
@@ -167,9 +155,8 @@ class _MenuBarState extends State<MenuBar> {
         break;
       }
     }
-    List<String> radicals = matchAtCursor == null
-        ? []
-        : List.from(matchAtCursor.group(1)!.split(''));
+    List<String> radicals =
+        matchAtCursor == null ? [] : List.from(matchAtCursor.group(1)!.split(''));
 
     //remove every non-radical characters
     //call to getRadicalsCharacter somehow move the cursor to the end of textinput, retain de current position now
@@ -182,21 +169,15 @@ class _MenuBarState extends State<MenuBar> {
     if (!mounted) return;
     Navigator.push(
       context,
-      MaterialPageRoute(
-          builder: (context) => RadicalPage(widget.dbKanji, radicals)),
+      MaterialPageRoute(builder: (context) => RadicalPage(widget.dbKanji, radicals)),
     ).then((selectedRadicals) {
       if (selectedRadicals.isNotEmpty) {
         if (matchAtCursor == null) {
           widget.textEditingController!.text = addCharAtPosition(
-              widget.textEditingController!.text,
-              '<${selectedRadicals.join()}>',
-              insertPosition);
+              widget.textEditingController!.text, '<${selectedRadicals.join()}>', insertPosition);
         } else {
-          widget.textEditingController!.text =
-              widget.textEditingController!.text.replaceRange(
-                  matchAtCursor.start,
-                  matchAtCursor.end,
-                  '<${selectedRadicals.join()}>');
+          widget.textEditingController!.text = widget.textEditingController!.text
+              .replaceRange(matchAtCursor.start, matchAtCursor.end, '<${selectedRadicals.join()}>');
         }
       }
 
@@ -210,8 +191,7 @@ class KanjiKotobaButton extends StatefulWidget {
   final Function? onPressed;
   final bool? kanjiSearch;
 
-  const KanjiKotobaButton({this.onPressed, this.kanjiSearch, Key? key})
-      : super(key: key);
+  const KanjiKotobaButton({this.onPressed, this.kanjiSearch, Key? key}) : super(key: key);
 
   @override
   State<KanjiKotobaButton> createState() => _KanjiKotobaButtonState();
@@ -246,7 +226,6 @@ class _ConvertButtonState extends State<ConvertButton> {
     return SizedBox(
         width: 70,
         child: IconButton(
-            icon: const Icon(Icons.translate),
-            onPressed: widget.onPressed as void Function()?));
+            icon: const Icon(Icons.translate), onPressed: widget.onPressed as void Function()?));
   }
 }

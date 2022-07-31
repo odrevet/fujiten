@@ -8,8 +8,7 @@ class RadicalPage extends StatefulWidget {
   final Database? _dbKanji;
   final List<String> _selectedRadicals;
 
-  const RadicalPage(this._dbKanji, this._selectedRadicals, {Key? key})
-      : super(key: key);
+  const RadicalPage(this._dbKanji, this._selectedRadicals, {Key? key}) : super(key: key);
 
   @override
   RadicalPageState createState() => RadicalPageState(_selectedRadicals);
@@ -31,8 +30,8 @@ class RadicalPageState extends State<RadicalPage> {
     _radicals = getRadicals(widget._dbKanji!);
 
     if (_selectedRadicals.isNotEmpty) {
-      _getRadicalsForSelection().then(
-          (validRadicals) => setState(() => _validRadicals = validRadicals));
+      _getRadicalsForSelection()
+          .then((validRadicals) => setState(() => _validRadicals = validRadicals));
     }
     super.initState();
   }
@@ -51,8 +50,7 @@ class RadicalPageState extends State<RadicalPage> {
                 title: const Text('Radicals'),
                 leading: IconButton(
                     icon: const Icon(Icons.arrow_back),
-                    onPressed: () =>
-                        Navigator.pop(context, _selectedRadicals))),
+                    onPressed: () => Navigator.pop(context, _selectedRadicals))),
             body: snapshot.hasData
                 ? Center(child: radicalGridView(snapshot.data!))
                 : const Center(child: CircularProgressIndicator()));
@@ -62,12 +60,10 @@ class RadicalPageState extends State<RadicalPage> {
 
   Widget radicalGridView(List<Kanji> radicals) {
     return GridView.builder(
-        gridDelegate:
-            const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 5),
+        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 5),
         itemCount: radicals.length,
         itemBuilder: (BuildContext context, int index) {
-          if (index == 0 ||
-              radicals[index].stroke != radicals[index - 1].stroke) {
+          if (index == 0 || radicals[index].stroke != radicals[index - 1].stroke) {
             return Stack(
               children: <Widget>[
                 Positioned.fill(
@@ -78,10 +74,7 @@ class RadicalPageState extends State<RadicalPage> {
                       color: Theme.of(context).brightness == Brightness.light
                           ? Colors.white
                           : Colors.black),
-                  Positioned(
-                      top: 3,
-                      left: 5,
-                      child: Text(radicals[index].stroke.toString()))
+                  Positioned(top: 3, left: 5, child: Text(radicals[index].stroke.toString()))
                 ]),
               ],
             );
@@ -98,8 +91,8 @@ class RadicalPageState extends State<RadicalPage> {
           : _selectedRadicals.add(character);
     });
 
-    _getRadicalsForSelection().then(
-        (validRadicals) => setState(() => _validRadicals = validRadicals));
+    _getRadicalsForSelection()
+        .then((validRadicals) => setState(() => _validRadicals = validRadicals));
   }
 
   Widget _radicalButton(Kanji radical) => TextButton(
@@ -115,10 +108,9 @@ class RadicalPageState extends State<RadicalPage> {
           },
         ),
       ),
-      onPressed:
-          _validRadicals.isEmpty || _validRadicals.contains(radical.character)
-              ? () => _onRadicalButtonPress(radical.character)
-              : null,
+      onPressed: _validRadicals.isEmpty || _validRadicals.contains(radical.character)
+          ? () => _onRadicalButtonPress(radical.character)
+          : null,
       child: Text(radical.character,
           style: TextStyle(
             fontSize: 40,
@@ -128,19 +120,16 @@ class RadicalPageState extends State<RadicalPage> {
           )));
 
   Future<List<String?>> _getRadicalsForSelection() async {
-    String sql =
-        'SELECT DISTINCT id_radical FROM kanji_radical WHERE id_kanji IN (';
+    String sql = 'SELECT DISTINCT id_radical FROM kanji_radical WHERE id_kanji IN (';
 
     _selectedRadicals.asMap().forEach((i, radical) {
-      sql +=
-          'SELECT DISTINCT id_kanji FROM kanji_radical WHERE id_radical = "$radical"';
+      sql += 'SELECT DISTINCT id_kanji FROM kanji_radical WHERE id_radical = "$radical"';
       if (i < _selectedRadicals.length - 1) sql += ' INTERSECT ';
     });
 
     sql += ')';
 
-    final List<Map<String, dynamic>> radicalIdMaps =
-        await widget._dbKanji!.rawQuery(sql);
+    final List<Map<String, dynamic>> radicalIdMaps = await widget._dbKanji!.rawQuery(sql);
 
     return List.generate(radicalIdMaps.length, (i) {
       return radicalIdMaps[i]['id_radical'];
