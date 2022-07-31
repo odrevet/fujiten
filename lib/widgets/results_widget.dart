@@ -59,14 +59,14 @@ class _ResultsWidgetState extends State<ResultsWidget> {
     var japaneseReading = searchResult.kanji == null
         ? Text(
             searchResult.reading,
-            style: const TextStyle(fontSize: 26.0),
+            style: const TextStyle(fontSize: 24.0),
           )
         : RubyText(
             [
               RubyTextData(
                 searchResult.kanji,
                 ruby: searchResult.reading ?? '',
-                style: const TextStyle(fontSize: 26.0),
+                style: const TextStyle(fontSize: 18.0),
               )
             ],
           );
