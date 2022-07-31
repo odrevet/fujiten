@@ -122,9 +122,6 @@ class _MenuBarState extends State<MenuBar> {
                 )),
         Row(
           children: <Widget>[
-            /*LanguageSelect(
-              onLanguageSelect: widget.onLanguageSelect,
-            ),*/
             popupMenuButtonInsert,
             widget.convertButton,
             widget.kanjiKotobaButton,

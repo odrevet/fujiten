@@ -127,7 +127,7 @@ class _DatasetPageState extends State<DatasetPage> {
                           trailing: ElevatedButton(
                             onPressed: () => _pickFiles().then((value) async {
                               String path = value![0].path!;
-                              _setPathExpression(path);
+                              _setPathKanji(path);
                               await widget.setKanjiDb(path);
                             }),
                             child: const Text('Pick file'),
