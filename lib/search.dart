@@ -11,8 +11,8 @@ class Search {
 abstract class Entry {}
 
 class ExpressionEntry extends Entry {
-  String? kanji;
-  String reading;
+  List<String>? kanji;
+  List<String> reading;
   List<Sense> senses;
 
   ExpressionEntry({this.kanji, required this.reading, required this.senses});

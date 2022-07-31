@@ -110,7 +110,7 @@ Future<List<ExpressionEntry>> searchExpression(Database dbExpression, String inp
     if (queryResult['entry_id'] != entryId) {
       senses = [];
       entries.add(ExpressionEntry(
-          kanji: queryResult['kanjis'], reading: queryResult['readings'], senses: senses));
+          kanji: queryResult['kanjis'] != null ? queryResult['kanjis'].split(';')  : [], reading: queryResult['readings'].split(';'), senses: senses));
       entryId = queryResult['entry_id'];
     }
 

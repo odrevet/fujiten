@@ -56,16 +56,16 @@ class _ResultsWidgetState extends State<ResultsWidget> {
   }
 
   Widget _buildResultExpression(searchResult) {
-    var japaneseReading = searchResult.kanji == null
+    var japaneseReading = searchResult.kanji.isEmpty
         ? Text(
-            searchResult.reading,
+            searchResult.reading.first,  //TODO
             style: const TextStyle(fontSize: 24.0),
           )
         : RubyText(
             [
               RubyTextData(
-                searchResult.kanji,
-                ruby: searchResult.reading ?? '',
+                searchResult.kanji.first,  //TODO
+                ruby: searchResult.reading.isEmpty ? '' : searchResult.reading.first, //TODO
                 style: const TextStyle(fontSize: 18.0),
               )
             ],
