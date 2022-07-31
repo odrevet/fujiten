@@ -50,6 +50,9 @@ class _MainWidgetState extends State<MainWidget> {
     });
   }
 
+  Future<void> setExpressionDb(String path) async =>
+      _dbExpression = await openDb(path);
+
   _disposeDb() async {
     await _dbExpression.close();
     await _dbKanji!.close();
@@ -164,6 +167,7 @@ class _MainWidgetState extends State<MainWidget> {
           child: Builder(
             builder: (context) =>
                 MenuBar(
+                    setExpressionDb: setExpressionDb,
                     dbKanji: _dbKanji,
                     search: _search,
                     textEditingController: widget._textEditingController,

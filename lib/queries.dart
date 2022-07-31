@@ -89,7 +89,8 @@ Future<List<ExpressionEntry>> searchExpression(Database dbExpression, String inp
                            priority_kanji.ichi, priority_reading.ichi, 
                            priority_kanji.gai, priority_reading.gai, 
                            priority_kanji.nf, priority_reading.nf 
-                           NULLS LAST''';
+                           NULLS LAST
+                  LIMIT $resultsPerPage OFFSET ${currentPage * resultsPerPage}''';
 
   List<Map<String, dynamic>> queryResults;
   try {

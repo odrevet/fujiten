@@ -56,6 +56,7 @@ class MenuBar extends StatefulWidget {
   final TextEditingController? textEditingController;
   final VoidCallback? onSearch;
   final void Function(String?)? onLanguageSelect;
+  final Future<void> Function(String) setExpressionDb;
   final KanjiKotobaButton kanjiKotobaButton;
   final ConvertButton convertButton;
   final int? insertPosition;
@@ -69,6 +70,7 @@ class MenuBar extends StatefulWidget {
       required this.convertButton,
       required this.kanjiKotobaButton,
       required this.insertPosition,
+      required this.setExpressionDb,
       Key? key})
       : super(key: key);
 
@@ -127,7 +129,7 @@ class _MenuBarState extends State<MenuBar> {
             icon: const Icon(Icons.menu),
             onPressed: () => Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => const SettingsPage()),
+                  MaterialPageRoute(builder: (context) => SettingsPage(setExpressionDb: widget.setExpressionDb)),
                 )),
         Row(
           children: <Widget>[

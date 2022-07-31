@@ -6,7 +6,9 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:file_picker/file_picker.dart';
 
 class SettingsPage extends StatelessWidget {
-  const SettingsPage({Key? key}) : super(key: key);
+  final Future<void> Function(String) setExpressionDb;
+
+  const SettingsPage({Key? key, required this.setExpressionDb}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -18,8 +20,7 @@ class SettingsPage extends StatelessWidget {
               title: const Text("Databases"),
               onTap: () => Navigator.push(
                     context,
-                    MaterialPageRoute(
-                        builder: (context) => const DatasetPage()),
+                    MaterialPageRoute(builder: (context) => DatasetPage(setExpressionDb: setExpressionDb)),
                   )),
           ListTile(
               leading: const Icon(Icons.info),
@@ -33,8 +34,7 @@ class SettingsPage extends StatelessWidget {
                           context: context,
                           applicationName: appName,
                           applicationVersion: version,
-                          applicationLegalese:
-                              '''2022 Olivier Drevet All right reserved
+                          applicationLegalese: '''2022 Olivier Drevet All right reserved
 This software uses data from JMDict, Kanjidic2, Radkfile by the Electronic Dictionary Research and Development Group
 under the Creative Commons Attribution-ShareAlike Licence (V3.0)''');
                     })
@@ -44,7 +44,9 @@ under the Creative Commons Attribution-ShareAlike Licence (V3.0)''');
 }
 
 class DatasetPage extends StatefulWidget {
-  const DatasetPage({Key? key}) : super(key: key);
+  final Future<void> Function(String) setExpressionDb;
+
+  const DatasetPage({Key? key, required this.setExpressionDb}) : super(key: key);
 
   @override
   State<DatasetPage> createState() => _DatasetPageState();
@@ -70,20 +72,18 @@ class _DatasetPageState extends State<DatasetPage> {
   Future<void> _setPathExpression(String path) async {
     final SharedPreferences prefs = await _prefs;
     setState(() {
-      _expressionPath =
-          prefs.setString('expression_path', path).then((bool success) {
-            return path;
-          });
+      _expressionPath = prefs.setString('expression_path', path).then((bool success) {
+        return path;
+      });
     });
   }
 
   Future<void> _setPathKanji(String path) async {
     final SharedPreferences prefs = await _prefs;
     setState(() {
-      _kanjiPath =
-          prefs.setString('kanji_path', path).then((bool success) {
-            return path;
-          });
+      _kanjiPath = prefs.setString('kanji_path', path).then((bool success) {
+        return path;
+      });
     });
   }
 
@@ -93,8 +93,7 @@ class _DatasetPageState extends State<DatasetPage> {
         appBar: AppBar(title: const Text('Databases')),
         body: FutureBuilder<List<String>>(
             future: Future.wait([_expressionPath, _kanjiPath]),
-            builder:
-                (BuildContext context, AsyncSnapshot<List<String>> snapshot) {
+            builder: (BuildContext context, AsyncSnapshot<List<String>> snapshot) {
               switch (snapshot.connectionState) {
                 case ConnectionState.waiting:
                   return const CircularProgressIndicator();
@@ -108,8 +107,11 @@ class _DatasetPageState extends State<DatasetPage> {
                           title: const Text("Expression"),
                           subtitle: Text(snapshot.data![0]),
                           trailing: ElevatedButton(
-                            onPressed: () => _pickFiles().then((value) =>
-                                _setPathExpression(value![0].path!)),
+                            onPressed: () => _pickFiles().then((value) async {
+                              String path = value![0].path!;
+                              _setPathExpression(path);
+                              await widget.setExpressionDb(path);
+                            }),
                             child: const Text('Pick file'),
                           ),
                         ),
@@ -117,8 +119,8 @@ class _DatasetPageState extends State<DatasetPage> {
                           title: const Text("Kanji"),
                           subtitle: Text(snapshot.data![1]),
                           trailing: ElevatedButton(
-                            onPressed: () => _pickFiles().then(
-                                (value) => _setPathKanji(value![0].path!)),
+                            onPressed: () =>
+                                _pickFiles().then((value) => _setPathKanji(value![0].path!)),
                             child: const Text('Pick file'),
                           ),
                         ),
@@ -131,11 +133,7 @@ class _DatasetPageState extends State<DatasetPage> {
 
   Future<List<PlatformFile>?> _pickFiles() async {
     try {
-      return (await FilePicker.platform.pickFiles(
-        type: FileType.any,
-        allowMultiple: false
-      ))
-          ?.files;
+      return (await FilePicker.platform.pickFiles(type: FileType.any, allowMultiple: false))?.files;
     } on PlatformException catch (e) {
       if (kDebugMode) {
         print('Unsupported operation $e');
