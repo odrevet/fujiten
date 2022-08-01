@@ -73,8 +73,8 @@ Future<List<ExpressionEntry>> searchExpression(Database dbExpression, String inp
                   FROM entry
                   JOIN sense ON sense.id_entry = entry.id
                   JOIN gloss ON gloss.id_sense = sense.id
+                  JOIN reading ON reading.id_entry = entry.id
                   LEFT JOIN kanji ON kanji.id_entry = entry.id
-                  LEFT JOIN reading ON reading.id_entry = entry.id
                   LEFT JOIN sense_pos on sense.id = sense_pos.id_sense 
                   LEFT JOIN pos on sense_pos.id_pos = pos.id
                   LEFT JOIN sense_dial on sense.id = sense_dial.id_sense 
@@ -110,7 +110,9 @@ Future<List<ExpressionEntry>> searchExpression(Database dbExpression, String inp
     if (queryResult['entry_id'] != entryId) {
       senses = [];
       entries.add(ExpressionEntry(
-          kanji: queryResult['kanjis'] != null ? queryResult['kanjis'].split(';')  : [], reading: queryResult['readings'].split(';'), senses: senses));
+          kanji: queryResult['kanjis'] != null ? queryResult['kanjis'].split(',') : [],
+          reading: queryResult['readings'].split(','),
+          senses: senses));
       entryId = queryResult['entry_id'];
     }
 
@@ -119,9 +121,9 @@ Future<List<ExpressionEntry>> searchExpression(Database dbExpression, String inp
       senseId = queryResult['sense_id'];
       senses.add(Sense(
           glosses: glosses,
-          posses: queryResult['pos_group'].split(';'),
-          dial: queryResult['dial_group'] != null ? queryResult['dial_group'].split(';') : [],
-          misc: queryResult['misc_group'] != null ? queryResult['misc_group'].split(';') : [],
+          posses: queryResult['pos_group'].split(','),
+          dial: queryResult['dial_group'] != null ? queryResult['dial_group'].split(',') : [],
+          misc: queryResult['misc_group'] != null ? queryResult['misc_group'].split(',') : [],
           lang: "eng"));
     }
 
