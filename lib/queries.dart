@@ -64,8 +64,8 @@ Future<List<ExpressionEntry>> searchExpression(Database dbExpression, String inp
 
   String sql = '''SELECT entry.id as entry_id,
                   sense.id as sense_id, 
-                  GROUP_CONCAT(DISTINCT kanji.kanji) kanjis, 
-                  GROUP_CONCAT(DISTINCT reading.reading) readings, 
+                  GROUP_CONCAT(DISTINCT k_ele.keb) keb_group, 
+                  GROUP_CONCAT(DISTINCT r_ele.reb) reb_group, 
                   GROUP_CONCAT(DISTINCT gloss.gloss) gloss_group,
                   GROUP_CONCAT(DISTINCT pos.name) pos_group,
                   GROUP_CONCAT(DISTINCT dial.name) dial_group,
@@ -73,22 +73,22 @@ Future<List<ExpressionEntry>> searchExpression(Database dbExpression, String inp
                   FROM entry
                   JOIN sense ON sense.id_entry = entry.id
                   JOIN gloss ON gloss.id_sense = sense.id
-                  JOIN reading ON reading.id_entry = entry.id
-                  LEFT JOIN kanji ON kanji.id_entry = entry.id
+                  JOIN r_ele ON r_ele.id_entry = entry.id
+                  LEFT JOIN k_ele ON k_ele.id_entry = entry.id
                   LEFT JOIN sense_pos on sense.id = sense_pos.id_sense 
                   LEFT JOIN pos on sense_pos.id_pos = pos.id
                   LEFT JOIN sense_dial on sense.id = sense_dial.id_sense 
                   LEFT JOIN dial on sense_dial.id_dial = dial.id
                   LEFT JOIN sense_misc on sense.id = sense_misc.id_sense 
                   LEFT JOIN misc on sense_misc.id_misc = misc.id
-                  LEFT JOIN priority priority_kanji on kanji.id_priority = priority_kanji.id
-                  LEFT JOIN priority priority_reading on reading.id_priority = priority_reading.id
+                  LEFT JOIN pri pri_k_ele on k_ele.id_pri = pri_k_ele.id
+                  LEFT JOIN pri pri_r_ele on r_ele.id_pri = pri_r_ele.id
                   $where
                   GROUP BY sense.id
-                  ORDER BY priority_kanji.news, priority_reading.news, 
-                           priority_kanji.ichi, priority_reading.ichi, 
-                           priority_kanji.gai, priority_reading.gai, 
-                           priority_kanji.nf, priority_reading.nf 
+                  ORDER BY pri_k_ele.news, pri_r_ele.news, 
+                           pri_k_ele.ichi, pri_r_ele.ichi, 
+                           pri_k_ele.gai, pri_r_ele.gai, 
+                           pri_k_ele.nf, pri_r_ele.nf 
                            NULLS LAST
                   LIMIT $resultsPerPage OFFSET ${currentPage * resultsPerPage}''';
 
@@ -110,8 +110,8 @@ Future<List<ExpressionEntry>> searchExpression(Database dbExpression, String inp
     if (queryResult['entry_id'] != entryId) {
       senses = [];
       entries.add(ExpressionEntry(
-          kanji: queryResult['kanjis'] != null ? queryResult['kanjis'].split(',') : [],
-          reading: queryResult['readings'].split(','),
+          kanji: queryResult['k_ele_group'] != null ? queryResult['keb_group'].split(',') : [],
+          reading: queryResult['reb_group'].split(','),
           senses: senses));
       entryId = queryResult['entry_id'];
     }

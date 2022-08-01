@@ -113,10 +113,12 @@ class _DatasetPageState extends State<DatasetPage> {
                           title: const Text("Expression"),
                           subtitle: Text(snapshot.data![0]),
                           trailing: ElevatedButton(
-                            onPressed: () => _pickFiles().then((value) async {
-                              String path = value![0].path!;
-                              _setPathExpression(path);
-                              await widget.setExpressionDb(path);
+                            onPressed: () => _pickFiles().then((result) async {
+                              if(result != null) {
+                                String path = result.first.path!;
+                                _setPathExpression(path);
+                                await widget.setExpressionDb(path);
+                              }
                             }),
                             child: const Text('Pick file'),
                           ),
@@ -125,10 +127,12 @@ class _DatasetPageState extends State<DatasetPage> {
                           title: const Text("Kanji"),
                           subtitle: Text(snapshot.data![1]),
                           trailing: ElevatedButton(
-                            onPressed: () => _pickFiles().then((value) async {
-                              String path = value![0].path!;
-                              _setPathKanji(path);
-                              await widget.setKanjiDb(path);
+                            onPressed: () => _pickFiles().then((result) async {
+                              if(result != null) {
+                                String path = result.first.path!;
+                                _setPathKanji(path);
+                                await widget.setKanjiDb(path);
+                              }
                             }),
                             child: const Text('Pick file'),
                           ),
