@@ -191,22 +191,24 @@ class _MainWidgetState extends State<MainWidget> {
     var exp = RegExp(r'<(.*?)>');
     Iterable<RegExpMatch> matches = exp.allMatches(input);
 
-    List<String?> radicalList = await getRadicalsCharacter(_dbKanji!);
-    String radicalsString = radicalList.join();
+    if (matches.isNotEmpty) {
+      List<String?> radicalList = await getRadicalsCharacter(_dbKanji!);
+      String radicalsString = radicalList.join();
 
-    await Future.forEach(matches, (dynamic match) async {
-      String radicals = match[1];
-      //remove all characters that are not a radical
-      radicals = radicals.replaceAll(RegExp('[^$radicalsString]'), '');
+      await Future.forEach(matches, (dynamic match) async {
+        String radicals = match[1];
+        //remove all characters that are not a radical
+        radicals = radicals.replaceAll(RegExp('[^$radicalsString]'), '');
 
-      kanjis.add(await getKanjiFromRadicals(_dbKanji!, radicals));
-    });
+        kanjis.add(await getKanjiFromRadicals(_dbKanji!, radicals));
+      });
 
-    int index = 0;
-    input = input.replaceAllMapped(exp, (Match m) {
-      if (kanjis[index] == '') return m.group(0)!;
-      return '[${kanjis[index++]}]';
-    });
+      int index = 0;
+      input = input.replaceAllMapped(exp, (Match m) {
+        if (kanjis[index] == '') return m.group(0)!;
+        return '[${kanjis[index++]}]';
+      });
+    }
 
     //replace regexp japanese character to latin character
     input = input.replaceAll('。', '.');
