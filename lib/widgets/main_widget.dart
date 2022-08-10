@@ -4,7 +4,7 @@ import 'package:sqflite/sqflite.dart';
 
 import '../queries.dart';
 import '../search.dart';
-import '../search_input.dart';
+import 'search_input.dart';
 import '../string_utils.dart';
 import 'menu_bar.dart';
 import 'results_widget.dart';
