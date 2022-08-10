@@ -160,7 +160,7 @@ Future<List<Kanji>> getKanjiFromCharacters(Database dbKanji, List<String> charac
         LEFT JOIN on_yomi ON kanji.id = on_yomi.id_kanji
         LEFT JOIN kun_yomi ON kun_yomi.id_kanji = kanji.id
         LEFT JOIN meaning ON meaning.id_kanji = kanji.id
-        WHERE kanji.id IN ${sqlIn(characters)}
+        WHERE kanji.id IN (${characters.join(',')})
         GROUP BY kanji.id''';
 
   final List<Map<String, dynamic>> kanjiMaps = await dbKanji.rawQuery(sqlKanji);

@@ -7,20 +7,6 @@ const String regexKana = '[ぁ-んァ-ン]';
 const String charKanji = 'Ⓚ';
 const String charKana = '㋐';
 
-String escape(String value) {
-  return value.replaceAll('\'', '\'\'');
-}
-
-String sqlIn(List<String> input) {
-  String res = '(';
-  input.asMap().forEach((i, String element) {
-    res += '"$element"';
-    if (i < input.length - 1) res += ',';
-  });
-
-  return '$res)';
-}
-
 String addCharAtPosition(String s, String char, int? position, {bool repeat = false}) {
   if (!repeat) {
     if (s.length < position!) {
