@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sqflite/sqflite.dart';
 
-import '../queries.dart';
-import '../search.dart';
+import '../services/queries.dart';
+import '../models/search.dart';
 import 'search_input.dart';
 import '../string_utils.dart';
 import 'menu_bar.dart';

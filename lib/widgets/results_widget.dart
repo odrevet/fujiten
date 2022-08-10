@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:sqflite/sqflite.dart';
 
-import '../kanji.dart';
-import '../queries.dart';
-import '../search.dart';
+import '../models/kanji.dart';
+import '../services/queries.dart';
+import '../models/search.dart';
 import '../string_utils.dart' show kanaKit;
 import 'kanji_widget.dart';
 
