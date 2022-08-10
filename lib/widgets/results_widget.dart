@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:ruby_text/ruby_text.dart';
 import 'package:sqflite/sqflite.dart';
 
 import '../kanji.dart';
@@ -56,20 +55,10 @@ class _ResultsWidgetState extends State<ResultsWidget> {
   }
 
   Widget _buildResultExpression(searchResult) {
-    var japaneseReading = searchResult.kanji.isEmpty
-        ? Text(
-            searchResult.reading.isEmpty ? "NO READING" : searchResult.reading.first,
-            style: const TextStyle(fontSize: 20.0),
-          )
-        : RubyText(
-            [
-              RubyTextData(
-                searchResult.kanji.first,
-                ruby: searchResult.reading.isEmpty ? '' : searchResult.reading.first,
-                style: const TextStyle(fontSize: 20.0),
-              )
-            ],
-          );
+    var japaneseReading = Text(
+      '${searchResult.reading.join("\n")}\n${searchResult.kanji.join("\n")}',
+      style: const TextStyle(fontSize: 20.0),
+    );
 
     //group glosses by pos
     Map sensesGroupedByPosses = <String?, List<Sense>>{};
