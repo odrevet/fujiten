@@ -11,40 +11,40 @@ Future<List<KanjiEntry>> searchKanji(Database dbKanji, String input) async {
   String where;
 
   if (kanaKit.isHiragana(input)) {
-    where = '''WHERE kanji.id IN (SELECT kanji.id
-        FROM kanji 
-        INNER JOIN kun_yomi ON kun_yomi.id_kanji = kanji.id 
+    where = '''WHERE character.id IN (SELECT character.id
+        FROM character 
+        INNER JOIN kun_yomi ON kun_yomi.id_character = character.id 
         WHERE REPLACE(kun_yomi.reading,'.','') = "$input"
-        GROUP BY kanji.id)''';
+        GROUP BY character.id)''';
   } else if (kanaKit.isKatakana(input)) {
-    where = '''WHERE kanji.id IN (SELECT kanji.id
-        FROM kanji 
-        INNER JOIN on_yomi ON on_yomi.id_kanji = kanji.id 
+    where = '''WHERE character.id IN (SELECT character.id
+        FROM character 
+        INNER JOIN on_yomi ON on_yomi.id_kanji = character.id 
         WHERE on_yomi.reading = "$input"
-        GROUP BY kanji.id)''';
+        GROUP BY character.id)''';
   } else if (kanaKit.isRomaji(input)) {
-    where = '''WHERE kanji.id IN (SELECT kanji.id
-        FROM kanji 
-        LEFT JOIN meaning ON meaning.id_kanji = kanji.id
-        WHERE meaning.meaning REGEXP ".*$input.*"
-        GROUP BY kanji.id)''';
+    where = '''WHERE character.id IN (SELECT character.id
+        FROM character 
+        LEFT JOIN meaning ON meaning.id_character = character.id
+        WHERE meaning.content REGEXP ".*$input.*"
+        GROUP BY character.id)''';
   } else {
-    where = 'WHERE kanji.id REGEXP "$input"';
+    where = 'WHERE character.id REGEXP "$input"';
   }
 
-  String sql = '''SELECT kanji.*,
-        GROUP_CONCAT(DISTINCT kanji_radical.id_radical) as radicals,
+  String sql = '''SELECT character.*,
+        GROUP_CONCAT(DISTINCT character_radical.id_radical) as radicals,
         GROUP_CONCAT(DISTINCT on_yomi.reading) AS on_reading,
         GROUP_CONCAT(DISTINCT kun_yomi.reading) AS kun_reading,
-        GROUP_CONCAT(DISTINCT meaning.meaning) AS meanings
-        FROM kanji
-        LEFT JOIN kanji_radical ON kanji.id = kanji_radical.id_kanji
-        LEFT JOIN on_yomi ON kanji.id = on_yomi.id_kanji
-        LEFT JOIN kun_yomi ON kun_yomi.id_kanji = kanji.id
-        LEFT JOIN meaning ON meaning.id_kanji = kanji.id
+        GROUP_CONCAT(DISTINCT meaning.content) AS meanings
+        FROM character
+        LEFT JOIN character_radical ON character.id = character_radical.id_character
+        LEFT JOIN on_yomi ON character.id = on_yomi.id_character
+        LEFT JOIN kun_yomi ON kun_yomi.id_character = character.id
+        LEFT JOIN meaning ON meaning.id_character = character.id
         $where
-        GROUP BY kanji.id
-        ORDER BY kanji.freq NULLS LAST, kanji.stroke''';
+        GROUP BY character.id
+        ORDER BY character.freq NULLS LAST, character.stroke_count''';
 
   final List<Map<String, dynamic>> kanjiMaps = await dbKanji.rawQuery(sql);
 
@@ -61,13 +61,14 @@ Future<List<ExpressionEntry>> searchExpression(Database dbExpression, String inp
                     LEFT JOIN pos on sense_pos.id_pos = pos.id
                     LEFT JOIN sense_dial on sense.id = sense_dial.id_sense 
                     LEFT JOIN dial on sense_dial.id_dial = dial.id
+                    LEFT JOIN field on sense_field.id_field = field.id
                     LEFT JOIN sense_misc on sense.id = sense_misc.id_sense 
                     LEFT JOIN misc on sense_misc.id_misc = misc.id''';
 
   String where;
   if (kanaKit.isRomaji(input)) {
     where =
-        "WHERE entry.id IN (SELECT sense.id_entry FROM sense JOIN gloss ON gloss.id_sense = sense.id WHERE gloss.gloss REGEXP '$input')";
+        "WHERE entry.id IN (SELECT sense.id_entry FROM sense JOIN gloss ON gloss.id_sense = sense.id WHERE gloss.content REGEXP '$input')";
   } else {
     where = 'WHERE (keb REGEXP "$input" OR reb REGEXP "$input")';
     joins += '''\nJOIN r_ele on entry.id = r_ele.id_entry
@@ -78,9 +79,10 @@ Future<List<ExpressionEntry>> searchExpression(Database dbExpression, String inp
                   sense.id as sense_id, 
                   (SELECT GROUP_CONCAT(reb) FROM r_ele WHERE r_ele.id_entry = entry.id AND r_ele.id NOT IN (SELECT DISTINCT id_r_ele FROM k_ele WHERE k_ele.id_entry = entry.id)) reb_group,
                   (SELECT GROUP_CONCAT(keb || ':' || (SELECT reb FROM r_ele WHERE r_ele.id_entry = entry.id AND id = k_ele.id_r_ele), ',') FROM k_ele WHERE k_ele.id_entry = entry.id) keb_reb_group,
-                  GROUP_CONCAT(DISTINCT gloss.gloss) gloss_group,
+                  GROUP_CONCAT(DISTINCT gloss.content) gloss_group,
                   GROUP_CONCAT(DISTINCT pos.name) pos_group,
                   GROUP_CONCAT(DISTINCT dial.name) dial_group,
+                  GROUP_CONCAT(DISTINCT field.name) field_group,
                   GROUP_CONCAT(DISTINCT misc.name) misc_group
                   FROM entry
                   $joins
@@ -133,35 +135,35 @@ Future<List<ExpressionEntry>> searchExpression(Database dbExpression, String inp
 }
 
 Future<Kanji> getKanjiFromCharacter(Database dbKanji, String character) async {
-  String sqlKanji = '''SELECT kanji.*,
-        GROUP_CONCAT(DISTINCT kanji_radical.id_radical) as radicals,
+  String sqlKanji = '''SELECT character.*,
+        GROUP_CONCAT(DISTINCT character_radical.id_radical) as radicals,
         GROUP_CONCAT(DISTINCT on_yomi.reading) AS on_reading,
         GROUP_CONCAT(DISTINCT kun_yomi.reading) AS kun_reading,
-        GROUP_CONCAT(DISTINCT meaning.meaning) AS meanings
-        FROM kanji
-        LEFT JOIN kanji_radical ON kanji.id = kanji_radical.id_kanji
-        LEFT JOIN on_yomi ON kanji.id = on_yomi.id_kanji
-        LEFT JOIN kun_yomi ON kun_yomi.id_kanji = kanji.id
-        LEFT JOIN meaning ON meaning.id_kanji = kanji.id
-        WHERE kanji.id = "$character"''';
+        GROUP_CONCAT(DISTINCT meaning.content) AS meanings
+        FROM character
+        LEFT JOIN character_radical ON character.id = character_radical.id_character
+        LEFT JOIN on_yomi ON character.id = on_yomi.id_character
+        LEFT JOIN kun_yomi ON kun_yomi.id_character = character.id
+        LEFT JOIN meaning ON meaning.id_character = character.id
+        WHERE character.id = "$character"''';
 
   final List<Map<String, dynamic>> kanjiMaps = await dbKanji.rawQuery(sqlKanji);
   return Kanji.fromMap(kanjiMaps.first);
 }
 
 Future<List<Kanji>> getKanjiFromCharacters(Database dbKanji, List<String> characters) async {
-  String sqlKanji = '''SELECT kanji.*,
-        GROUP_CONCAT(DISTINCT kanji_radical.id_radical) as radicals,
+  String sqlKanji = '''SELECT character.*,
+        GROUP_CONCAT(DISTINCT character_radical.id_radical) as radicals,
         GROUP_CONCAT(DISTINCT on_yomi.reading) AS on_reading,
         GROUP_CONCAT(DISTINCT kun_yomi.reading) AS kun_reading,
-        GROUP_CONCAT(DISTINCT meaning.meaning) AS meanings
-        FROM kanji
-        LEFT JOIN kanji_radical ON kanji.id = kanji_radical.id_kanji
-        LEFT JOIN on_yomi ON kanji.id = on_yomi.id_kanji
-        LEFT JOIN kun_yomi ON kun_yomi.id_kanji = kanji.id
-        LEFT JOIN meaning ON meaning.id_kanji = kanji.id
-        WHERE kanji.id IN (${characters.join(',')})
-        GROUP BY kanji.id''';
+        GROUP_CONCAT(DISTINCT meaning.content) AS meanings
+        FROM character
+        LEFT JOIN character_radical ON character.id = character_radical.id_character
+        LEFT JOIN on_yomi ON character.id = on_yomi.id_character
+        LEFT JOIN kun_yomi ON kun_yomi.id_character = character.id
+        LEFT JOIN meaning ON meaning.id_character = character.id
+        WHERE character.id IN (${characters.join(',')})
+        GROUP BY character.id''';
 
   final List<Map<String, dynamic>> kanjiMaps = await dbKanji.rawQuery(sqlKanji);
 
@@ -171,10 +173,10 @@ Future<List<Kanji>> getKanjiFromCharacters(Database dbKanji, List<String> charac
 }
 
 Future<String> getKanjiFromRadicals(Database dbKanji, String radicals) async {
-  String sql = ' SELECT id FROM kanji WHERE id IN (';
+  String sql = ' SELECT id FROM character WHERE id IN (';
   radicals.split('').asMap().forEach((i, radical) {
-    sql += "SELECT id_kanji FROM kanji_radical WHERE id_radical = '$radical'";
-    sql += i < radicals.length - 1 ? ' INTERSECT ' : ') ORDER BY stroke;';
+    sql += "SELECT id_character FROM character_radical WHERE id_radical = '$radical'";
+    sql += i < radicals.length - 1 ? ' INTERSECT ' : ') ORDER BY stroke_count;';
   });
 
   final List<Map<String, dynamic>> kanjiMaps = await dbKanji.rawQuery(sql);
@@ -186,7 +188,7 @@ Future<String> getKanjiFromRadicals(Database dbKanji, String radicals) async {
 
 Future<List<Kanji>> getRadicals(Database dbKanji) async {
   final List<Map<String, dynamic>> radicalMaps =
-      await dbKanji.rawQuery('SELECT * FROM radical ORDER BY stroke');
+      await dbKanji.rawQuery('SELECT * FROM radical ORDER BY stroke_count');
 
   return List.generate(radicalMaps.length, (i) {
     return Kanji.fromMap(radicalMaps[i]);
