@@ -61,6 +61,7 @@ Future<List<ExpressionEntry>> searchExpression(Database dbExpression, String inp
                     LEFT JOIN pos on sense_pos.id_pos = pos.id
                     LEFT JOIN sense_dial on sense.id = sense_dial.id_sense 
                     LEFT JOIN dial on sense_dial.id_dial = dial.id
+                    LEFT JOIN sense_field on sense.id = sense_field.id_sense 
                     LEFT JOIN field on sense_field.id_field = field.id
                     LEFT JOIN sense_misc on sense.id = sense_misc.id_sense 
                     LEFT JOIN misc on sense_misc.id_misc = misc.id''';

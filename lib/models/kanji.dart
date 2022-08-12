@@ -23,7 +23,7 @@ class Kanji {
   factory Kanji.fromMap(Map<String, dynamic> map) {
     return Kanji(
       character: map['id'],
-      stroke: map['stroke'],
+      stroke: map['stroke_count'],
       radicals: map['radicals']?.split(','),
       on: map['on_reading']?.split(','),
       kun: map['kun_reading']?.split(','),
