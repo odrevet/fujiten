@@ -11,7 +11,7 @@ class MenuBar extends StatefulWidget {
   final Database? dbKanji;
   final Search? search;
   final TextEditingController? textEditingController;
-  final VoidCallback? onSearch;
+  final VoidCallback onSearch;
   final Future<void> Function(String) setExpressionDb;
   final Future<void> Function(String) setKanjiDb;
   final KanjiKotobaButton kanjiKotobaButton;
@@ -97,7 +97,7 @@ class _MenuBarState extends State<MenuBar> {
                 }),
             IconButton(
               icon: const Icon(Icons.search),
-              onPressed: () => widget.onSearch!(),
+              onPressed: () => widget.onSearch(),
             )
           ],
         ),
