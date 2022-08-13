@@ -71,7 +71,11 @@ Future<List<ExpressionEntry>> searchExpression(Database dbExpression, String inp
     where =
         "WHERE entry.id IN (SELECT sense.id_entry FROM sense JOIN gloss ON gloss.id_sense = sense.id WHERE gloss.content REGEXP '$input')";
   } else {
-    where = 'WHERE (keb REGEXP "$input" OR reb REGEXP "$input")';
+    // optimize the search: if the input does not contains a kanji it's useless to search in the reb
+    var regExp = RegExp(regexKanji);
+    var hasKanji = regExp.hasMatch(input);
+
+    where = "WHERE (keb REGEXP '$input' ${hasKanji ? "" : "OR reb REGEXP '$input'"})";
     joins += '''\nJOIN r_ele on entry.id = r_ele.id_entry
                 LEFT JOIN k_ele on entry.id = k_ele.id_entry''';
   }
