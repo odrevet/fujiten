@@ -7,46 +7,11 @@ import '../string_utils.dart';
 import 'radical_page.dart';
 import 'settings.dart';
 
-class LanguageSelect extends StatefulWidget {
-  final void Function(String?)? onLanguageSelect;
-
-  const LanguageSelect({Key? key, this.onLanguageSelect}) : super(key: key);
-
-  @override
-  State<LanguageSelect> createState() => _LanguageSelectState();
-}
-
-class _LanguageSelectState extends State<LanguageSelect> {
-  String? dropdownValue = 'eng';
-
-  @override
-  Widget build(BuildContext context) {
-    return DropdownButton<String>(
-      value: dropdownValue,
-      icon: const Icon(Icons.language),
-      onChanged: (String? lang) {
-        widget.onLanguageSelect!(lang);
-        setState(() {
-          dropdownValue = lang;
-        });
-      },
-      items: <String>['eng', 'fre', 'rus', 'swe', 'spa', 'slv', 'ger', 'dut', 'hun']
-          .map<DropdownMenuItem<String>>((String value) {
-        return DropdownMenuItem<String>(
-          value: value,
-          child: Text(value),
-        );
-      }).toList(),
-    );
-  }
-}
-
 class MenuBar extends StatefulWidget {
   final Database? dbKanji;
   final Search? search;
   final TextEditingController? textEditingController;
   final VoidCallback? onSearch;
-  final void Function(String?)? onLanguageSelect;
   final Future<void> Function(String) setExpressionDb;
   final Future<void> Function(String) setKanjiDb;
   final KanjiKotobaButton kanjiKotobaButton;
@@ -58,7 +23,6 @@ class MenuBar extends StatefulWidget {
       required this.search,
       required this.textEditingController,
       required this.onSearch,
-      required this.onLanguageSelect,
       required this.convertButton,
       required this.kanjiKotobaButton,
       required this.insertPosition,

@@ -32,7 +32,6 @@ class _MainWidgetState extends State<MainWidget> {
   bool? _isLoading;
   int _cursorPosition = -1;
   bool? _kanjiSearch;
-  late String _lang;
 
   final Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
 
@@ -66,7 +65,6 @@ class _MainWidgetState extends State<MainWidget> {
     _currentPage = 0;
     _isLoading = false;
     _kanjiSearch = false;
-    _lang = 'eng';
 
     super.initState();
   }
@@ -88,7 +86,7 @@ class _MainWidgetState extends State<MainWidget> {
             });
           }));
     } else {
-      searchExpression(_dbExpression, input, _lang, _resultsPerPage, _currentPage)
+      searchExpression(_dbExpression, input, _resultsPerPage, _currentPage)
           .then((searchResult) {
         setState(() {
           if (searchResult.isNotEmpty) {
@@ -129,10 +127,6 @@ class _MainWidgetState extends State<MainWidget> {
     _runSearch(input);
   }
 
-  _onLanguageSelect(String? lang) => setState(() {
-        _lang = lang!;
-      });
-
   void _onFocusChanged(bool hasFocus) async {
     setState(() {
       _cursorPosition = widget._textEditingController.selection.start;
@@ -169,7 +163,6 @@ class _MainWidgetState extends State<MainWidget> {
                 search: _search,
                 textEditingController: widget._textEditingController,
                 onSearch: _onSearch,
-                onLanguageSelect: _onLanguageSelect,
                 convertButton: ConvertButton(
                   onPressed: _convert,
                 ),

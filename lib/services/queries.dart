@@ -53,7 +53,7 @@ Future<List<KanjiEntry>> searchKanji(Database dbKanji, String input) async {
   });
 }
 
-Future<List<ExpressionEntry>> searchExpression(Database dbExpression, String input, String lang,
+Future<List<ExpressionEntry>> searchExpression(Database dbExpression, String input,
     [resultsPerPage = 10, currentPage = 0]) async {
   String joins = '''JOIN sense ON sense.id_entry = entry.id
                     JOIN gloss ON gloss.id_sense = sense.id
