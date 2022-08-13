@@ -1,5 +1,3 @@
-import 'dart:developer';
-
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sqflite/sqflite.dart';
@@ -28,7 +26,8 @@ class _MainWidgetState extends State<MainWidget> {
   final Search _search = Search(totalResult: 0, input: '');
   int? _resultsPerPage;
   int _currentPage = 0;
-  bool? _isLoading;
+  bool _isLoading = false;
+  bool _isLoadingNextPage = false;
   int _cursorPosition = -1;
   bool? _kanjiSearch;
 
@@ -81,16 +80,17 @@ class _MainWidgetState extends State<MainWidget> {
                 _search.searchResults.addAll(searchResult);
               }
               _isLoading = false;
+              _isLoadingNextPage = false;
             });
           }));
     } else {
-      searchExpression(_dbExpression, input, _resultsPerPage, _currentPage)
-          .then((searchResult) {
+      searchExpression(_dbExpression, input, _resultsPerPage, _currentPage).then((searchResult) {
         setState(() {
           if (searchResult.isNotEmpty) {
             _search.searchResults.addAll(searchResult);
           }
           _isLoading = false;
+          _isLoadingNextPage = false;
         });
       });
     }
@@ -116,6 +116,7 @@ class _MainWidgetState extends State<MainWidget> {
 
     setState(() {
       _isLoading = true;
+      _isLoadingNextPage = false;
       _currentPage = 0;
       _search.totalResult = 0;
       _search.input = input;
@@ -134,6 +135,7 @@ class _MainWidgetState extends State<MainWidget> {
   _onEndReached() {
     setState(() {
       _currentPage++;
+      _isLoadingNextPage = true;
     });
     _runSearch(_search.input);
   }
@@ -151,6 +153,13 @@ class _MainWidgetState extends State<MainWidget> {
   Widget build(BuildContext context) {
     return Scaffold(
         key: _scaffoldKey,
+        floatingActionButton: _isLoadingNextPage
+            ? const FloatingActionButton(
+                onPressed: null,
+                backgroundColor: Colors.white,
+                child: CircularProgressIndicator(),
+              )
+            : null,
         appBar: PreferredSize(
           preferredSize: const Size.fromHeight(56),
           child: Builder(
