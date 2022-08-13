@@ -22,13 +22,10 @@ class MainWidget extends StatefulWidget {
 }
 
 class _MainWidgetState extends State<MainWidget> {
+  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   Database? _dbKanji;
   late Database _dbExpression;
-
-  Search? _search;
-
-  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
-
+  final Search _search = Search(totalResult: 0, input: '');
   int? _resultsPerPage;
   int _currentPage = 0;
   bool? _isLoading;
@@ -62,7 +59,6 @@ class _MainWidgetState extends State<MainWidget> {
   @override
   initState() {
     _initDb();
-    _search = Search(totalResult: 0, input: '');
     _resultsPerPage = 20;
     _currentPage = 0;
     _isLoading = false;
@@ -82,7 +78,7 @@ class _MainWidgetState extends State<MainWidget> {
       searchKanji(_dbKanji!, input).then((searchResult) => setState(() {
             setState(() {
               if (searchResult.isNotEmpty) {
-                _search!.searchResults.addAll(searchResult);
+                _search.searchResults.addAll(searchResult);
               }
               _isLoading = false;
             });
@@ -92,7 +88,7 @@ class _MainWidgetState extends State<MainWidget> {
           .then((searchResult) {
         setState(() {
           if (searchResult.isNotEmpty) {
-            _search!.searchResults.addAll(searchResult);
+            _search.searchResults.addAll(searchResult);
           }
           _isLoading = false;
         });
@@ -121,9 +117,9 @@ class _MainWidgetState extends State<MainWidget> {
     setState(() {
       _isLoading = true;
       _currentPage = 0;
-      _search!.totalResult = 0;
-      _search!.input = input;
-      _search!.searchResults.clear();
+      _search.totalResult = 0;
+      _search.input = input;
+      _search.searchResults.clear();
     });
 
     _runSearch(input);
@@ -139,7 +135,7 @@ class _MainWidgetState extends State<MainWidget> {
     setState(() {
       _currentPage++;
     });
-    _runSearch(_search!.input);
+    _runSearch(_search.input);
   }
 
   Widget _body() {
