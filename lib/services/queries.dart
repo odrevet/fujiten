@@ -203,3 +203,18 @@ Future<List<String?>> getRadicalsCharacter(Database dbKanji) async {
     return radicalMaps[i]['id'];
   });
 }
+
+Future<List<String?>> getRadicalsForSelection(Database dbKanji, selectedRadicals) async {
+  String sql = 'SELECT DISTINCT id_radical FROM character_radical WHERE id_character IN (';
+  selectedRadicals.asMap().forEach((i, radical) {
+    sql += 'SELECT DISTINCT id_character FROM character_radical WHERE id_radical = "$radical"';
+    if (i < selectedRadicals.length - 1) sql += ' INTERSECT ';
+  });
+  sql += ')';
+
+  final List<Map<String, dynamic>> radicalIdMaps = await dbKanji.rawQuery(sql);
+
+  return List.generate(radicalIdMaps.length, (i) {
+    return radicalIdMaps[i]['id_radical'];
+  });
+}

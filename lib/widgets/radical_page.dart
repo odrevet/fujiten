@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:sqflite/sqflite.dart';
 
 import '../models/kanji.dart';
-import '../services/queries.dart' show getRadicals;
+import '../services/queries.dart' show getRadicals, getRadicalsForSelection;
 
 class RadicalPage extends StatefulWidget {
   final Database? _dbKanji;
@@ -30,7 +30,7 @@ class RadicalPageState extends State<RadicalPage> {
     _radicals = getRadicals(widget._dbKanji!);
 
     if (_selectedRadicals.isNotEmpty) {
-      _getRadicalsForSelection()
+      getRadicalsForSelection(widget._dbKanji!, _selectedRadicals)
           .then((validRadicals) => setState(() => _validRadicals = validRadicals));
     }
     super.initState();
@@ -91,7 +91,7 @@ class RadicalPageState extends State<RadicalPage> {
           : _selectedRadicals.add(character);
     });
 
-    _getRadicalsForSelection()
+    getRadicalsForSelection(widget._dbKanji!, _selectedRadicals)
         .then((validRadicals) => setState(() => _validRadicals = validRadicals));
   }
 
@@ -118,21 +118,4 @@ class RadicalPageState extends State<RadicalPage> {
                 ? Theme.of(context).colorScheme.primary
                 : Theme.of(context).colorScheme.secondary,
           )));
-
-  Future<List<String?>> _getRadicalsForSelection() async {
-    String sql = 'SELECT DISTINCT id_radical FROM kanji_radical WHERE id_kanji IN (';
-
-    _selectedRadicals.asMap().forEach((i, radical) {
-      sql += 'SELECT DISTINCT id_kanji FROM kanji_radical WHERE id_radical = "$radical"';
-      if (i < _selectedRadicals.length - 1) sql += ' INTERSECT ';
-    });
-
-    sql += ')';
-
-    final List<Map<String, dynamic>> radicalIdMaps = await widget._dbKanji!.rawQuery(sql);
-
-    return List.generate(radicalIdMaps.length, (i) {
-      return radicalIdMaps[i]['id_radical'];
-    });
-  }
 }
