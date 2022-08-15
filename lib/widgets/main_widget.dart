@@ -114,16 +114,17 @@ class _MainWidgetState extends State<MainWidget> {
   _onSearch() async {
     String input = await _formatInput();
 
-    setState(() {
-      _isLoading = true;
-      _isLoadingNextPage = false;
-      _currentPage = 0;
-      _search.totalResult = 0;
-      _search.input = input;
-      _search.searchResults.clear();
-    });
-
-    _runSearch(input);
+    if (input.isNotEmpty) {
+      setState(() {
+        _isLoading = true;
+        _isLoadingNextPage = false;
+        _currentPage = 0;
+        _search.totalResult = 0;
+        _search.input = input;
+        _search.searchResults.clear();
+      });
+      _runSearch(input);
+    }
   }
 
   void _onFocusChanged(bool hasFocus) async {

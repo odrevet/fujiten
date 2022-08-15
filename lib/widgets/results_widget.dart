@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:sqflite/sqflite.dart';
@@ -163,22 +165,35 @@ class _ResultsWidgetState extends State<ResultsWidget> {
 
   @override
   Widget build(BuildContext context) {
-    return Expanded(
-        child: widget._isLoading!
-            ? const Center(child: CircularProgressIndicator())
-            : ListView.separated(
-                separatorBuilder: (context, index) {
-                  return const Divider();
-                },
-                controller: _scrollController,
-                itemCount: widget._search!.searchResults.length,
-                itemBuilder: (BuildContext context, int index) {
-                  if (widget._search!.searchResults[index] is KanjiEntry) {
-                    KanjiEntry searchResult = widget._search!.searchResults[index] as KanjiEntry;
-                    return _buildResultKanji(searchResult);
-                  } else {
-                    return _buildResultExpression(widget._search!.searchResults[index]);
-                  }
-                }));
+    late Widget child;
+
+    if (widget._isLoading == true) {
+      child = const CircularProgressIndicator();
+    } else {
+      if (widget._search?.searchResults.isEmpty == true && widget._search!.input.isNotEmpty ) {
+        child = Text("No results for '${widget._search!.input}'");
+      } else {
+        if(widget._search!.input.isEmpty){
+          child = const Text("Welcome to Japanese Dictionary Flutter");
+        }else {
+          child = ListView.separated(
+            separatorBuilder: (context, index) {
+              return const Divider();
+            },
+            controller: _scrollController,
+            itemCount: widget._search!.searchResults.length,
+            itemBuilder: (BuildContext context, int index) {
+              if (widget._search!.searchResults[index] is KanjiEntry) {
+                KanjiEntry searchResult = widget._search!.searchResults[index] as KanjiEntry;
+                return _buildResultKanji(searchResult);
+              } else {
+                return _buildResultExpression(widget._search!.searchResults[index]);
+              }
+            });
+        }
+      }
+    }
+
+    return Expanded(child: Center(child: child));
   }
 }
