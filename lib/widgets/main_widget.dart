@@ -105,9 +105,9 @@ class _MainWidgetState extends State<MainWidget> {
   _convert() async {
     String input = widget._textEditingController.text;
     if (kanaKit.isRomaji(input)) {
-      widget._textEditingController.text = kanaKit.toHiragana(input);
-    } else {
       widget._textEditingController.text = kanaKit.toKana(input);
+    } else {
+      widget._textEditingController.text = kanaKit.toRomaji(input);
     }
   }
 
