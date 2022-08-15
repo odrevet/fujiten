@@ -39,6 +39,7 @@ class _SearchInputState extends State<SearchInput> {
         style: const TextStyle(fontSize: 32.0),
         controller: widget.textEditingController,
         focusNode: _focusNode,
+        autofocus: true,
         decoration: const InputDecoration(hintText: 'Enter a search term'),
       ),
     );

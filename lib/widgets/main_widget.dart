@@ -157,7 +157,8 @@ class _MainWidgetState extends State<MainWidget> {
             ? const FloatingActionButton(
                 onPressed: null,
                 backgroundColor: Colors.white,
-                child: CircularProgressIndicator(),
+                mini: true,
+                child: SizedBox(height: 10, width: 10, child: CircularProgressIndicator()),
               )
             : null,
         appBar: PreferredSize(
