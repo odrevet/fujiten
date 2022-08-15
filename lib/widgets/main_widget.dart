@@ -238,8 +238,13 @@ class _MainWidgetState extends State<MainWidget> {
     //replace regexp japanese character to latin character
     input = input.replaceAll('。', '.');
     input = input.replaceAll('？', '?');
-    input = input.replaceAll('？', '?');
-    input = input.replaceAll('？', '?');
+    input = input.replaceAll('｛', '}');
+    input = input.replaceAll('｝', '{');
+    input = input.replaceAll('（', '(');
+    input = input.replaceAll('）', ')');
+    input = input.replaceAll('［', '[');
+    input = input.replaceAll('］', ']');
+    {
     input = input.replaceAll(charKanji, regexKanji);
     input = input.replaceAll(charKanjiJp, regexKanji);
     input = input.replaceAll(charKana, regexKana);
