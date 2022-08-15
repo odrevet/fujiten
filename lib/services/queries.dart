@@ -7,6 +7,42 @@ import '../models/kanji.dart';
 import '../models/search.dart';
 import '../string_utils.dart';
 
+Future<bool> checkDb(Database? dbExpression, Database? dbKanji) async {
+  if (dbExpression == null || dbKanji == null) {
+    return false;
+  }
+
+  if (dbExpression.isOpen == false) {
+    return false;
+  } else {
+    try {
+      var nbEntries = await dbExpression.rawQuery('SELECT COUNT(id) nb_entries from entry');
+      if (nbEntries.isNotEmpty && int.parse(nbEntries[0]['nb_entries'].toString()) == 0) {
+        return false;
+      }
+    } catch (e) {
+      log(e.toString());
+      return false;
+    }
+  }
+
+  if (dbKanji.isOpen == false) {
+    return false;
+  } else {
+    try {
+      var nbCharacter = await dbKanji.rawQuery('SELECT COUNT(id) nb_character from character');
+      if (nbCharacter.isNotEmpty && int.parse(nbCharacter[0]['nb_character'].toString()) == 0) {
+        return false;
+      }
+    } catch (e) {
+      log(e.toString());
+      return false;
+    }
+  }
+
+  return true;
+}
+
 Future<List<KanjiEntry>> searchKanji(Database dbKanji, String input) async {
   String where;
 

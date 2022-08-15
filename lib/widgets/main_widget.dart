@@ -95,8 +95,7 @@ class _MainWidgetState extends State<MainWidget> {
             _isLoadingNextPage = false;
           });
         });
-      }
-      catch(e){
+      } catch (e) {
         showDialog(
           context: context,
           builder: (ctx) => AlertDialog(
@@ -165,11 +164,26 @@ class _MainWidgetState extends State<MainWidget> {
   }
 
   Widget _body() {
-    return Column(
-      children: <Widget>[
-        SearchInput(widget._textEditingController, _onSearch, _onFocusChanged, focusNode),
-        ResultsWidget(_dbExpression, _dbKanji, _search, _onEndReached, _isLoading)
-      ],
+    return FutureBuilder<bool>(
+      future: checkDb(_dbExpression, _dbKanji), // async work
+      builder: (BuildContext context, AsyncSnapshot<bool> snapshot) {
+        if (snapshot.hasError) {
+          return Center(child: Text('Error: ${snapshot.error}'));
+        } else if (snapshot.hasData) {
+          if (snapshot.data == true) {
+            return Column(
+              children: <Widget>[
+                SearchInput(widget._textEditingController, _onSearch, _onFocusChanged, focusNode),
+                ResultsWidget(_dbExpression, _dbKanji, _search, _onEndReached, _isLoading)
+              ],
+            );
+          } else {
+            return const Center(child: Text("Opening Databases..."));
+          }
+        } else {
+          return const Text("Checking DataBases integrity");
+        }
+      },
     );
   }
 
