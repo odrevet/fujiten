@@ -170,7 +170,7 @@ class _MainWidgetState extends State<MainWidget> {
         if (snapshot.hasError) {
           return Center(child: Text('Error: ${snapshot.error}'));
         } else if (snapshot.hasData) {
-          if (snapshot.data == true) {
+          if (/*snapshot.data == true*/ true ) {
             return Column(
               children: <Widget>[
                 SearchInput(widget._textEditingController, _onSearch, _onFocusChanged, focusNode),
