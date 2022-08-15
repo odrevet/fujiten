@@ -80,7 +80,7 @@ class _ResultsWidgetState extends State<ResultsWidget> {
               context: context,
               builder: (_) => AlertDialog(
                     title: const Text('Kanji'),
-                    content: _kanjiDialogContent(searchResult.kanji),
+                    content: _kanjiDialogContent(searchResult.kanji[0]),
                   )),
           onDoubleTap: () =>
               Clipboard.setData(ClipboardData(text: searchResult.kanji ?? searchResult.reading)),

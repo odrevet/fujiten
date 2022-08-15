@@ -150,7 +150,7 @@ Future<Kanji> getKanjiFromCharacter(Database dbKanji, String character) async {
         LEFT JOIN on_yomi ON character.id = on_yomi.id_character
         LEFT JOIN kun_yomi ON kun_yomi.id_character = character.id
         LEFT JOIN meaning ON meaning.id_character = character.id
-        WHERE character.id = "$character"''';
+        WHERE character.id = '$character';''';
 
   final List<Map<String, dynamic>> kanjiMaps = await dbKanji.rawQuery(sqlKanji);
   return Kanji.fromMap(kanjiMaps.first);
@@ -167,7 +167,7 @@ Future<List<Kanji>> getKanjiFromCharacters(Database dbKanji, List<String> charac
         LEFT JOIN on_yomi ON character.id = on_yomi.id_character
         LEFT JOIN kun_yomi ON kun_yomi.id_character = character.id
         LEFT JOIN meaning ON meaning.id_character = character.id
-        WHERE character.id IN (${characters.join(',')})
+        WHERE character.id IN (${characters.map((char) => "'$char'").join(',')})
         GROUP BY character.id''';
 
   final List<Map<String, dynamic>> kanjiMaps = await dbKanji.rawQuery(sqlKanji);
