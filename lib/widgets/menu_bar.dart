@@ -17,12 +17,14 @@ class MenuBar extends StatefulWidget {
   final KanjiKotobaButton kanjiKotobaButton;
   final ConvertButton convertButton;
   final int? insertPosition;
+  final FocusNode focusNode;
 
   const MenuBar(
       {required this.dbKanji,
       required this.search,
       required this.textEditingController,
       required this.onSearch,
+      required this.focusNode,
       required this.convertButton,
       required this.kanjiKotobaButton,
       required this.insertPosition,
@@ -94,6 +96,7 @@ class _MenuBarState extends State<MenuBar> {
                 onPressed: () {
                   widget.textEditingController!.clear();
                   widget.search!.searchResults.clear();
+                  widget.focusNode.requestFocus();
                 }),
             IconButton(
               icon: const Icon(Icons.search),

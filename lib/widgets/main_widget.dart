@@ -30,6 +30,7 @@ class _MainWidgetState extends State<MainWidget> {
   bool _isLoadingNextPage = false;
   int _cursorPosition = -1;
   bool? _kanjiSearch;
+  FocusNode focusNode = FocusNode();
 
   final Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
 
@@ -144,7 +145,7 @@ class _MainWidgetState extends State<MainWidget> {
   Widget _body() {
     return Column(
       children: <Widget>[
-        SearchInput(widget._textEditingController, _onSearch, _onFocusChanged),
+        SearchInput(widget._textEditingController, _onSearch, _onFocusChanged, focusNode),
         ResultsWidget(_dbKanji, _search, _onEndReached, _isLoading)
       ],
     );
@@ -172,6 +173,7 @@ class _MainWidgetState extends State<MainWidget> {
                 search: _search,
                 textEditingController: widget._textEditingController,
                 onSearch: _onSearch,
+                focusNode: focusNode,
                 convertButton: ConvertButton(
                   onPressed: _convert,
                 ),

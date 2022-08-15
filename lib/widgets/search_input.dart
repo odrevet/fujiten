@@ -3,9 +3,10 @@ import 'package:flutter/material.dart';
 class SearchInput extends StatefulWidget {
   final VoidCallback onSubmitted;
   final void Function(bool) onFocusChanged;
+  final FocusNode focusNode;
   final TextEditingController textEditingController;
 
-  const SearchInput(this.textEditingController, this.onSubmitted, this.onFocusChanged, {Key? key})
+  const SearchInput(this.textEditingController, this.onSubmitted, this.onFocusChanged, this.focusNode, {Key? key})
       : super(key: key);
 
   @override
@@ -13,19 +14,17 @@ class SearchInput extends StatefulWidget {
 }
 
 class _SearchInputState extends State<SearchInput> {
-  final FocusNode _focusNode = FocusNode();
-
   @override
   void initState() {
     super.initState();
-    _focusNode.addListener(() {
-      widget.onFocusChanged(_focusNode.hasFocus);
+    widget.focusNode.addListener(() {
+      widget.onFocusChanged(widget.focusNode.hasFocus);
     });
   }
 
   @override
   void dispose() {
-    _focusNode.dispose();
+    widget.focusNode.dispose();
     super.dispose();
   }
 
@@ -38,7 +37,7 @@ class _SearchInputState extends State<SearchInput> {
         textInputAction: TextInputAction.search,
         style: const TextStyle(fontSize: 32.0),
         controller: widget.textEditingController,
-        focusNode: _focusNode,
+        focusNode: widget.focusNode,
         autofocus: true,
         decoration: const InputDecoration(hintText: 'Enter a search term'),
       ),
