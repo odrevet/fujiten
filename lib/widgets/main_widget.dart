@@ -22,7 +22,7 @@ class MainWidget extends StatefulWidget {
 class _MainWidgetState extends State<MainWidget> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   Database? _dbKanji;
-  late Database _dbExpression;
+  Database? _dbExpression;
   final Search _search = Search(totalResult: 0, input: '');
   int? _resultsPerPage;
   int _currentPage = 0;
@@ -52,7 +52,7 @@ class _MainWidgetState extends State<MainWidget> {
   Future<void> setKanjiDb(String path) async => _dbKanji = await openDatabase(path, readOnly: true);
 
   _disposeDb() async {
-    await _dbExpression.close();
+    await _dbExpression!.close();
     await _dbKanji!.close();
   }
 
@@ -86,7 +86,7 @@ class _MainWidgetState extends State<MainWidget> {
           }));
     } else {
       try {
-        searchExpression(_dbExpression, input, _resultsPerPage, _currentPage).then((searchResult) {
+        searchExpression(_dbExpression!, input, _resultsPerPage, _currentPage).then((searchResult) {
           setState(() {
             if (searchResult.isNotEmpty) {
               _search.searchResults.addAll(searchResult);
@@ -168,7 +168,7 @@ class _MainWidgetState extends State<MainWidget> {
     return Column(
       children: <Widget>[
         SearchInput(widget._textEditingController, _onSearch, _onFocusChanged, focusNode),
-        ResultsWidget(_dbKanji, _search, _onEndReached, _isLoading)
+        ResultsWidget(_dbExpression, _dbKanji, _search, _onEndReached, _isLoading)
       ],
     );
   }

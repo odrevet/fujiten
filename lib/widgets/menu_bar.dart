@@ -96,6 +96,7 @@ class _MenuBarState extends State<MenuBar> {
                 onPressed: () {
                   widget.textEditingController!.clear();
                   widget.search!.searchResults.clear();
+                  widget.search!.input = '';
                   widget.focusNode.requestFocus();
                 }),
             IconButton(

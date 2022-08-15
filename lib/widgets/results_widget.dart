@@ -12,11 +12,12 @@ import 'kanji_widget.dart';
 
 class ResultsWidget extends StatefulWidget {
   final Database? _dbKanji;
+  final Database? _dbExpression;
   final Search? _search;
   final Function _onEndReached;
   final bool? _isLoading;
 
-  const ResultsWidget(this._dbKanji, this._search, this._onEndReached, this._isLoading, {Key? key})
+  const ResultsWidget(this._dbExpression, this._dbKanji, this._search, this._onEndReached, this._isLoading, {Key? key})
       : super(key: key);
 
   @override
@@ -167,29 +168,33 @@ class _ResultsWidgetState extends State<ResultsWidget> {
   Widget build(BuildContext context) {
     late Widget child;
 
-    if (widget._isLoading == true) {
-      child = const CircularProgressIndicator();
+    if (widget._dbExpression == null || widget._dbExpression!.isOpen == false || widget._dbKanji == null || widget._dbKanji!.isOpen == false) {
+      child = const Text("Cannot open database. Please setup the databases in the settings");
     } else {
-      if (widget._search?.searchResults.isEmpty == true && widget._search!.input.isNotEmpty ) {
-        child = Text("No results for '${widget._search!.input}'");
+      if (widget._isLoading == true) {
+        child = const CircularProgressIndicator();
       } else {
-        if(widget._search!.input.isEmpty){
-          child = const Text("Welcome to Japanese Dictionary Flutter");
-        }else {
-          child = ListView.separated(
-            separatorBuilder: (context, index) {
-              return const Divider();
-            },
-            controller: _scrollController,
-            itemCount: widget._search!.searchResults.length,
-            itemBuilder: (BuildContext context, int index) {
-              if (widget._search!.searchResults[index] is KanjiEntry) {
-                KanjiEntry searchResult = widget._search!.searchResults[index] as KanjiEntry;
-                return _buildResultKanji(searchResult);
-              } else {
-                return _buildResultExpression(widget._search!.searchResults[index]);
-              }
-            });
+        if (widget._search?.searchResults.isEmpty == true && widget._search!.input.isNotEmpty) {
+          child = Text("No results for '${widget._search!.input}'");
+        } else {
+          if (widget._search!.input.isEmpty) {
+            child = const Text("Welcome to Japanese Dictionary Flutter");
+          } else {
+            child = ListView.separated(
+                separatorBuilder: (context, index) {
+                  return const Divider();
+                },
+                controller: _scrollController,
+                itemCount: widget._search!.searchResults.length,
+                itemBuilder: (BuildContext context, int index) {
+                  if (widget._search!.searchResults[index] is KanjiEntry) {
+                    KanjiEntry searchResult = widget._search!.searchResults[index] as KanjiEntry;
+                    return _buildResultKanji(searchResult);
+                  } else {
+                    return _buildResultExpression(widget._search!.searchResults[index]);
+                  }
+                });
+          }
         }
       }
     }
