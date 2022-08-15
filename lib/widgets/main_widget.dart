@@ -85,15 +85,37 @@ class _MainWidgetState extends State<MainWidget> {
             });
           }));
     } else {
-      searchExpression(_dbExpression, input, _resultsPerPage, _currentPage).then((searchResult) {
-        setState(() {
-          if (searchResult.isNotEmpty) {
-            _search.searchResults.addAll(searchResult);
-          }
-          _isLoading = false;
-          _isLoadingNextPage = false;
+      try {
+        searchExpression(_dbExpression, input, _resultsPerPage, _currentPage).then((searchResult) {
+          setState(() {
+            if (searchResult.isNotEmpty) {
+              _search.searchResults.addAll(searchResult);
+            }
+            _isLoading = false;
+            _isLoadingNextPage = false;
+          });
         });
-      });
+      }
+      catch(e){
+        showDialog(
+          context: context,
+          builder: (ctx) => AlertDialog(
+            title: const Text("ERROR"),
+            content: Text(e.toString()),
+            actions: <Widget>[
+              TextButton(
+                onPressed: () {
+                  Navigator.of(ctx).pop();
+                },
+                child: Container(
+                  padding: const EdgeInsets.all(14),
+                  child: const Text("okay"),
+                ),
+              ),
+            ],
+          ),
+        );
+      }
     }
   }
 
@@ -215,6 +237,8 @@ class _MainWidgetState extends State<MainWidget> {
 
     //replace regexp japanese character to latin character
     input = input.replaceAll('。', '.');
+    input = input.replaceAll('？', '?');
+    input = input.replaceAll('？', '?');
     input = input.replaceAll('？', '?');
     input = input.replaceAll(charKanji, regexKanji);
     input = input.replaceAll(charKanjiJp, regexKanji);

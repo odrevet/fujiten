@@ -145,8 +145,8 @@ class _MenuBarState extends State<MenuBar> {
         }
       }
 
-      widget.textEditingController!.selection =
-          TextSelection.fromPosition(TextPosition(offset: insertPosition!));
+      //widget.textEditingController!.selection =
+      //    TextSelection.fromPosition(TextPosition(offset: insertPosition!));
     });
   }
 }
