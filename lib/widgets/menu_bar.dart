@@ -16,7 +16,7 @@ class MenuBar extends StatefulWidget {
   final Future<void> Function(String) setKanjiDb;
   final KanjiKotobaButton kanjiKotobaButton;
   final ConvertButton convertButton;
-  final int? insertPosition;
+  final int insertPosition;
   final FocusNode focusNode;
 
   const MenuBar(
@@ -48,21 +48,21 @@ class _MenuBarState extends State<MenuBar> {
             _displayRadicalWidget(context);
             break;
           case 1:
-            if (widget.insertPosition! >= 0) {
+            if (widget.insertPosition >= 0) {
               widget.textEditingController!.text = addCharAtPosition(
                   widget.textEditingController!.text, charKanji, widget.insertPosition);
               widget.textEditingController!.selection =
-                  TextSelection.fromPosition(TextPosition(offset: widget.insertPosition! + 1));
+                  TextSelection.fromPosition(TextPosition(offset: widget.insertPosition+ 1));
             } else {
               widget.textEditingController!.text += charKanji;
             }
             break;
           case 2:
-            if (widget.insertPosition! >= 0) {
+            if (widget.insertPosition>= 0) {
               widget.textEditingController!.text = addCharAtPosition(
                   widget.textEditingController!.text, charKana, widget.insertPosition);
               widget.textEditingController!.selection =
-                  TextSelection.fromPosition(TextPosition(offset: widget.insertPosition! + 1));
+                  TextSelection.fromPosition(TextPosition(offset: widget.insertPosition+ 1));
             } else {
               widget.textEditingController!.text += charKana;
             }
@@ -115,7 +115,7 @@ class _MenuBarState extends State<MenuBar> {
     Iterable<RegExpMatch> matches = exp.allMatches(widget.textEditingController!.text);
     Match? matchAtCursor;
     for (Match m in matches) {
-      if (widget.insertPosition! > m.start && widget.insertPosition! < m.end) {
+      if (widget.insertPosition> m.start && widget.insertPosition< m.end) {
         matchAtCursor = m;
         break;
       }
@@ -126,7 +126,7 @@ class _MenuBarState extends State<MenuBar> {
     //remove every non-radical characters
     //call to getRadicalsCharacter somehow move the cursor to the end of textinput, retain de current position now
     int? insertPosition = 0;
-    if (widget.insertPosition! > 0) insertPosition = widget.insertPosition;
+    if (widget.insertPosition> 0) insertPosition = widget.insertPosition;
 
     List<String?> radicalsFromDb = await getRadicalsCharacter(widget.dbKanji!);
     radicals.removeWhere((String radical) => !radicalsFromDb.contains(radical));

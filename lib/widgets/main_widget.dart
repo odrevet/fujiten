@@ -1,5 +1,3 @@
-import 'dart:developer';
-
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sqflite/sqflite.dart';
@@ -23,20 +21,26 @@ class MainWidget extends StatefulWidget {
 
 class _MainWidgetState extends State<MainWidget> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
-  Database? _dbKanji;
-  Database? _dbExpression;
+  Database? dbKanji;
+  Database? dbExpression;
   final Search _search = Search(totalResult: 0, input: '');
-  int? _resultsPerPage;
-  int _currentPage = 0;
-  bool _isLoading = false;
-  bool _isLoadingNextPage = false;
-  int _cursorPosition = -1;
-  bool? _kanjiSearch;
+  int resultsPerPage = 30;
+  int currentPage = 0;
+  bool isLoading = false;
+  bool isLoadingNextPage = false;
+  int cursorPosition = -1;
+  bool kanjiSearch = false;
   FocusNode focusNode = FocusNode();
 
   final Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
 
-  _initDb() async {
+  @override
+  initState() {
+    _initDb();
+    super.initState();
+  }
+
+    _initDb() async {
     _prefs.then((SharedPreferences prefs) async {
       String? path = prefs.getString("expression_path");
       if (path != null) await setExpressionDb(path);
@@ -49,24 +53,13 @@ class _MainWidgetState extends State<MainWidget> {
   }
 
   Future<void> setExpressionDb(String path) async =>
-      _dbExpression = await openDatabase(path, readOnly: true);
+      dbExpression = await openDatabase(path, readOnly: true);
 
-  Future<void> setKanjiDb(String path) async => _dbKanji = await openDatabase(path, readOnly: true);
+  Future<void> setKanjiDb(String path) async => dbKanji = await openDatabase(path, readOnly: true);
 
   _disposeDb() async {
-    await _dbExpression!.close();
-    await _dbKanji!.close();
-  }
-
-  @override
-  initState() {
-    _initDb();
-    _resultsPerPage = 20;
-    _currentPage = 0;
-    _isLoading = false;
-    _kanjiSearch = false;
-
-    super.initState();
+    await dbExpression!.close();
+    await dbKanji!.close();
   }
 
   @override
@@ -76,25 +69,25 @@ class _MainWidgetState extends State<MainWidget> {
   }
 
   _runSearch(String input) {
-    if (_kanjiSearch!) {
-      searchKanji(_dbKanji!, input, _resultsPerPage, _currentPage).then((searchResult) => setState(() {
+    if (kanjiSearch) {
+      searchKanji(dbKanji!, input, resultsPerPage, currentPage).then((searchResult) => setState(() {
             setState(() {
               if (searchResult.isNotEmpty) {
                 _search.searchResults.addAll(searchResult);
               }
-              _isLoading = false;
-              _isLoadingNextPage = false;
+              isLoading = false;
+              isLoadingNextPage = false;
             });
           }));
     } else {
       try {
-        searchExpression(_dbExpression!, input, _resultsPerPage, _currentPage).then((searchResult) {
+        searchExpression(dbExpression!, input, resultsPerPage, currentPage).then((searchResult) {
           setState(() {
             if (searchResult.isNotEmpty) {
               _search.searchResults.addAll(searchResult);
             }
-            _isLoading = false;
-            _isLoadingNextPage = false;
+            isLoading = false;
+            isLoadingNextPage = false;
           });
         });
       } catch (e) {
@@ -122,7 +115,7 @@ class _MainWidgetState extends State<MainWidget> {
 
   _searchTypeToggle() async {
     setState(() {
-      _kanjiSearch = !_kanjiSearch!;
+      kanjiSearch = !kanjiSearch;
     });
   }
 
@@ -140,9 +133,9 @@ class _MainWidgetState extends State<MainWidget> {
 
     if (input.isNotEmpty) {
       setState(() {
-        _isLoading = true;
-        _isLoadingNextPage = false;
-        _currentPage = 0;
+        isLoading = true;
+        isLoadingNextPage = false;
+        currentPage = 0;
         _search.totalResult = 0;
         _search.input = input;
         _search.searchResults.clear();
@@ -153,21 +146,21 @@ class _MainWidgetState extends State<MainWidget> {
 
   void _onFocusChanged(bool hasFocus) async {
     setState(() {
-      _cursorPosition = widget._textEditingController.selection.start;
+      cursorPosition = widget._textEditingController.selection.start;
     });
   }
 
   _onEndReached() {
     setState(() {
-      _currentPage++;
-      _isLoadingNextPage = true;
+      currentPage++;
+      isLoadingNextPage = true;
     });
     _runSearch(_search.input);
   }
 
   Widget _body() {
     return FutureBuilder<bool>(
-      future: checkDb(_dbExpression, _dbKanji), // async work
+      future: checkDb(dbExpression, dbKanji), // async work
       builder: (BuildContext context, AsyncSnapshot<bool> snapshot) {
         if (snapshot.hasError) {
           return Center(child: Text('Error: ${snapshot.error}'));
@@ -175,7 +168,7 @@ class _MainWidgetState extends State<MainWidget> {
           return Column(
             children: <Widget>[
               SearchInput(widget._textEditingController, _onSearch, _onFocusChanged, focusNode),
-              ResultsWidget(_dbKanji, _search, _onEndReached, _isLoading)
+              ResultsWidget(dbKanji, _search, _onEndReached, isLoading)
             ],
           );
         } else {
@@ -189,7 +182,7 @@ class _MainWidgetState extends State<MainWidget> {
   Widget build(BuildContext context) {
     return Scaffold(
         key: _scaffoldKey,
-        floatingActionButton: _isLoadingNextPage
+        floatingActionButton: isLoadingNextPage
             ? const FloatingActionButton(
                 onPressed: null,
                 backgroundColor: Colors.white,
@@ -203,7 +196,7 @@ class _MainWidgetState extends State<MainWidget> {
             builder: (context) => MenuBar(
                 setExpressionDb: setExpressionDb,
                 setKanjiDb: setKanjiDb,
-                dbKanji: _dbKanji,
+                dbKanji: dbKanji,
                 search: _search,
                 textEditingController: widget._textEditingController,
                 onSearch: _onSearch,
@@ -212,8 +205,8 @@ class _MainWidgetState extends State<MainWidget> {
                   onPressed: _convert,
                 ),
                 kanjiKotobaButton:
-                    KanjiKotobaButton(onPressed: _searchTypeToggle, kanjiSearch: _kanjiSearch),
-                insertPosition: _cursorPosition),
+                    KanjiKotobaButton(onPressed: _searchTypeToggle, kanjiSearch: kanjiSearch),
+                insertPosition: cursorPosition),
           ),
         ),
         body: _body());
@@ -229,7 +222,7 @@ class _MainWidgetState extends State<MainWidget> {
     Iterable<RegExpMatch> matches = exp.allMatches(input);
 
     if (matches.isNotEmpty) {
-      List<String?> radicalList = await getRadicalsCharacter(_dbKanji!);
+      List<String?> radicalList = await getRadicalsCharacter(dbKanji!);
       String radicalsString = radicalList.join();
 
       await Future.forEach(matches, (dynamic match) async {
@@ -237,7 +230,7 @@ class _MainWidgetState extends State<MainWidget> {
         //remove all characters that are not a radical
         radicals = radicals.replaceAll(RegExp('[^$radicalsString]'), '');
 
-        kanjis.add(await getKanjiFromRadicals(_dbKanji!, radicals));
+        kanjis.add(await getKanjiFromRadicals(dbKanji!, radicals));
       });
 
       int index = 0;
