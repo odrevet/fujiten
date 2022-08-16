@@ -60,7 +60,7 @@ class RadicalPageState extends State<RadicalPage> {
             return Stack(
               children: <Widget>[
                 Positioned.fill(
-                  child: _radicalButton(radicals[index]),
+                  child: radicalButton(radicals[index]),
                 ),
                 Stack(children: [
                   Icon(Icons.bookmark,
@@ -72,12 +72,12 @@ class RadicalPageState extends State<RadicalPage> {
               ],
             );
           } else {
-            return _radicalButton(radicals[index]);
+            return radicalButton(radicals[index]);
           }
         });
   }
 
-  _onRadicalButtonPress(String character) {
+  onRadicalButtonPress(String character) {
     setState(() {
       widget.selectedRadicals.contains(character)
           ? widget.selectedRadicals.removeWhere((test) => test == character)
@@ -88,7 +88,7 @@ class RadicalPageState extends State<RadicalPage> {
         .then((validRadicals) => setState(() => _validRadicals = validRadicals));
   }
 
-  Widget _radicalButton(Kanji radical) => TextButton(
+  Widget radicalButton(Kanji radical) => TextButton(
       style: ButtonStyle(
         backgroundColor: MaterialStateProperty.resolveWith<Color?>(
           (Set<MaterialState> states) {
@@ -102,7 +102,7 @@ class RadicalPageState extends State<RadicalPage> {
         ),
       ),
       onPressed: _validRadicals.isEmpty || _validRadicals.contains(radical.character)
-          ? () => _onRadicalButtonPress(radical.character)
+          ? () => onRadicalButtonPress(radical.character)
           : null,
       child: Text(radical.character,
           style: TextStyle(

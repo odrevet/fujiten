@@ -75,7 +75,7 @@ class _DatasetPageState extends State<DatasetPage> {
     });
   }
 
-  Future<void> _setPathExpression(String path) async {
+  Future<void> setPathExpression(String path) async {
     final SharedPreferences prefs = await _prefs;
     setState(() {
       _expressionPath = prefs.setString('expression_path', path).then((bool success) {
@@ -84,7 +84,7 @@ class _DatasetPageState extends State<DatasetPage> {
     });
   }
 
-  Future<void> _setPathKanji(String path) async {
+  Future<void> setPathKanji(String path) async {
     final SharedPreferences prefs = await _prefs;
     setState(() {
       _kanjiPath = prefs.setString('kanji_path', path).then((bool success) {
@@ -116,7 +116,7 @@ class _DatasetPageState extends State<DatasetPage> {
                             onPressed: () => _pickFiles().then((result) async {
                               if (result != null) {
                                 String path = result.first.path!;
-                                _setPathExpression(path);
+                                setPathExpression(path);
                                 await widget.setExpressionDb(path);
                               }
                             }),
@@ -130,7 +130,7 @@ class _DatasetPageState extends State<DatasetPage> {
                             onPressed: () => _pickFiles().then((result) async {
                               if (result != null) {
                                 String path = result.first.path!;
-                                _setPathKanji(path);
+                                setPathKanji(path);
                                 await widget.setKanjiDb(path);
                               }
                             }),

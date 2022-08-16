@@ -16,8 +16,10 @@ class ResultsWidget extends StatefulWidget {
   final Database? dbKanji;
   final Function onEndReached;
   final bool isLoading;
+  final bool isLoadingNextPage;
 
-  const ResultsWidget(this.dbKanji, this.onEndReached, this.isLoading, {Key? key})
+  const ResultsWidget(this.dbKanji, this.onEndReached, this.isLoading, this.isLoadingNextPage,
+      {Key? key})
       : super(key: key);
 
   @override
@@ -31,7 +33,7 @@ class _ResultsWidgetState extends State<ResultsWidget> {
   @override
   initState() {
     _scrollController = ScrollController();
-    _scrollController!.addListener(_scrollListener);
+    _scrollController!.addListener(scrollListener);
 
     _styleFieldInformation =
         const TextStyle(fontSize: 12, fontStyle: FontStyle.italic, color: Colors.blue);
@@ -45,10 +47,11 @@ class _ResultsWidgetState extends State<ResultsWidget> {
     super.dispose();
   }
 
-  _scrollListener() {
+  scrollListener() {
     if (_scrollController!.offset >= _scrollController!.position.maxScrollExtent &&
         !_scrollController!.position.outOfRange &&
-        !widget.isLoading) {
+        !widget.isLoading &&
+        !widget.isLoadingNextPage) {
       widget.onEndReached();
     }
   }
@@ -169,11 +172,11 @@ class _ResultsWidgetState extends State<ResultsWidget> {
     return BlocBuilder<SearchCubit, Search>(builder: (context, search) {
       late Widget child;
 
-      if (search.isLoading) {
+      if (search.isLoading && !search.isLoadingNextPage) {
         child = const CircularProgressIndicator();
       } else {
-        if (search.searchResults.isEmpty == true && search.input.isNotEmpty) {
-          child = Text("No results for '${search.input}' --> ${search.totalResult}");
+        if (search.searchResults.isEmpty && search.input.isNotEmpty) {
+          child = Text("No results for '${search.input}'");
         } else {
           if (search.input.isEmpty) {
             child = const Text("Welcome to Japanese Dictionary Flutter");

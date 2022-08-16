@@ -5,29 +5,29 @@ import '../models/search.dart';
 import '../services/database.dart';
 
 class SearchCubit extends Cubit<Search> {
-  SearchCubit()
-      : super(Search(
-            input: '',
-            isLoading: false,
-            isLoadingNextPage: false,
-            searchResults: [],
-            totalResult: 0));
+  SearchCubit() : super(Search());
 
   void reset() => emit(Search(
       input: '', searchResults: [], isLoading: false, isLoadingNextPage: false, totalResult: 0));
 
-  void runSearch(String formattedInput, bool kanjiSearch, Database database) {
+  void setInput(String input) => emit(state.copyWith(input: input));
+
+  void nextPage() {
+    emit(state.copyWith(page: ++state.page, isLoadingNextPage: true));
+  }
+
+  void runSearch(bool kanjiSearch, Database database) {
     emit(state.copyWith(
-        input: formattedInput,
-        isLoading: true,
-        isLoadingNextPage: false,
-        totalResult: 0,
-        searchResults: []));
+      isLoading: true,
+    ));
 
     Function searchFunction = kanjiSearch ? searchKanji : searchExpression;
-    searchFunction(database, formattedInput, 10, 0).then((searchResults) {
+    searchFunction(database, state.input, state.resultsPerPage, state.page).then((searchResults) {
       emit(state.copyWith(
-          isLoading: false, totalResult: searchResults.length, searchResults: searchResults));
+          isLoading: false,
+          isLoadingNextPage: false,
+          totalResult: searchResults.length,
+          searchResults: [...state.searchResults, ...searchResults]));
     });
   }
 }

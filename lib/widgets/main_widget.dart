@@ -24,10 +24,6 @@ class _MainWidgetState extends State<MainWidget> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   Database? dbKanji;
   Database? dbExpression;
-  int resultsPerPage = 30;
-  int currentPage = 0;
-  bool isLoading = false;
-  bool isLoadingNextPage = false;
   int cursorPosition = -1;
   bool kanjiSearch = false;
   FocusNode focusNode = FocusNode();
@@ -36,11 +32,11 @@ class _MainWidgetState extends State<MainWidget> {
 
   @override
   initState() {
-    _initDb();
+    initDb();
     super.initState();
   }
 
-  _initDb() async {
+  initDb() async {
     _prefs.then((SharedPreferences prefs) async {
       String? path = prefs.getString("expression_path");
       if (path != null) await setExpressionDb(path);
@@ -57,69 +53,24 @@ class _MainWidgetState extends State<MainWidget> {
 
   Future<void> setKanjiDb(String path) async => dbKanji = await openDatabase(path, readOnly: true);
 
-  _disposeDb() async {
+  disposeDb() async {
     await dbExpression!.close();
     await dbKanji!.close();
   }
 
   @override
   void dispose() {
-    _disposeDb();
+    disposeDb();
     super.dispose();
   }
 
-  /*_runSearch(String input) {
-    if (kanjiSearch) {
-      searchKanji(dbKanji!, input, resultsPerPage, currentPage).then((searchResult) => setState(() {
-            setState(() {
-              if (searchResult.isNotEmpty) {
-                _search.searchResults.addAll(searchResult);
-              }
-              isLoading = false;
-              isLoadingNextPage = false;
-            });
-          }));
-    } else {
-      try {
-        searchExpression(dbExpression!, input, resultsPerPage, currentPage).then((searchResult) {
-          setState(() {
-            if (searchResult.isNotEmpty) {
-              _search.searchResults.addAll(searchResult);
-            }
-            isLoading = false;
-            isLoadingNextPage = false;
-          });
-        });
-      } catch (e) {
-        showDialog(
-          context: context,
-          builder: (ctx) => AlertDialog(
-            title: const Text("ERROR"),
-            content: Text(e.toString()),
-            actions: <Widget>[
-              TextButton(
-                onPressed: () {
-                  Navigator.of(ctx).pop();
-                },
-                child: Container(
-                  padding: const EdgeInsets.all(14),
-                  child: const Text("okay"),
-                ),
-              ),
-            ],
-          ),
-        );
-      }
-    }
-  }*/
-
-  _searchTypeToggle() async {
+  searchTypeToggle() async {
     setState(() {
       kanjiSearch = !kanjiSearch;
     });
   }
 
-  _convert() async {
+  convert() async {
     String input = widget._textEditingController.text;
     if (kanaKit.isRomaji(input)) {
       widget._textEditingController.text = kanaKit.toKana(input);
@@ -128,25 +79,23 @@ class _MainWidgetState extends State<MainWidget> {
     }
   }
 
-  _onSearch() => formatInput().then((formattedInput) => context
-      .read<SearchCubit>()
-      .runSearch(formattedInput, kanjiSearch, kanjiSearch ? dbKanji! : dbExpression!));
+  onSearch() => formatInput().then((formattedInput) {
+        context.read<SearchCubit>().setInput(formattedInput);
+        context.read<SearchCubit>().runSearch(kanjiSearch, kanjiSearch ? dbKanji! : dbExpression!);
+      });
 
-  void _onFocusChanged(bool hasFocus) async {
+  void onFocusChanged(bool hasFocus) async {
     setState(() {
       cursorPosition = widget._textEditingController.selection.start;
     });
   }
 
-  _onEndReached() {
-    setState(() {
-      currentPage++;
-      isLoadingNextPage = true;
-    });
-    //_runSearch(_search.input);
+  onEndReached() {
+    context.read<SearchCubit>().nextPage();
+    context.read<SearchCubit>().runSearch(kanjiSearch, kanjiSearch ? dbKanji! : dbExpression!);
   }
 
-  Widget _body() {
+  Widget body() {
     return FutureBuilder<bool>(
       future: checkDb(dbExpression, dbKanji), // async work
       builder: (BuildContext context, AsyncSnapshot<bool> snapshot) {
@@ -155,8 +104,9 @@ class _MainWidgetState extends State<MainWidget> {
         } else if (snapshot.hasData) {
           return Column(
             children: <Widget>[
-              SearchInput(widget._textEditingController, _onSearch, _onFocusChanged, focusNode),
-              ResultsWidget(dbKanji, _onEndReached, isLoading)
+              SearchInput(widget._textEditingController, onSearch, onFocusChanged, focusNode),
+              ResultsWidget(dbKanji, onEndReached, context.read<SearchCubit>().state.isLoading,
+                  context.read<SearchCubit>().state.isLoadingNextPage)
             ],
           );
         } else {
@@ -170,7 +120,7 @@ class _MainWidgetState extends State<MainWidget> {
   Widget build(BuildContext context) {
     return Scaffold(
         key: _scaffoldKey,
-        floatingActionButton: isLoadingNextPage
+        floatingActionButton: context.read<SearchCubit>().state.isLoadingNextPage //TODO blocBuilder
             ? const FloatingActionButton(
                 onPressed: null,
                 backgroundColor: Colors.white,
@@ -187,17 +137,17 @@ class _MainWidgetState extends State<MainWidget> {
                 dbKanji: dbKanji,
                 search: context.read<SearchCubit>().state,
                 textEditingController: widget._textEditingController,
-                onSearch: _onSearch,
+                onSearch: onSearch,
                 focusNode: focusNode,
                 convertButton: ConvertButton(
-                  onPressed: _convert,
+                  onPressed: convert,
                 ),
                 kanjiKotobaButton:
-                    KanjiKotobaButton(onPressed: _searchTypeToggle, kanjiSearch: kanjiSearch),
+                    KanjiKotobaButton(onPressed: searchTypeToggle, kanjiSearch: kanjiSearch),
                 insertPosition: cursorPosition),
           ),
         ),
-        body: _body());
+        body: body());
   }
 
   Future<String> formatInput() async {

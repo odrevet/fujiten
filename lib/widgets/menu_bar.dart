@@ -45,7 +45,7 @@ class _MenuBarState extends State<MenuBar> {
       onSelected: (dynamic result) {
         switch (result) {
           case 0:
-            _displayRadicalWidget(context);
+            displayRadicalWidget(context);
             break;
           case 1:
             if (widget.insertPosition >= 0) {
@@ -109,7 +109,7 @@ class _MenuBarState extends State<MenuBar> {
     );
   }
 
-  _displayRadicalWidget(BuildContext context) async {
+  displayRadicalWidget(BuildContext context) async {
     //send the radicals inside < > to the radical page
     var exp = RegExp(r'<(.*?)>');
     Iterable<RegExpMatch> matches = exp.allMatches(widget.textEditingController!.text);
@@ -145,9 +145,6 @@ class _MenuBarState extends State<MenuBar> {
               .replaceRange(matchAtCursor.start, matchAtCursor.end, '<${selectedRadicals.join()}>');
         }
       }
-
-      //widget.textEditingController!.selection =
-      //    TextSelection.fromPosition(TextPosition(offset: insertPosition!));
     });
   }
 }
