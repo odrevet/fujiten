@@ -6,7 +6,9 @@ class SearchInput extends StatefulWidget {
   final FocusNode focusNode;
   final TextEditingController textEditingController;
 
-  const SearchInput(this.textEditingController, this.onSubmitted, this.onFocusChanged, this.focusNode, {Key? key})
+  const SearchInput(
+      this.textEditingController, this.onSubmitted, this.onFocusChanged, this.focusNode,
+      {Key? key})
       : super(key: key);
 
   @override

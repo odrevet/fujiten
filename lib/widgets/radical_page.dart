@@ -6,31 +6,24 @@ import '../services/queries.dart' show getRadicals, getRadicalsForSelection;
 
 class RadicalPage extends StatefulWidget {
   final Database? _dbKanji;
-  final List<String> _selectedRadicals;
+  final List<String> selectedRadicals;
 
-  const RadicalPage(this._dbKanji, this._selectedRadicals, {Key? key}) : super(key: key);
+  const RadicalPage(this._dbKanji, this.selectedRadicals, {Key? key}) : super(key: key);
 
   @override
-  RadicalPageState createState() => RadicalPageState(_selectedRadicals);
+  RadicalPageState createState() => RadicalPageState();
 }
 
 class RadicalPageState extends State<RadicalPage> {
   Future<List<Kanji>>? _radicals;
-  final List<String> _selectedRadicals = [];
   List<String?> _validRadicals = [];
-
-  RadicalPageState(List<String> initialRadicals) {
-    for (var radical in initialRadicals) {
-      _selectedRadicals.add(radical);
-    }
-  }
 
   @override
   void initState() {
     _radicals = getRadicals(widget._dbKanji!);
 
-    if (_selectedRadicals.isNotEmpty) {
-      getRadicalsForSelection(widget._dbKanji!, _selectedRadicals)
+    if (widget.selectedRadicals.isNotEmpty) {
+      getRadicalsForSelection(widget._dbKanji!, widget.selectedRadicals)
           .then((validRadicals) => setState(() => _validRadicals = validRadicals));
     }
     super.initState();
@@ -50,7 +43,7 @@ class RadicalPageState extends State<RadicalPage> {
                 title: const Text('Radicals'),
                 leading: IconButton(
                     icon: const Icon(Icons.arrow_back),
-                    onPressed: () => Navigator.pop(context, _selectedRadicals))),
+                    onPressed: () => Navigator.pop(context, widget.selectedRadicals))),
             body: snapshot.hasData
                 ? Center(child: radicalGridView(snapshot.data!))
                 : const Center(child: CircularProgressIndicator()));
@@ -86,12 +79,12 @@ class RadicalPageState extends State<RadicalPage> {
 
   _onRadicalButtonPress(String character) {
     setState(() {
-      _selectedRadicals.contains(character)
-          ? _selectedRadicals.removeWhere((test) => test == character)
-          : _selectedRadicals.add(character);
+      widget.selectedRadicals.contains(character)
+          ? widget.selectedRadicals.removeWhere((test) => test == character)
+          : widget.selectedRadicals.add(character);
     });
 
-    getRadicalsForSelection(widget._dbKanji!, _selectedRadicals)
+    getRadicalsForSelection(widget._dbKanji!, widget.selectedRadicals)
         .then((validRadicals) => setState(() => _validRadicals = validRadicals));
   }
 
@@ -114,7 +107,7 @@ class RadicalPageState extends State<RadicalPage> {
       child: Text(radical.character,
           style: TextStyle(
             fontSize: 40,
-            color: _selectedRadicals.contains(radical.character)
+            color: widget.selectedRadicals.contains(radical.character)
                 ? Theme.of(context).colorScheme.primary
                 : Theme.of(context).colorScheme.secondary,
           )));

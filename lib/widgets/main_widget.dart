@@ -2,12 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sqflite/sqflite.dart';
 
-import '../services/queries.dart';
 import '../models/search.dart';
-import 'search_input.dart';
+import '../services/queries.dart';
 import '../string_utils.dart';
 import 'menu_bar.dart';
 import 'results_widget.dart';
+import 'search_input.dart';
 
 class MainWidget extends StatefulWidget {
   final String? title;
@@ -170,16 +170,12 @@ class _MainWidgetState extends State<MainWidget> {
         if (snapshot.hasError) {
           return Center(child: Text('Error: ${snapshot.error}'));
         } else if (snapshot.hasData) {
-          if (/*snapshot.data == true*/ true ) {
-            return Column(
-              children: <Widget>[
-                SearchInput(widget._textEditingController, _onSearch, _onFocusChanged, focusNode),
-                ResultsWidget(_dbExpression, _dbKanji, _search, _onEndReached, _isLoading)
-              ],
-            );
-          } else {
-            return const Center(child: Text("Opening Databases..."));
-          }
+          return Column(
+            children: <Widget>[
+              SearchInput(widget._textEditingController, _onSearch, _onFocusChanged, focusNode),
+              ResultsWidget(_dbKanji, _search, _onEndReached, _isLoading)
+            ],
+          );
         } else {
           return const Text("Checking DataBases integrity");
         }

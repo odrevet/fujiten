@@ -114,7 +114,7 @@ class _DatasetPageState extends State<DatasetPage> {
                           subtitle: Text(snapshot.data![0]),
                           trailing: ElevatedButton(
                             onPressed: () => _pickFiles().then((result) async {
-                              if(result != null) {
+                              if (result != null) {
                                 String path = result.first.path!;
                                 _setPathExpression(path);
                                 await widget.setExpressionDb(path);
@@ -128,7 +128,7 @@ class _DatasetPageState extends State<DatasetPage> {
                           subtitle: Text(snapshot.data![1]),
                           trailing: ElevatedButton(
                             onPressed: () => _pickFiles().then((result) async {
-                              if(result != null) {
+                              if (result != null) {
                                 String path = result.first.path!;
                                 _setPathKanji(path);
                                 await widget.setKanjiDb(path);

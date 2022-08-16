@@ -1,25 +1,20 @@
-import 'dart:developer';
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:sqflite/sqflite.dart';
 
 import '../models/kanji.dart';
-import '../services/queries.dart';
 import '../models/search.dart';
+import '../services/queries.dart';
 import '../string_utils.dart' show kanaKit;
 import 'kanji_widget.dart';
 
 class ResultsWidget extends StatefulWidget {
   final Database? _dbKanji;
-  final Database? _dbExpression;
   final Search? _search;
   final Function _onEndReached;
   final bool? _isLoading;
 
-  const ResultsWidget(
-      this._dbExpression, this._dbKanji, this._search, this._onEndReached, this._isLoading,
-      {Key? key})
+  const ResultsWidget(this._dbKanji, this._search, this._onEndReached, this._isLoading, {Key? key})
       : super(key: key);
 
   @override
