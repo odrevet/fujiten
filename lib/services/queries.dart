@@ -43,7 +43,8 @@ Future<bool> checkDb(Database? dbExpression, Database? dbKanji) async {
   return true;
 }
 
-Future<List<KanjiEntry>> searchKanji(Database dbKanji, String input, [resultsPerPage = 10, currentPage = 0]) async {
+Future<List<KanjiEntry>> searchKanji(Database dbKanji, String input,
+    [resultsPerPage = 10, currentPage = 0]) async {
   String where;
 
   if (kanaKit.isHiragana(input)) {

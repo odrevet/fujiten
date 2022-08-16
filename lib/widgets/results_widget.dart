@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:japanese_dictionary/cubits/search_cubit.dart';
 import 'package:sqflite/sqflite.dart';
 
 import '../models/kanji.dart';
@@ -10,11 +12,10 @@ import 'kanji_widget.dart';
 
 class ResultsWidget extends StatefulWidget {
   final Database? dbKanji;
-  final Search search;
   final Function onEndReached;
   final bool isLoading;
 
-  const ResultsWidget(this.dbKanji, this.search, this.onEndReached, this.isLoading, {Key? key})
+  const ResultsWidget(this.dbKanji, this.onEndReached, this.isLoading, {Key? key})
       : super(key: key);
 
   @override
@@ -163,35 +164,36 @@ class _ResultsWidgetState extends State<ResultsWidget> {
 
   @override
   Widget build(BuildContext context) {
-    late Widget child;
+    return BlocBuilder<SearchCubit, Search>(builder: (context, search) {
+      late Widget child;
 
-    if (widget.isLoading == true) {
-      child = const CircularProgressIndicator();
-    } else {
-      if (widget.search.searchResults.isEmpty == true && widget.search.input.isNotEmpty) {
-        child = Text("No results for '${widget.search.input}'");
+      if (search.isLoading) {
+        child = const CircularProgressIndicator();
       } else {
-        if (widget.search.input.isEmpty) {
-          child = const Text("Welcome to Japanese Dictionary Flutter");
+        if (search.searchResults.isEmpty == true && search.input.isNotEmpty) {
+          child = Text("No results for '${search.input}' --> ${search.totalResult}");
         } else {
-          child = ListView.separated(
-              separatorBuilder: (context, index) {
-                return const Divider();
-              },
-              controller: _scrollController,
-              itemCount: widget.search.searchResults.length,
-              itemBuilder: (BuildContext context, int index) {
-                if (widget.search.searchResults[index] is KanjiEntry) {
-                  KanjiEntry searchResult = widget.search.searchResults[index] as KanjiEntry;
-                  return _buildResultKanji(searchResult);
-                } else {
-                  return _buildResultExpression(widget.search.searchResults[index]);
-                }
-              });
+          if (search.input.isEmpty) {
+            child = const Text("Welcome to Japanese Dictionary Flutter");
+          } else {
+            child = ListView.separated(
+                separatorBuilder: (context, index) {
+                  return const Divider();
+                },
+                controller: _scrollController,
+                itemCount: search.searchResults.length,
+                itemBuilder: (BuildContext context, int index) {
+                  if (search.searchResults[index] is KanjiEntry) {
+                    KanjiEntry searchResult = search.searchResults[index] as KanjiEntry;
+                    return _buildResultKanji(searchResult);
+                  } else {
+                    return _buildResultExpression(search.searchResults[index]);
+                  }
+                });
+          }
         }
       }
-    }
-
-    return Expanded(child: Center(child: child));
+      return Expanded(child: Center(child: child));
+    });
   }
 }

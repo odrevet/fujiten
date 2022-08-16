@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:japanese_dictionary/cubits/search_cubit.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sqflite/sqflite.dart';
 
-import '../models/search.dart';
 import '../services/queries.dart';
 import '../string_utils.dart';
 import 'menu_bar.dart';
@@ -23,7 +24,6 @@ class _MainWidgetState extends State<MainWidget> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   Database? dbKanji;
   Database? dbExpression;
-  final Search _search = Search(totalResult: 0, input: '');
   int resultsPerPage = 30;
   int currentPage = 0;
   bool isLoading = false;
@@ -40,7 +40,7 @@ class _MainWidgetState extends State<MainWidget> {
     super.initState();
   }
 
-    _initDb() async {
+  _initDb() async {
     _prefs.then((SharedPreferences prefs) async {
       String? path = prefs.getString("expression_path");
       if (path != null) await setExpressionDb(path);
@@ -68,7 +68,7 @@ class _MainWidgetState extends State<MainWidget> {
     super.dispose();
   }
 
-  _runSearch(String input) {
+  /*_runSearch(String input) {
     if (kanjiSearch) {
       searchKanji(dbKanji!, input, resultsPerPage, currentPage).then((searchResult) => setState(() {
             setState(() {
@@ -111,7 +111,7 @@ class _MainWidgetState extends State<MainWidget> {
         );
       }
     }
-  }
+  }*/
 
   _searchTypeToggle() async {
     setState(() {
@@ -128,21 +128,8 @@ class _MainWidgetState extends State<MainWidget> {
     }
   }
 
-  _onSearch() async {
-    String input = await _formatInput();
-
-    if (input.isNotEmpty) {
-      setState(() {
-        isLoading = true;
-        isLoadingNextPage = false;
-        currentPage = 0;
-        _search.totalResult = 0;
-        _search.input = input;
-        _search.searchResults.clear();
-      });
-      _runSearch(input);
-    }
-  }
+  _onSearch() => formatInput().then((formattedInput) =>
+      context.read<SearchCubit>().runSearch(formattedInput, kanjiSearch, dbKanji, dbExpression));
 
   void _onFocusChanged(bool hasFocus) async {
     setState(() {
@@ -155,7 +142,7 @@ class _MainWidgetState extends State<MainWidget> {
       currentPage++;
       isLoadingNextPage = true;
     });
-    _runSearch(_search.input);
+    //_runSearch(_search.input);
   }
 
   Widget _body() {
@@ -168,7 +155,7 @@ class _MainWidgetState extends State<MainWidget> {
           return Column(
             children: <Widget>[
               SearchInput(widget._textEditingController, _onSearch, _onFocusChanged, focusNode),
-              ResultsWidget(dbKanji, _search, _onEndReached, isLoading)
+              ResultsWidget(dbKanji, _onEndReached, isLoading)
             ],
           );
         } else {
@@ -197,7 +184,7 @@ class _MainWidgetState extends State<MainWidget> {
                 setExpressionDb: setExpressionDb,
                 setKanjiDb: setKanjiDb,
                 dbKanji: dbKanji,
-                search: _search,
+                search: context.read<SearchCubit>().state,
                 textEditingController: widget._textEditingController,
                 onSearch: _onSearch,
                 focusNode: focusNode,
@@ -212,7 +199,7 @@ class _MainWidgetState extends State<MainWidget> {
         body: _body());
   }
 
-  Future<String> _formatInput() async {
+  Future<String> formatInput() async {
     String input = widget._textEditingController.text.trim();
     input.replaceAll(RegExp(r'\s+'), ' ');
 

@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:japanese_dictionary/cubits/search_cubit.dart';
 
 import 'widgets/main_widget.dart';
 
@@ -19,7 +21,7 @@ class App extends StatelessWidget {
           secondary: Colors.black,
         ),
       ),
-      home: MainWidget(),
+      home: BlocProvider(create: (_) => SearchCubit(), child: MainWidget()),
     );
   }
 }
