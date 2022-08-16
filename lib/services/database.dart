@@ -3,8 +3,9 @@ import 'dart:developer';
 
 import 'package:sqflite/sqflite.dart';
 
+import '../models/entry.dart';
 import '../models/kanji.dart';
-import '../models/search.dart';
+import '../models/sense.dart';
 import '../string_utils.dart';
 
 Future<bool> checkDb(Database? dbExpression, Database? dbKanji) async {

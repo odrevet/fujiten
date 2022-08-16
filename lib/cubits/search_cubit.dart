@@ -16,8 +16,7 @@ class SearchCubit extends Cubit<Search> {
   void reset() => emit(Search(
       input: '', searchResults: [], isLoading: false, isLoadingNextPage: false, totalResult: 0));
 
-  void runSearch(
-      String formattedInput, bool kanjiSearch, Database database) {
+  void runSearch(String formattedInput, bool kanjiSearch, Database database) {
     emit(state.copyWith(
         input: formattedInput,
         isLoading: true,
@@ -28,9 +27,7 @@ class SearchCubit extends Cubit<Search> {
     Function searchFunction = kanjiSearch ? searchKanji : searchExpression;
     searchFunction(database, formattedInput, 10, 0).then((searchResults) {
       emit(state.copyWith(
-          isLoading: false,
-          totalResult: searchResults.length,
-          searchResults: searchResults));
+          isLoading: false, totalResult: searchResults.length, searchResults: searchResults));
     });
   }
 }

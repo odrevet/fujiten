@@ -4,8 +4,10 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:japanese_dictionary/cubits/search_cubit.dart';
 import 'package:sqflite/sqflite.dart';
 
+import '../models/entry.dart';
 import '../models/kanji.dart';
 import '../models/search.dart';
+import '../models/sense.dart';
 import '../services/database.dart';
 import '../string_utils.dart' show kanaKit;
 import 'kanji_widget.dart';
