@@ -43,7 +43,7 @@ Future<bool> checkDb(Database? dbExpression, Database? dbKanji) async {
   return true;
 }
 
-Future<List<KanjiEntry>> searchKanji(Database dbKanji, String input) async {
+Future<List<KanjiEntry>> searchKanji(Database dbKanji, String input, [resultsPerPage = 10, currentPage = 0]) async {
   String where;
 
   if (kanaKit.isHiragana(input)) {
@@ -62,7 +62,7 @@ Future<List<KanjiEntry>> searchKanji(Database dbKanji, String input) async {
     where = '''WHERE character.id IN (SELECT character.id
         FROM character 
         LEFT JOIN meaning ON meaning.id_character = character.id
-        WHERE meaning.content REGEXP ".*$input.*"
+        WHERE meaning.content REGEXP "$input"
         GROUP BY character.id)''';
   } else {
     where = 'WHERE character.id REGEXP "$input"';
@@ -80,7 +80,10 @@ Future<List<KanjiEntry>> searchKanji(Database dbKanji, String input) async {
         LEFT JOIN meaning ON meaning.id_character = character.id
         $where
         GROUP BY character.id
-        ORDER BY character.freq NULLS LAST, character.stroke_count''';
+        ORDER BY character.freq NULLS LAST, character.stroke_count
+        LIMIT $resultsPerPage OFFSET ${currentPage * resultsPerPage}''';
+
+  log(sql);
 
   final List<Map<String, dynamic>> kanjiMaps = await dbKanji.rawQuery(sql);
 

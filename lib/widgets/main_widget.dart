@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sqflite/sqflite.dart';
@@ -75,7 +77,7 @@ class _MainWidgetState extends State<MainWidget> {
 
   _runSearch(String input) {
     if (_kanjiSearch!) {
-      searchKanji(_dbKanji!, input).then((searchResult) => setState(() {
+      searchKanji(_dbKanji!, input, _resultsPerPage, _currentPage).then((searchResult) => setState(() {
             setState(() {
               if (searchResult.isNotEmpty) {
                 _search.searchResults.addAll(searchResult);
