@@ -128,8 +128,9 @@ class _MainWidgetState extends State<MainWidget> {
     }
   }
 
-  _onSearch() => formatInput().then((formattedInput) =>
-      context.read<SearchCubit>().runSearch(formattedInput, kanjiSearch, dbKanji, dbExpression));
+  _onSearch() => formatInput().then((formattedInput) => context
+      .read<SearchCubit>()
+      .runSearch(formattedInput, kanjiSearch, kanjiSearch ? dbKanji! : dbExpression!));
 
   void _onFocusChanged(bool hasFocus) async {
     setState(() {
