@@ -125,7 +125,7 @@ class _MenuBarState extends State<MenuBar> {
 
     //remove every non-radical characters
     //call to getRadicalsCharacter somehow move the cursor to the end of textinput, retain de current position now
-    int? insertPosition = 0;
+    int insertPosition = 0;
     if (widget.insertPosition> 0) insertPosition = widget.insertPosition;
 
     List<String?> radicalsFromDb = await getRadicalsCharacter(widget.dbKanji!);

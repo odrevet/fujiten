@@ -9,12 +9,12 @@ import '../string_utils.dart' show kanaKit;
 import 'kanji_widget.dart';
 
 class ResultsWidget extends StatefulWidget {
-  final Database? _dbKanji;
-  final Search? _search;
-  final Function _onEndReached;
-  final bool? _isLoading;
+  final Database? dbKanji;
+  final Search search;
+  final Function onEndReached;
+  final bool isLoading;
 
-  const ResultsWidget(this._dbKanji, this._search, this._onEndReached, this._isLoading, {Key? key})
+  const ResultsWidget(this.dbKanji, this.search, this.onEndReached, this.isLoading, {Key? key})
       : super(key: key);
 
   @override
@@ -45,8 +45,8 @@ class _ResultsWidgetState extends State<ResultsWidget> {
   _scrollListener() {
     if (_scrollController!.offset >= _scrollController!.position.maxScrollExtent &&
         !_scrollController!.position.outOfRange &&
-        !widget._isLoading!) {
-      widget._onEndReached();
+        !widget.isLoading) {
+      widget.onEndReached();
     }
   }
 
@@ -132,7 +132,7 @@ class _ResultsWidgetState extends State<ResultsWidget> {
     return SizedBox(
       width: double.maxFinite,
       child: FutureBuilder<List<Kanji>>(
-          future: getKanjiFromCharacters(widget._dbKanji!, kanjis),
+          future: getKanjiFromCharacters(widget.dbKanji!, kanjis),
           builder: (context, snapshot) {
             if (snapshot.hasData) {
               if (snapshot.data == null) {
@@ -165,13 +165,13 @@ class _ResultsWidgetState extends State<ResultsWidget> {
   Widget build(BuildContext context) {
     late Widget child;
 
-    if (widget._isLoading == true) {
+    if (widget.isLoading == true) {
       child = const CircularProgressIndicator();
     } else {
-      if (widget._search?.searchResults.isEmpty == true && widget._search!.input.isNotEmpty) {
-        child = Text("No results for '${widget._search!.input}'");
+      if (widget.search.searchResults.isEmpty == true && widget.search.input.isNotEmpty) {
+        child = Text("No results for '${widget.search.input}'");
       } else {
-        if (widget._search!.input.isEmpty) {
+        if (widget.search.input.isEmpty) {
           child = const Text("Welcome to Japanese Dictionary Flutter");
         } else {
           child = ListView.separated(
@@ -179,13 +179,13 @@ class _ResultsWidgetState extends State<ResultsWidget> {
                 return const Divider();
               },
               controller: _scrollController,
-              itemCount: widget._search!.searchResults.length,
+              itemCount: widget.search.searchResults.length,
               itemBuilder: (BuildContext context, int index) {
-                if (widget._search!.searchResults[index] is KanjiEntry) {
-                  KanjiEntry searchResult = widget._search!.searchResults[index] as KanjiEntry;
+                if (widget.search.searchResults[index] is KanjiEntry) {
+                  KanjiEntry searchResult = widget.search.searchResults[index] as KanjiEntry;
                   return _buildResultKanji(searchResult);
                 } else {
-                  return _buildResultExpression(widget._search!.searchResults[index]);
+                  return _buildResultExpression(widget.search.searchResults[index]);
                 }
               });
         }
