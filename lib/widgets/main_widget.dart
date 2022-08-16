@@ -79,7 +79,7 @@ class _MainWidgetState extends State<MainWidget> {
     }
   }
 
-  onSearch() => formatInput().then((formattedInput) {
+  onSearch() => formatInput(widget._textEditingController.text, dbKanji!).then((formattedInput) {
         context.read<SearchCubit>().setInput(formattedInput);
         context.read<SearchCubit>().runSearch(kanjiSearch, kanjiSearch ? dbKanji! : dbExpression!);
       });
@@ -148,51 +148,5 @@ class _MainWidgetState extends State<MainWidget> {
           ),
         ),
         body: body());
-  }
-
-  Future<String> formatInput() async {
-    String input = widget._textEditingController.text.trim();
-    input.replaceAll(RegExp(r'\s+'), ' ');
-
-    //replace every radicals into < > with matching kanji in [ ] for regexp
-    List<String> kanjis = [];
-    var exp = RegExp(r'<(.*?)>');
-    Iterable<RegExpMatch> matches = exp.allMatches(input);
-
-    if (matches.isNotEmpty) {
-      List<String?> radicalList = await getRadicalsCharacter(dbKanji!);
-      String radicalsString = radicalList.join();
-
-      await Future.forEach(matches, (dynamic match) async {
-        String radicals = match[1];
-        //remove all characters that are not a radical
-        radicals = radicals.replaceAll(RegExp('[^$radicalsString]'), '');
-
-        kanjis.add(await getKanjiFromRadicals(dbKanji!, radicals));
-      });
-
-      int index = 0;
-      input = input.replaceAllMapped(exp, (Match m) {
-        if (kanjis[index] == '') return m.group(0)!;
-        return '[${kanjis[index++]}]';
-      });
-    }
-
-    //replace regexp japanese character to latin character
-    input = input.replaceAll('。', '.');
-    input = input.replaceAll('？', '?');
-    input = input.replaceAll('｛', '{');
-    input = input.replaceAll('｝', '}');
-    input = input.replaceAll('（', '(');
-    input = input.replaceAll('）', ')');
-    input = input.replaceAll('［', '[');
-    input = input.replaceAll('］', ']');
-
-    input = input.replaceAll(charKanji, regexKanji);
-    input = input.replaceAll(charKanjiJp, regexKanji);
-    input = input.replaceAll(charKana, regexKana);
-    input = input.replaceAll(charKanaJp, regexKana);
-
-    return input;
   }
 }
