@@ -80,6 +80,7 @@ class _MainWidgetState extends State<MainWidget> {
   }
 
   onSearch() => formatInput(widget._textEditingController.text, dbKanji!).then((formattedInput) {
+        context.read<SearchCubit>().reset();
         context.read<SearchCubit>().setInput(formattedInput);
         context.read<SearchCubit>().runSearch(kanjiSearch, kanjiSearch ? dbKanji! : dbExpression!);
       });
