@@ -6,7 +6,7 @@ import 'package:sqflite/sqflite.dart';
 
 import '../models/kanji.dart';
 import '../models/search.dart';
-import '../services/queries.dart';
+import '../services/database.dart';
 import '../string_utils.dart' show kanaKit;
 import 'kanji_widget.dart';
 

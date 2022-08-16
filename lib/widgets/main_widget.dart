@@ -4,7 +4,7 @@ import 'package:japanese_dictionary/cubits/search_cubit.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sqflite/sqflite.dart';
 
-import '../services/queries.dart';
+import '../services/database.dart';
 import '../string_utils.dart';
 import 'menu_bar.dart';
 import 'results_widget.dart';

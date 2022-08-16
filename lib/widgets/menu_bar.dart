@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:sqflite/sqflite.dart';
 
 import '../models/search.dart';
-import '../services/queries.dart';
+import '../services/database.dart';
 import '../string_utils.dart';
 import 'radical_page.dart';
 import 'settings.dart';

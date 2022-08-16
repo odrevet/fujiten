@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:sqflite/sqflite.dart';
 
 import '../models/kanji.dart';
-import '../services/queries.dart' show getRadicals, getRadicalsForSelection;
+import '../services/database.dart' show getRadicals, getRadicalsForSelection;
 
 class RadicalPage extends StatefulWidget {
   final Database? _dbKanji;

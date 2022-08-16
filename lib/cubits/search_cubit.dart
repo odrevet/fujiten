@@ -2,7 +2,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:sqflite/sqflite.dart';
 
 import '../models/search.dart';
-import '../services/queries.dart';
+import '../services/database.dart';
 
 class SearchCubit extends Cubit<Search> {
   SearchCubit()
