@@ -15,6 +15,20 @@ class SearchInput extends StatefulWidget {
 
 class _SearchInputState extends State<SearchInput> {
   @override
+  void initState() {
+    super.initState();
+    widget.focusNode.addListener(() {
+      widget.onFocusChanged(widget.focusNode.hasFocus);
+    });
+  }
+
+  @override
+  void dispose() {
+    widget.focusNode.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.only(left: 12, right: 12),
