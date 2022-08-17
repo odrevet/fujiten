@@ -10,7 +10,7 @@ const String charKanjiJp = 'ⓚ';
 const String charKana = '㋐';
 const String charKanaJp = '㋐';
 
-String addCharAtPosition(String s, String char, int position, {bool repeat = false}) {
+String addCharAtPosition(String s, String char, int position) {
   if (s.length < position) {
     return s;
   }
