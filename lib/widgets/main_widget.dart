@@ -1,6 +1,10 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:japanese_dictionary/cubits/search_cubit.dart';
+import 'package:japanese_dictionary/models/search.dart';
+import 'package:japanese_dictionary/widgets/toggle_search_type_button.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sqflite/sqflite.dart';
 
@@ -28,7 +32,6 @@ class _MainWidgetState extends State<MainWidget> {
   late DatabaseInterfaceKanji databaseInterfaceKanji;
   late DatabaseInterfaceExpression databaseInterfaceExpression;
   int cursorPosition = -1;
-  bool kanjiSearch = false;
   FocusNode focusNode = FocusNode();
 
   final Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
@@ -74,12 +77,6 @@ class _MainWidgetState extends State<MainWidget> {
     super.dispose();
   }
 
-  searchTypeToggle() async {
-    setState(() {
-      kanjiSearch = !kanjiSearch;
-    });
-  }
-
   convert() async {
     String input = widget._textEditingController.text;
     if (kanaKit.isRomaji(input)) {
@@ -89,14 +86,15 @@ class _MainWidgetState extends State<MainWidget> {
     }
   }
 
-  onSearch() =>
-      formatInput(widget._textEditingController.text, databaseInterfaceKanji)
+  onSearch() => formatInput(widget._textEditingController.text, databaseInterfaceKanji)
           .then((formattedInput) {
         context.read<SearchCubit>().reset();
+        log(context.read<SearchCubit>().state.searchType.toString());
         context.read<SearchCubit>().setInput(formattedInput);
-        context
-            .read<SearchCubit>()
-            .runSearch(kanjiSearch ? databaseInterfaceKanji : databaseInterfaceExpression);
+        context.read<SearchCubit>().runSearch(
+            context.read<SearchCubit>().state.searchType == SearchType.kanji
+                ? databaseInterfaceKanji
+                : databaseInterfaceExpression);
       });
 
   void onFocusChanged(bool hasFocus) async {
@@ -106,10 +104,10 @@ class _MainWidgetState extends State<MainWidget> {
   }
 
   onEndReached() {
+    var searchType = context.read<SearchCubit>().state.searchType;
     context.read<SearchCubit>().nextPage();
-    context
-        .read<SearchCubit>()
-        .runSearch(kanjiSearch ? databaseInterfaceKanji : databaseInterfaceExpression);
+    context.read<SearchCubit>().runSearch(
+        searchType == SearchType.kanji ? databaseInterfaceKanji : databaseInterfaceExpression);
   }
 
   Widget body() {
@@ -119,14 +117,8 @@ class _MainWidgetState extends State<MainWidget> {
         ResultsWidget(
             databaseInterfaceKanji,
             onEndReached,
-            context
-                .read<SearchCubit>()
-                .state
-                .isLoading,
-            context
-                .read<SearchCubit>()
-                .state
-                .isLoadingNextPage)
+            context.read<SearchCubit>().state.isLoading,
+            context.read<SearchCubit>().state.isLoadingNextPage)
       ],
     );
   }
@@ -135,37 +127,30 @@ class _MainWidgetState extends State<MainWidget> {
   Widget build(BuildContext context) {
     return Scaffold(
         key: _scaffoldKey,
-        floatingActionButton: context
-            .read<SearchCubit>()
-            .state
-            .isLoadingNextPage //TODO blocBuilder
+        floatingActionButton: context.read<SearchCubit>().state.isLoadingNextPage //TODO blocBuilder
             ? const FloatingActionButton(
-          onPressed: null,
-          backgroundColor: Colors.white,
-          mini: true,
-          child: SizedBox(height: 10, width: 10, child: CircularProgressIndicator()),
-        )
+                onPressed: null,
+                backgroundColor: Colors.white,
+                mini: true,
+                child: SizedBox(height: 10, width: 10, child: CircularProgressIndicator()),
+              )
             : null,
         appBar: PreferredSize(
           preferredSize: const Size.fromHeight(56),
           child: Builder(
-            builder: (context) =>
-                MenuBar(
-                    setExpressionDb: setExpressionDb,
-                    setKanjiDb: setKanjiDb,
-                    databaseInterfaceKanji: databaseInterfaceKanji,
-                    search: context
-                        .read<SearchCubit>()
-                        .state,
-                    textEditingController: widget._textEditingController,
-                    onSearch: onSearch,
-                    focusNode: focusNode,
-                    convertButton: ConvertButton(
-                      onPressed: convert,
-                    ),
-                    kanjiKotobaButton:
-                    KanjiKotobaButton(onPressed: searchTypeToggle, kanjiSearch: kanjiSearch),
-                    insertPosition: cursorPosition),
+            builder: (context) => MenuBar(
+                setExpressionDb: setExpressionDb,
+                setKanjiDb: setKanjiDb,
+                databaseInterfaceKanji: databaseInterfaceKanji,
+                search: context.read<SearchCubit>().state,
+                textEditingController: widget._textEditingController,
+                onSearch: onSearch,
+                focusNode: focusNode,
+                convertButton: ConvertButton(
+                  onPressed: convert,
+                ),
+                kanjiKotobaButton: const ToggleSearchTypeButton(),
+                insertPosition: cursorPosition),
           ),
         ),
         body: body());

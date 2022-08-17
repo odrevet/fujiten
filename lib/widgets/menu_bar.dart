@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:japanese_dictionary/services/database_interface_kanji.dart';
+import 'package:japanese_dictionary/widgets/toggle_search_type_button.dart';
 
 import '../models/search.dart';
 import '../string_utils.dart';
@@ -13,7 +14,7 @@ class MenuBar extends StatefulWidget {
   final VoidCallback onSearch;
   final Future<void> Function(String) setExpressionDb;
   final Future<void> Function(String) setKanjiDb;
-  final KanjiKotobaButton kanjiKotobaButton;
+  final ToggleSearchTypeButton kanjiKotobaButton;
   final ConvertButton convertButton;
   final int insertPosition;
   final FocusNode focusNode;
@@ -145,30 +146,6 @@ class _MenuBarState extends State<MenuBar> {
         }
       }
     });
-  }
-}
-
-class KanjiKotobaButton extends StatefulWidget {
-  final Function? onPressed;
-  final bool? kanjiSearch;
-
-  const KanjiKotobaButton({this.onPressed, this.kanjiSearch, Key? key}) : super(key: key);
-
-  @override
-  State<KanjiKotobaButton> createState() => _KanjiKotobaButtonState();
-}
-
-class _KanjiKotobaButtonState extends State<KanjiKotobaButton> {
-  @override
-  Widget build(BuildContext context) {
-    return SizedBox(
-        width: 70,
-        child: TextButton(
-            onPressed: widget.onPressed as void Function()?,
-            child: Text(
-              widget.kanjiSearch == true ? '漢字' : '言葉',
-              style: const TextStyle(fontSize: 23.0, color: Colors.white),
-            )));
   }
 }
 

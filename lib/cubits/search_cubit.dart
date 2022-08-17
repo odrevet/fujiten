@@ -6,7 +6,7 @@ import '../models/search.dart';
 class SearchCubit extends Cubit<Search> {
   SearchCubit() : super(Search());
 
-  void reset() => emit(Search(
+  void reset() => emit(state.copyWith(
       input: '', searchResults: [], isLoading: false, isLoadingNextPage: false, totalResult: 0));
 
   void setInput(String input) => emit(state.copyWith(input: input));
@@ -28,4 +28,7 @@ class SearchCubit extends Cubit<Search> {
           searchResults: [...state.searchResults, ...searchResults]));
     });
   }
+
+  void toggleSearchType() => emit(state.copyWith(
+      searchType: state.searchType == SearchType.kanji ? SearchType.expression : SearchType.kanji));
 }
