@@ -3,7 +3,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:japanese_dictionary/cubits/search_cubit.dart';
 import 'package:japanese_dictionary/models/search.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:sqflite/sqflite.dart';
 
 import '../services/database_interface_expression.dart';
 import '../services/database_interface_kanji.dart';
@@ -24,8 +23,6 @@ class MainWidget extends StatefulWidget {
 
 class _MainWidgetState extends State<MainWidget> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
-  Database? dbKanji;
-  Database? dbExpression;
   late DatabaseInterfaceKanji databaseInterfaceKanji;
   late DatabaseInterfaceExpression databaseInterfaceExpression;
   int cursorPosition = -1;
@@ -37,8 +34,8 @@ class _MainWidgetState extends State<MainWidget> {
   initState() {
     initDb();
     super.initState();
-    databaseInterfaceExpression = DatabaseInterfaceExpression(database: dbExpression);
-    databaseInterfaceKanji = DatabaseInterfaceKanji(database: dbKanji);
+    databaseInterfaceExpression = DatabaseInterfaceExpression();
+    databaseInterfaceKanji = DatabaseInterfaceKanji();
   }
 
   initDb() async {
@@ -53,24 +50,14 @@ class _MainWidgetState extends State<MainWidget> {
     });
   }
 
-  Future<void> setExpressionDb(String path) async {
-    dbExpression = await openDatabase(path, readOnly: true);
-    databaseInterfaceExpression.database = dbExpression;
-  }
+  Future<void> setExpressionDb(String path) async => await databaseInterfaceExpression.open(path);
 
-  Future<void> setKanjiDb(String path) async {
-    dbKanji = await openDatabase(path, readOnly: true);
-    databaseInterfaceKanji.database = dbKanji;
-  }
-
-  disposeDb() async {
-    await dbExpression!.close();
-    await dbKanji!.close();
-  }
+  Future<void> setKanjiDb(String path) async => databaseInterfaceKanji.open(path);
 
   @override
   void dispose() {
-    disposeDb();
+    databaseInterfaceExpression.dispose();
+    databaseInterfaceKanji.dispose();
     super.dispose();
   }
 
