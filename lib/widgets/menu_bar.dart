@@ -14,7 +14,6 @@ class MenuBar extends StatefulWidget {
   final VoidCallback onSearch;
   final Future<void> Function(String) setExpressionDb;
   final Future<void> Function(String) setKanjiDb;
-  final ToggleSearchTypeButton kanjiKotobaButton;
   final ConvertButton convertButton;
   final int insertPosition;
   final FocusNode focusNode;
@@ -26,7 +25,6 @@ class MenuBar extends StatefulWidget {
       required this.onSearch,
       required this.focusNode,
       required this.convertButton,
-      required this.kanjiKotobaButton,
       required this.insertPosition,
       required this.setExpressionDb,
       required this.setKanjiDb,
@@ -90,7 +88,7 @@ class _MenuBarState extends State<MenuBar> {
           children: <Widget>[
             popupMenuButtonInsert,
             widget.convertButton,
-            widget.kanjiKotobaButton,
+            const ToggleSearchTypeButton(),
             IconButton(
                 icon: const Icon(Icons.clear),
                 onPressed: () {

@@ -1,5 +1,3 @@
-import 'dart:developer';
-
 import '../models/entry.dart';
 import '../models/sense.dart';
 import '../string_utils.dart';
@@ -49,9 +47,6 @@ class DatabaseInterfaceExpression extends DatabaseInterface {
                   $where
                   GROUP BY sense.id
                   LIMIT $resultsPerPage OFFSET ${currentPage * resultsPerPage}''';
-    log(sql);
-    log(database == null ? "NULL DATABASE" : "DATABASE OK");
-
     List<Map<String, dynamic>> queryResults;
     try {
       queryResults = await database!.rawQuery(sql);
@@ -68,7 +63,6 @@ class DatabaseInterfaceExpression extends DatabaseInterface {
 
     for (var queryResult in queryResults) {
       if (queryResult['entry_id'] != entryId) {
-        log(queryResult['entry_id'].toString());
         senses = [];
         entries.add(ExpressionEntry(
             kanji:

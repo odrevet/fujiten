@@ -1,10 +1,7 @@
-import 'dart:developer';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:japanese_dictionary/cubits/search_cubit.dart';
 import 'package:japanese_dictionary/models/search.dart';
-import 'package:japanese_dictionary/widgets/toggle_search_type_button.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sqflite/sqflite.dart';
 
@@ -89,7 +86,6 @@ class _MainWidgetState extends State<MainWidget> {
   onSearch() => formatInput(widget._textEditingController.text, databaseInterfaceKanji)
           .then((formattedInput) {
         context.read<SearchCubit>().reset();
-        log(context.read<SearchCubit>().state.searchType.toString());
         context.read<SearchCubit>().setInput(formattedInput);
         context.read<SearchCubit>().runSearch(
             context.read<SearchCubit>().state.searchType == SearchType.kanji
@@ -125,34 +121,34 @@ class _MainWidgetState extends State<MainWidget> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-        key: _scaffoldKey,
-        floatingActionButton: context.read<SearchCubit>().state.isLoadingNextPage //TODO blocBuilder
-            ? const FloatingActionButton(
-                onPressed: null,
-                backgroundColor: Colors.white,
-                mini: true,
-                child: SizedBox(height: 10, width: 10, child: CircularProgressIndicator()),
-              )
-            : null,
-        appBar: PreferredSize(
-          preferredSize: const Size.fromHeight(56),
-          child: Builder(
-            builder: (context) => MenuBar(
-                setExpressionDb: setExpressionDb,
-                setKanjiDb: setKanjiDb,
-                databaseInterfaceKanji: databaseInterfaceKanji,
-                search: context.read<SearchCubit>().state,
-                textEditingController: widget._textEditingController,
-                onSearch: onSearch,
-                focusNode: focusNode,
-                convertButton: ConvertButton(
-                  onPressed: convert,
-                ),
-                kanjiKotobaButton: const ToggleSearchTypeButton(),
-                insertPosition: cursorPosition),
-          ),
-        ),
-        body: body());
+    return BlocBuilder<SearchCubit, Search>(
+        builder: (context, search) => Scaffold(
+            key: _scaffoldKey,
+            floatingActionButton: context.read<SearchCubit>().state.isLoadingNextPage
+                ? const FloatingActionButton(
+                    onPressed: null,
+                    backgroundColor: Colors.white,
+                    mini: true,
+                    child: SizedBox(height: 10, width: 10, child: CircularProgressIndicator()),
+                  )
+                : null,
+            appBar: PreferredSize(
+              preferredSize: const Size.fromHeight(56),
+              child: Builder(
+                builder: (context) => MenuBar(
+                    setExpressionDb: setExpressionDb,
+                    setKanjiDb: setKanjiDb,
+                    databaseInterfaceKanji: databaseInterfaceKanji,
+                    search: search,
+                    textEditingController: widget._textEditingController,
+                    onSearch: onSearch,
+                    focusNode: focusNode,
+                    convertButton: ConvertButton(
+                      onPressed: convert,
+                    ),
+                    insertPosition: cursorPosition),
+              ),
+            ),
+            body: body()));
   }
 }
