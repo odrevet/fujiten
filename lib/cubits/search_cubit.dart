@@ -1,8 +1,7 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:sqflite/sqflite.dart';
+import 'package:japanese_dictionary/services/database_interface.dart';
 
 import '../models/search.dart';
-import '../services/database.dart';
 
 class SearchCubit extends Cubit<Search> {
   SearchCubit() : super(Search());
@@ -16,13 +15,12 @@ class SearchCubit extends Cubit<Search> {
     emit(state.copyWith(page: ++state.page, isLoadingNextPage: true));
   }
 
-  void runSearch(bool kanjiSearch, Database database) {
+  void runSearch(DatabaseInterface databaseInterface) {
     emit(state.copyWith(
       isLoading: true,
     ));
 
-    Function searchFunction = kanjiSearch ? searchKanji : searchExpression;
-    searchFunction(database, state.input, state.resultsPerPage, state.page).then((searchResults) {
+    databaseInterface.search(state.input, state.resultsPerPage, state.page).then((searchResults) {
       emit(state.copyWith(
           isLoading: false,
           isLoadingNextPage: false,

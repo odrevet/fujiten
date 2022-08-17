@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
-import 'package:sqflite/sqflite.dart';
 
 import '../models/kanji.dart';
-import '../services/database.dart' show getRadicals, getRadicalsForSelection;
+import '../services/database_interface_kanji.dart';
 
 class RadicalPage extends StatefulWidget {
-  final Database? _dbKanji;
+  final DatabaseInterfaceKanji databaseInterfaceKanji;
   final List<String> selectedRadicals;
 
-  const RadicalPage(this._dbKanji, this.selectedRadicals, {Key? key}) : super(key: key);
+  const RadicalPage(this.databaseInterfaceKanji, this.selectedRadicals, {Key? key})
+      : super(key: key);
 
   @override
   RadicalPageState createState() => RadicalPageState();
@@ -20,10 +20,11 @@ class RadicalPageState extends State<RadicalPage> {
 
   @override
   void initState() {
-    _radicals = getRadicals(widget._dbKanji!);
+    _radicals = widget.databaseInterfaceKanji.getRadicals();
 
     if (widget.selectedRadicals.isNotEmpty) {
-      getRadicalsForSelection(widget._dbKanji!, widget.selectedRadicals)
+      widget.databaseInterfaceKanji
+          .getRadicalsForSelection(widget.selectedRadicals)
           .then((validRadicals) => setState(() => _validRadicals = validRadicals));
     }
     super.initState();
@@ -84,7 +85,8 @@ class RadicalPageState extends State<RadicalPage> {
           : widget.selectedRadicals.add(character);
     });
 
-    getRadicalsForSelection(widget._dbKanji!, widget.selectedRadicals)
+    widget.databaseInterfaceKanji
+        .getRadicalsForSelection(widget.selectedRadicals)
         .then((validRadicals) => setState(() => _validRadicals = validRadicals));
   }
 

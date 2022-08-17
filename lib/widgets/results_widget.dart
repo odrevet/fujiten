@@ -2,23 +2,23 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:japanese_dictionary/cubits/search_cubit.dart';
-import 'package:sqflite/sqflite.dart';
+import 'package:japanese_dictionary/services/database_interface_kanji.dart';
 
 import '../models/entry.dart';
 import '../models/kanji.dart';
 import '../models/search.dart';
 import '../models/sense.dart';
-import '../services/database.dart';
 import '../string_utils.dart' show kanaKit;
 import 'kanji_widget.dart';
 
 class ResultsWidget extends StatefulWidget {
-  final Database? dbKanji;
+  final DatabaseInterfaceKanji databaseInterfaceKanji;
   final Function onEndReached;
   final bool isLoading;
   final bool isLoadingNextPage;
 
-  const ResultsWidget(this.dbKanji, this.onEndReached, this.isLoading, this.isLoadingNextPage,
+  const ResultsWidget(
+      this.databaseInterfaceKanji, this.onEndReached, this.isLoading, this.isLoadingNextPage,
       {Key? key})
       : super(key: key);
 
@@ -138,7 +138,7 @@ class _ResultsWidgetState extends State<ResultsWidget> {
     return SizedBox(
       width: double.maxFinite,
       child: FutureBuilder<List<Kanji>>(
-          future: getKanjiFromCharacters(widget.dbKanji!, kanjis),
+          future: widget.databaseInterfaceKanji.getKanjiFromCharacters(kanjis),
           builder: (context, snapshot) {
             if (snapshot.hasData) {
               if (snapshot.data == null) {

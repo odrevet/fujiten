@@ -1,6 +1,5 @@
-import 'package:japanese_dictionary/services/database.dart';
+import 'package:japanese_dictionary/services/database_interface_kanji.dart';
 import 'package:kana_kit/kana_kit.dart';
-import 'package:sqflite/sqflite.dart';
 
 const kanaKit = KanaKit();
 
@@ -18,7 +17,7 @@ String addCharAtPosition(String s, String char, int position, {bool repeat = fal
   return s.substring(0, position) + char + s.substring(position, s.length);
 }
 
-Future<String> formatInput(String input, Database dbKanji) async {
+Future<String> formatInput(String input, DatabaseInterfaceKanji databaseInterfaceKanji) async {
   input.trim().replaceAll(RegExp(r'\s+'), ' ');
 
   //replace every radicals into < > with matching kanji in [ ] for regexp
@@ -27,7 +26,7 @@ Future<String> formatInput(String input, Database dbKanji) async {
   Iterable<RegExpMatch> matches = exp.allMatches(input);
 
   if (matches.isNotEmpty) {
-    List<String?> radicalList = await getRadicalsCharacter(dbKanji);
+    List<String?> radicalList = await databaseInterfaceKanji.getRadicalsCharacter();
     String radicalsString = radicalList.join();
 
     await Future.forEach(matches, (dynamic match) async {
@@ -35,7 +34,7 @@ Future<String> formatInput(String input, Database dbKanji) async {
       //remove all characters that are not a radical
       radicals = radicals.replaceAll(RegExp('[^$radicalsString]'), '');
 
-      kanjis.add(await getKanjiFromRadicals(dbKanji, radicals));
+      kanjis.add(await databaseInterfaceKanji.getKanjiFromRadicals(radicals));
     });
 
     int index = 0;

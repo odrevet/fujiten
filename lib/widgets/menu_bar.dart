@@ -1,14 +1,13 @@
 import 'package:flutter/material.dart';
-import 'package:sqflite/sqflite.dart';
+import 'package:japanese_dictionary/services/database_interface_kanji.dart';
 
 import '../models/search.dart';
-import '../services/database.dart';
 import '../string_utils.dart';
 import 'radical_page.dart';
 import 'settings.dart';
 
 class MenuBar extends StatefulWidget {
-  final Database? dbKanji;
+  final DatabaseInterfaceKanji databaseInterfaceKanji;
   final Search? search;
   final TextEditingController? textEditingController;
   final VoidCallback onSearch;
@@ -20,7 +19,7 @@ class MenuBar extends StatefulWidget {
   final FocusNode focusNode;
 
   const MenuBar(
-      {required this.dbKanji,
+      {required this.databaseInterfaceKanji,
       required this.search,
       required this.textEditingController,
       required this.onSearch,
@@ -128,13 +127,13 @@ class _MenuBarState extends State<MenuBar> {
     int insertPosition = 0;
     if (widget.insertPosition > 0) insertPosition = widget.insertPosition;
 
-    List<String?> radicalsFromDb = await getRadicalsCharacter(widget.dbKanji!);
+    List<String?> radicalsFromDb = await widget.databaseInterfaceKanji.getRadicalsCharacter();
     radicals.removeWhere((String radical) => !radicalsFromDb.contains(radical));
 
     if (!mounted) return;
     Navigator.push(
       context,
-      MaterialPageRoute(builder: (context) => RadicalPage(widget.dbKanji, radicals)),
+      MaterialPageRoute(builder: (context) => RadicalPage(widget.databaseInterfaceKanji, radicals)),
     ).then((selectedRadicals) {
       if (selectedRadicals.isNotEmpty) {
         if (matchAtCursor == null) {
