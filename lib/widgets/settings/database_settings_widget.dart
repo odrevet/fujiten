@@ -92,7 +92,7 @@ class _DatabaseSettingsWidgetState extends State<DatabaseSettingsWidget> {
                                 String appDocPath = appDocDir.path;
                                 String downloadTo = "$appDocPath/${widget.type}.db";
                                 Dio().download(
-                                    "https://github.com/odrevet/edict_database/releases/download/v0.0.1/${widget.type}.zip",
+                                    "https://github.com/odrevet/edict_database/releases/latest/download/${widget.type}.zip",
                                     downloadTo, onReceiveProgress: (received, total) {
                                   if (total != -1) {
                                     setState(() => downloadLog =

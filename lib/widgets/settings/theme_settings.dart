@@ -27,10 +27,10 @@ class ThemeSettings extends StatelessWidget {
         builder: (context, themeData) => ListView(children: [
           ThemeTile(
               title: "Light",
-              themeData: ThemeData(primarySwatch: Colors.red, brightness: Brightness.light)),
+              themeData: ThemeData(brightness: Brightness.light)),
           ThemeTile(
               title: "Dark",
-              themeData: ThemeData(primarySwatch: Colors.red, brightness: Brightness.dark)),
+              themeData: ThemeData(brightness: Brightness.dark)),
         ]),
       ),
     );
