@@ -1,7 +1,5 @@
-import 'package:file_picker/file_picker.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
+import 'package:japanese_dictionary/widgets/database_settings_widget.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -109,53 +107,20 @@ class _DatasetPageState extends State<DatasetPage> {
                   } else {
                     return ListView(
                       children: [
-                        ListTile(
-                          title: const Text("Expression"),
-                          subtitle: Text(snapshot.data![0]),
-                          trailing: ElevatedButton(
-                            onPressed: () => _pickFiles().then((result) async {
-                              if (result != null) {
-                                String path = result.first.path!;
-                                setPathExpression(path);
-                                await widget.setExpressionDb(path);
-                              }
-                            }),
-                            child: const Text('Pick file'),
-                          ),
-                        ),
-                        ListTile(
-                          title: const Text("Kanji"),
-                          subtitle: Text(snapshot.data![1]),
-                          trailing: ElevatedButton(
-                            onPressed: () => _pickFiles().then((result) async {
-                              if (result != null) {
-                                String path = result.first.path!;
-                                setPathKanji(path);
-                                await widget.setKanjiDb(path);
-                              }
-                            }),
-                            child: const Text('Pick file'),
-                          ),
-                        ),
+                        DatabaseSettingsWidget(
+                            type: "expression",
+                            path: snapshot.data![0],
+                            setDb: widget.setExpressionDb,
+                            setPath: setPathExpression),
+                        DatabaseSettingsWidget(
+                            type: "kanji",
+                            path: snapshot.data![1],
+                            setDb: widget.setKanjiDb,
+                            setPath: setPathKanji)
                       ],
                     );
                   }
               }
             }));
-  }
-
-  Future<List<PlatformFile>?> _pickFiles() async {
-    try {
-      return (await FilePicker.platform.pickFiles(type: FileType.any, allowMultiple: false))?.files;
-    } on PlatformException catch (e) {
-      if (kDebugMode) {
-        print('Unsupported operation $e');
-      }
-    } catch (e) {
-      if (kDebugMode) {
-        print(e.toString());
-      }
-    }
-    return null;
   }
 }
