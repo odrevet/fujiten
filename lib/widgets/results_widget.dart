@@ -152,7 +152,7 @@ class _ResultsWidgetState extends State<ResultsWidget> {
                     itemCount: snapshot.data!.length,
                     itemBuilder: (BuildContext context, int index) {
                       return KanjiWidget(snapshot.data!
-                          .firstWhere((kanji) => kanji.character == kanjiReading[index]));
+                          .firstWhere((kanji) => kanji.literal == kanjiReading[index]));
                     });
               }
             } else if (snapshot.hasError) {

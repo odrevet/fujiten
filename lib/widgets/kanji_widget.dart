@@ -29,10 +29,10 @@ class KanjiCharacteriWidget extends StatelessWidget {
             ? Column(
                 children: <Widget>[
                   Text(furigana!, style: styleFurigana),
-                  Expanded(child: Text(kanji!.character, style: style))
+                  Expanded(child: Text(kanji!.literal, style: style))
                 ],
               )
-            : Text(kanji!.character, style: style));
+            : Text(kanji!.literal, style: style));
   }
 }
 
@@ -43,8 +43,8 @@ class KanjiWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    String stroke = '${kanji!.stroke.toString()} '
-        'stroke${kanji!.stroke > 1 ? 's' : ''}';
+    String stroke = '${kanji!.strokeCount.toString()} '
+        'stroke${kanji!.strokeCount > 1 ? 's' : ''}';
     String on = kanji!.on == null ? '' : kanji!.on!.join('・');
     String kun = kanji!.kun == null ? '' : kanji!.kun!.join('・');
     String radicals = kanji!.radicals == null ? '' : kanji!.radicals!.join('');
@@ -53,7 +53,7 @@ class KanjiWidget extends StatelessWidget {
     return ListTile(
         leading: KanjiCharacteriWidget(
             kanji: kanji,
-            onTap: () => Clipboard.setData(ClipboardData(text: kanji!.character)),
+            onTap: () => Clipboard.setData(ClipboardData(text: kanji!.literal)),
             style: const TextStyle(fontSize: 40.0)),
         title: Table(children: <TableRow>[
           TableRow(children: <Widget>[Text(stroke)]),

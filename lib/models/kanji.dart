@@ -5,16 +5,16 @@ class Meaning {
 }
 
 class Kanji {
-  final String character;
-  final int stroke;
+  final String literal;
+  final int strokeCount;
   final List<String>? radicals;
   final List<String>? on;
   final List<String>? kun;
   final List<String>? meanings;
 
   Kanji(
-      {required this.character,
-      required this.stroke,
+      {required this.literal,
+      required this.strokeCount,
       this.radicals = const [],
       this.on = const [],
       this.kun = const [],
@@ -22,8 +22,8 @@ class Kanji {
 
   factory Kanji.fromMap(Map<String, dynamic> map) {
     return Kanji(
-      character: map['id'],
-      stroke: map['stroke_count'],
+      literal: map['id'],
+      strokeCount: map['stroke_count'],
       radicals: map['radicals']?.split(','),
       on: map['on_reading']?.split(','),
       kun: map['kun_reading']?.split(','),
@@ -33,6 +33,6 @@ class Kanji {
 
   @override
   String toString() {
-    return character;
+    return literal;
   }
 }

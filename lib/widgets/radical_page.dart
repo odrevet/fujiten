@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 
 import '../models/kanji.dart';
@@ -17,6 +19,7 @@ class RadicalPage extends StatefulWidget {
 class RadicalPageState extends State<RadicalPage> {
   Future<List<Kanji>>? _radicals;
   List<String?> _validRadicals = [];
+  String filter = "";
 
   @override
   void initState() {
@@ -36,7 +39,7 @@ class RadicalPageState extends State<RadicalPage> {
       future: _radicals,
       builder: (context, snapshot) {
         if (snapshot.hasError) {
-          return Center(child: Text(snapshot.error as String));
+          return Center(child: Text(snapshot.error.toString()));
         }
 
         return Scaffold(
@@ -46,18 +49,36 @@ class RadicalPageState extends State<RadicalPage> {
                     icon: const Icon(Icons.arrow_back),
                     onPressed: () => Navigator.pop(context, widget.selectedRadicals))),
             body: snapshot.hasData
-                ? Center(child: radicalGridView(snapshot.data!))
+                ? Column(
+                    children: [
+                      TextField(
+                        decoration: const InputDecoration(hintText: 'Filter by meaning'),
+                        onChanged: (value) => setState(() {
+                          filter = value;
+                        }),
+                      ),
+                      Expanded(child: radicalGridView(snapshot.data!)),
+                    ],
+                  )
                 : const Center(child: CircularProgressIndicator()));
       },
     );
   }
 
   Widget radicalGridView(List<Kanji> radicals) {
+    if (filter.isNotEmpty) {
+      radicals = radicals
+          .where((radical) => radical.meanings == null
+              ? false
+              : radical.meanings!.any((meaning) => meaning.contains(filter)))
+          .toList();
+    }
+
     return GridView.builder(
         gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 5),
         itemCount: radicals.length,
         itemBuilder: (BuildContext context, int index) {
-          if (index == 0 || radicals[index].stroke != radicals[index - 1].stroke) {
+          if (index == 0 || radicals[index].strokeCount != radicals[index - 1].strokeCount) {
             return Stack(
               children: <Widget>[
                 Positioned.fill(
@@ -68,7 +89,7 @@ class RadicalPageState extends State<RadicalPage> {
                       color: Theme.of(context).brightness == Brightness.light
                           ? Colors.white
                           : Colors.black),
-                  Positioned(top: 3, left: 5, child: Text(radicals[index].stroke.toString()))
+                  Positioned(top: 3, left: 5, child: Text(radicals[index].strokeCount.toString()))
                 ]),
               ],
             );
@@ -95,14 +116,12 @@ class RadicalPageState extends State<RadicalPage> {
         backgroundColor: MaterialStateProperty.resolveWith<Color?>((Set<MaterialState> states) =>
             states.contains(MaterialState.disabled) ? Colors.grey : null),
       ),
-      onPressed: _validRadicals.isEmpty || _validRadicals.contains(radical.character)
-          ? () => onRadicalButtonPress(radical.character)
+      onPressed: _validRadicals.isEmpty || _validRadicals.contains(radical.literal)
+          ? () => onRadicalButtonPress(radical.literal)
           : null,
-      child: Text(radical.character,
+      child: Text(radical.literal,
           style: TextStyle(
             fontSize: 40,
-            color: widget.selectedRadicals.contains(radical.character)
-                ? Colors.red
-                : null,
+            color: widget.selectedRadicals.contains(radical.literal) ? Colors.red : null,
           )));
 }
