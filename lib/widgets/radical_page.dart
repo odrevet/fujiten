@@ -1,9 +1,8 @@
-import 'dart:developer';
-
 import 'package:flutter/material.dart';
 
 import '../models/kanji.dart';
 import '../services/database_interface_kanji.dart';
+import '../string_utils.dart';
 
 class RadicalPage extends StatefulWidget {
   final DatabaseInterfaceKanji databaseInterfaceKanji;
@@ -67,11 +66,23 @@ class RadicalPageState extends State<RadicalPage> {
 
   Widget radicalGridView(List<Kanji> radicals) {
     if (filter.isNotEmpty) {
-      radicals = radicals
-          .where((radical) => radical.meanings == null
-              ? false
-              : radical.meanings!.any((meaning) => meaning.contains(filter)))
-          .toList();
+      if (kanaKit.isRomaji(filter)) {
+        radicals = radicals
+            .where((radical) => radical.meanings == null
+                ? false
+                : radical.meanings!.any((meaning) => meaning.contains(filter)))
+            .toList();
+      } else if (kanaKit.isHiragana(filter)) {
+        radicals = radicals
+            .where((radical) =>
+                radical.kun == null ? false : radical.kun!.any((kun) => kun.contains(filter)))
+            .toList();
+      } else if (kanaKit.isKatakana(filter)) {
+        radicals = radicals
+            .where((radical) =>
+                radical.on == null ? false : radical.on!.any((on) => on.contains(filter)))
+            .toList();
+      }
     }
 
     return GridView.builder(
