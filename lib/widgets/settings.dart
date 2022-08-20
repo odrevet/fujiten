@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:japanese_dictionary/widgets/database_settings_widget.dart';
 import 'package:package_info_plus/package_info_plus.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 class SettingsPage extends StatelessWidget {
   final Future<void> Function(String) setExpressionDb;
@@ -57,70 +56,16 @@ class DatasetPage extends StatefulWidget {
 }
 
 class _DatasetPageState extends State<DatasetPage> {
-  final Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
-  late Future<String> _expressionPath;
-  late Future<String> _kanjiPath;
-
-  @override
-  void initState() {
-    super.initState();
-    _expressionPath = _prefs.then((SharedPreferences prefs) {
-      return prefs.getString('expression_path') ?? "";
-    });
-
-    _kanjiPath = _prefs.then((SharedPreferences prefs) {
-      return prefs.getString('kanji_path') ?? "";
-    });
-  }
-
-  Future<void> setPathExpression(String path) async {
-    final SharedPreferences prefs = await _prefs;
-    setState(() {
-      _expressionPath = prefs.setString('expression_path', path).then((bool success) {
-        return path;
-      });
-    });
-  }
-
-  Future<void> setPathKanji(String path) async {
-    final SharedPreferences prefs = await _prefs;
-    setState(() {
-      _kanjiPath = prefs.setString('kanji_path', path).then((bool success) {
-        return path;
-      });
-    });
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: AppBar(title: const Text('Databases')),
-        body: FutureBuilder<List<String>>(
-            future: Future.wait([_expressionPath, _kanjiPath]),
-            builder: (BuildContext context, AsyncSnapshot<List<String>> snapshot) {
-              switch (snapshot.connectionState) {
-                case ConnectionState.waiting:
-                  return const CircularProgressIndicator();
-                default:
-                  if (snapshot.hasError) {
-                    return Text('Error: ${snapshot.error}');
-                  } else {
-                    return ListView(
-                      children: [
-                        DatabaseSettingsWidget(
-                            type: "expression",
-                            path: snapshot.data![0],
-                            setDb: widget.setExpressionDb,
-                            setPath: setPathExpression),
-                        DatabaseSettingsWidget(
-                            type: "kanji",
-                            path: snapshot.data![1],
-                            setDb: widget.setKanjiDb,
-                            setPath: setPathKanji)
-                      ],
-                    );
-                  }
-              }
-            }));
+        body: ListView(
+          children: [
+            DatabaseSettingsWidget(
+                type: "expression", setDb: widget.setExpressionDb),
+            DatabaseSettingsWidget(type: "kanji", setDb: widget.setKanjiDb)
+          ],
+        ));
   }
 }

@@ -1,6 +1,4 @@
-import 'dart:developer';
 import 'dart:io';
-
 import 'package:archive/archive_io.dart';
 import 'package:dio/dio.dart';
 import 'package:file_picker/file_picker.dart';
@@ -8,17 +6,14 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class DatabaseSettingsWidget extends StatefulWidget {
   final String type;
-  final String path;
-  final Function setPath;
   final Function setDb;
 
   const DatabaseSettingsWidget(
       {required this.type,
-      required this.path,
-      required this.setPath,
       required this.setDb,
       Key? key})
       : super(key: key);
@@ -30,74 +25,111 @@ class DatabaseSettingsWidget extends StatefulWidget {
 class _DatabaseSettingsWidgetState extends State<DatabaseSettingsWidget> {
   String downloadLog = '';
 
+  final Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
+  late Future<String> pathDb;
+
+  @override
+  void initState() {
+    super.initState();
+    pathDb = _prefs.then((SharedPreferences prefs) {
+      return prefs.getString('${widget.type}_path') ?? "";
+    });
+  }
+
+  Future<void> setPath(String path) async {
+    final SharedPreferences prefs = await _prefs;
+    setState(() {
+      pathDb = prefs.setString('${widget.type}_path', path).then((bool success) {
+        return path;
+      });
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Card(
-      child: Column(
-        children: [
-          Text(widget.type),
-          Text(widget.path),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: [
-              ElevatedButton(
-                onPressed: () async {
-                  Directory appDocDir = await getApplicationDocumentsDirectory();
-                  String appDocPath = appDocDir.path;
-                  String downloadTo = "$appDocPath/${widget.type}.db";
-                  Dio().download(
-                      "https://github.com/odrevet/edict_database/releases/download/v0.0.1/${widget.type}.zip",
-                      downloadTo, onReceiveProgress: (received, total) {
-                    if (total != -1) {
-                      setState(() => downloadLog =
-                          ("Downloading... ${(received / total * 100).toStringAsFixed(0)}%"));
-                    }
-                  }).then((_) async {
-                    String path = "$appDocPath/${widget.type}.db";
+    return FutureBuilder<String>(
+        future: pathDb,
+        builder: (BuildContext context, AsyncSnapshot<String> snapshot) {
+          switch (snapshot.connectionState) {
+            case ConnectionState.waiting:
+              return const CircularProgressIndicator();
+            default:
+              if (snapshot.hasError) {
+                return Text('Error: ${snapshot.error}');
+              } else {
+                return Card(
+                  child: Column(
+                    children: [
+                      Text(widget.type),
+                      Text(snapshot.data!),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        children: [
+                          ElevatedButton(
+                            onPressed: () async {
+                              Directory appDocDir = await getApplicationDocumentsDirectory();
+                              String appDocPath = appDocDir.path;
+                              String downloadTo = "$appDocPath/${widget.type}.db";
+                              Dio().download(
+                                  "https://github.com/odrevet/edict_database/releases/download/v0.0.1/${widget.type}.zip",
+                                  downloadTo, onReceiveProgress: (received, total) {
+                                if (total != -1) {
+                                  setState(() => downloadLog =
+                                  ("Downloading... ${(received / total * 100).toStringAsFixed(0)}%"));
+                                }
+                              }).then((_) async {
+                                String path = "$appDocPath/${widget.type}.db";
 
-                    // Extract zip
-                    try {
-                      // Read the Zip file from disk.
-                      final bytes = File(downloadTo).readAsBytesSync();
+                                // Extract zip
+                                try {
+                                  // Read the Zip file from disk.
+                                  final bytes = File(downloadTo).readAsBytesSync();
 
-                      // Decode the Zip file
-                      final archive = ZipDecoder().decodeBytes(bytes);
+                                  // Decode the Zip file
+                                  final archive = ZipDecoder().decodeBytes(bytes);
 
-                      // Extract the contents of the Zip archive to disk.
-                      for (final file in archive) {
-                        final data = file.content as List<int>;
-                        File('$appDocPath/${widget.type}.db')
-                          ..createSync(recursive: true)
-                          ..writeAsBytesSync(data);
-                      }
+                                  // Extract the contents of the Zip archive to disk.
+                                  for (final file in archive) {
+                                    final data = file.content as List<int>;
+                                    File('$appDocPath/${widget.type}.db')
+                                      ..createSync(recursive: true)
+                                      ..writeAsBytesSync(data);
+                                  }
 
-                      // Set DB Path and open the Database
-                      widget.setPath(path);
-                      log("SET DB $path");
-                      await widget.setDb(path);
-                    } catch (e) {
-                      setState(() => downloadLog = "Error ${e.toString()}");
-                    }
-                  });
-                },
-                child: const Text('Download'),
-              ),
-              ElevatedButton(
-                onPressed: () => _pickFiles().then((result) async {
-                  if (result != null) {
-                    String path = result.first.path!;
-                    widget.setPath(path);
-                    await widget.setDb(path);
-                  }
-                }),
-                child: const Text('Pick file'),
-              )
-            ],
-          ),
-          Text(downloadLog)
-        ],
-      ),
-    );
+                                  // Set DB Path and open the Database
+                                  setPath(path);
+                                  setState(() {
+                                    downloadLog = "";
+                                  });
+                                  await widget.setDb(path);
+                                } catch (e) {
+                                  setState(() => downloadLog = "Error ${e.toString()}");
+                                }
+                              });
+                            },
+                            child: const Text('Download'),
+                          ),
+                          ElevatedButton(
+                            onPressed: () => _pickFiles().then((result) async {
+                              if (result != null) {
+                                String path = result.first.path!;
+                                setPath(path);
+                                await widget.setDb(path);
+                              }
+                            }),
+                            child: const Text('Pick file'),
+                          )
+                        ],
+                      ),
+                      Text(downloadLog)
+                    ],
+                  ),
+                );
+              }
+          }
+        });
+
+
   }
 
   Future<List<PlatformFile>?> _pickFiles() async {
