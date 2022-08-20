@@ -102,7 +102,7 @@ class RadicalPageState extends State<RadicalPage> {
           style: TextStyle(
             fontSize: 40,
             color: widget.selectedRadicals.contains(radical.character)
-                ? Theme.of(context).colorScheme.primary
+                ? Colors.red
                 : null,
           )));
 }
