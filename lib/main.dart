@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:japanese_dictionary/cubits/search_cubit.dart';
 
+import 'cubits/theme_cubit.dart';
 import 'widgets/main_widget.dart';
 
 void main() async {
@@ -14,14 +15,14 @@ class App extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: "Japanese Dictionary",
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSwatch().copyWith(
-          secondary: Colors.black,
-        ),
-      ),
-      home: BlocProvider(create: (_) => SearchCubit(), child: MainWidget()),
-    );
+    return BlocProvider(
+        create: (_) => ThemeCubit(),
+        child: BlocBuilder<ThemeCubit, ThemeData>(
+          builder: (context, themeData) => MaterialApp(
+            title: "Japanese Dictionary",
+            theme: themeData,
+            home: BlocProvider(create: (_) => SearchCubit(), child: MainWidget()),
+          ),
+        ));
   }
 }

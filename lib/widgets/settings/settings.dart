@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:japanese_dictionary/widgets/database_settings_widget.dart';
+import 'package:japanese_dictionary/widgets/settings/theme_settings.dart';
 import 'package:package_info_plus/package_info_plus.dart';
+
+import 'DatasetPage.dart';
 
 class SettingsPage extends StatelessWidget {
   final Future<void> Function(String) setExpressionDb;
@@ -24,6 +26,15 @@ class SettingsPage extends StatelessWidget {
                             DatasetPage(setExpressionDb: setExpressionDb, setKanjiDb: setKanjiDb)),
                   )),
           ListTile(
+              leading: const Icon(Icons.palette),
+              title: const Text("Brightness"),
+              onTap: () => Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) =>
+                            const ThemeSettings()),
+                  )),
+          ListTile(
               leading: const Icon(Icons.info),
               title: const Text("About"),
               onTap: () => {
@@ -44,28 +55,4 @@ under the Creative Commons Attribution-ShareAlike Licence (V3.0)''');
   }
 }
 
-class DatasetPage extends StatefulWidget {
-  final Future<void> Function(String) setExpressionDb;
-  final Future<void> Function(String) setKanjiDb;
 
-  const DatasetPage({Key? key, required this.setExpressionDb, required this.setKanjiDb})
-      : super(key: key);
-
-  @override
-  State<DatasetPage> createState() => _DatasetPageState();
-}
-
-class _DatasetPageState extends State<DatasetPage> {
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-        appBar: AppBar(title: const Text('Databases')),
-        body: ListView(
-          children: [
-            DatabaseSettingsWidget(
-                type: "expression", setDb: widget.setExpressionDb),
-            DatabaseSettingsWidget(type: "kanji", setDb: widget.setKanjiDb)
-          ],
-        ));
-  }
-}

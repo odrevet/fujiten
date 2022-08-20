@@ -5,7 +5,7 @@ import 'package:japanese_dictionary/widgets/toggle_search_type_button.dart';
 import '../models/search.dart';
 import '../string_utils.dart';
 import 'radical_page.dart';
-import 'settings.dart';
+import 'settings/settings.dart';
 
 class MenuBar extends StatefulWidget {
   final DatabaseInterfaceKanji databaseInterfaceKanji;
