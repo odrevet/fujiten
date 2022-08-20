@@ -1,8 +1,11 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 
 import '../models/kanji.dart';
 import '../services/database_interface_kanji.dart';
 import '../string_utils.dart';
+import 'convert_button.dart';
 
 class RadicalPage extends StatefulWidget {
   final DatabaseInterfaceKanji databaseInterfaceKanji;
@@ -19,6 +22,7 @@ class RadicalPageState extends State<RadicalPage> {
   Future<List<Kanji>>? _radicals;
   List<String?> _validRadicals = [];
   String filter = "";
+  final TextEditingController filterController = TextEditingController();
 
   @override
   void initState() {
@@ -30,6 +34,21 @@ class RadicalPageState extends State<RadicalPage> {
           .then((validRadicals) => setState(() => _validRadicals = validRadicals));
     }
     super.initState();
+  }
+
+  convert() async {
+    String input = filterController.text;
+    if (kanaKit.isRomaji(input)) {
+      filterController.text = kanaKit.toKana(input);
+      setState(() {
+        filter = filterController.text;
+      });
+    } else {
+      filterController.text = kanaKit.toRomaji(input);
+      setState(() {
+        filter = filterController.text;
+      });
+    }
   }
 
   @override
@@ -50,11 +69,25 @@ class RadicalPageState extends State<RadicalPage> {
             body: snapshot.hasData
                 ? Column(
                     children: [
-                      TextField(
-                        decoration: const InputDecoration(hintText: 'Filter by meaning'),
-                        onChanged: (value) => setState(() {
-                          filter = value;
-                        }),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: TextField(
+                              controller: filterController,
+                              decoration: const InputDecoration(
+                                  hintText: 'Filter by meaning, on yomi, kun yomi'),
+                              onChanged: (value) => setState(() {
+                                filter = value;
+                              }),
+                            ),
+                          ),
+                          IconButton(
+                              icon: const Icon(Icons.clear),
+                              onPressed: () {filterController.text = ""; setState(() {
+                                filter = "";
+                              });}),
+                          ConvertButton(onPressed: convert)
+                        ],
                       ),
                       Expanded(child: radicalGridView(snapshot.data!)),
                     ],

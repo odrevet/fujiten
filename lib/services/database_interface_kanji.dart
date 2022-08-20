@@ -107,8 +107,7 @@ class DatabaseInterfaceKanji extends DatabaseInterface {
   }
 
   Future<List<Kanji>> getRadicals() async {
-    final List<Map<String, dynamic>> radicalMaps =
-        await database!.rawQuery('''SELECT radical.id, 
+    final List<Map<String, dynamic>> radicalMaps = await database!.rawQuery('''SELECT radical.id, 
                                     radical.stroke_count,
                                     GROUP_CONCAT(DISTINCT on_yomi.reading) AS on_reading,
                                     GROUP_CONCAT(DISTINCT kun_yomi.reading) AS kun_reading,

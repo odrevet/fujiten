@@ -4,6 +4,7 @@ import 'package:japanese_dictionary/widgets/toggle_search_type_button.dart';
 
 import '../models/search.dart';
 import '../string_utils.dart';
+import 'convert_button.dart';
 import 'radical_page.dart';
 import 'settings/settings.dart';
 
@@ -144,24 +145,5 @@ class _MenuBarState extends State<MenuBar> {
         }
       }
     });
-  }
-}
-
-class ConvertButton extends StatefulWidget {
-  final Function? onPressed;
-
-  const ConvertButton({this.onPressed, Key? key}) : super(key: key);
-
-  @override
-  State<ConvertButton> createState() => _ConvertButtonState();
-}
-
-class _ConvertButtonState extends State<ConvertButton> {
-  @override
-  Widget build(BuildContext context) {
-    return SizedBox(
-        width: 70,
-        child: IconButton(
-            icon: const Icon(Icons.translate), onPressed: widget.onPressed as void Function()?));
   }
 }

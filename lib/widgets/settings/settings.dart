@@ -30,9 +30,7 @@ class SettingsPage extends StatelessWidget {
               title: const Text("Brightness"),
               onTap: () => Navigator.push(
                     context,
-                    MaterialPageRoute(
-                        builder: (context) =>
-                            const ThemeSettings()),
+                    MaterialPageRoute(builder: (context) => const ThemeSettings()),
                   )),
           ListTile(
               leading: const Icon(Icons.info),
@@ -54,5 +52,3 @@ under the Creative Commons Attribution-ShareAlike Licence (V3.0)''');
         ]));
   }
 }
-
-

@@ -25,12 +25,8 @@ class ThemeSettings extends StatelessWidget {
       appBar: AppBar(title: const Text('Brightness')),
       body: BlocBuilder<ThemeCubit, ThemeData>(
         builder: (context, themeData) => ListView(children: [
-          ThemeTile(
-              title: "Light",
-              themeData: ThemeData(brightness: Brightness.light)),
-          ThemeTile(
-              title: "Dark",
-              themeData: ThemeData(brightness: Brightness.dark)),
+          ThemeTile(title: "Light", themeData: ThemeData(brightness: Brightness.light)),
+          ThemeTile(title: "Dark", themeData: ThemeData(brightness: Brightness.dark)),
         ]),
       ),
     );

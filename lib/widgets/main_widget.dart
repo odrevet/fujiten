@@ -7,6 +7,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../services/database_interface_expression.dart';
 import '../services/database_interface_kanji.dart';
 import '../string_utils.dart';
+import 'convert_button.dart';
 import 'menu_bar.dart';
 import 'results_widget.dart';
 import 'search_input.dart';
@@ -61,7 +62,7 @@ class _MainWidgetState extends State<MainWidget> {
     super.dispose();
   }
 
-  convert() async {
+  convert() {
     String input = widget._textEditingController.text;
     if (kanaKit.isRomaji(input)) {
       widget._textEditingController.text = kanaKit.toKana(input);
