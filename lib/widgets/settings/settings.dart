@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:japanese_dictionary/widgets/settings/theme_settings.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 
-import 'DatasetPage.dart';
+import 'dataset_page.dart';
 
 class SettingsPage extends StatelessWidget {
   final Future<void> Function(String) setExpressionDb;

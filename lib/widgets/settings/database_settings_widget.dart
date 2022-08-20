@@ -51,11 +51,11 @@ class _DatabaseSettingsWidgetState extends State<DatabaseSettingsWidget> {
             content: const Text('Exit will cancel the download'),
             actions: <Widget>[
               TextButton(
-                onPressed: () => Navigator.of(context).pop(false), //<-- SEE HERE
+                onPressed: () => Navigator.of(context).pop(false),
                 child: const Text('No'),
               ),
               TextButton(
-                onPressed: () => Navigator.of(context).pop(true), // <-- SEE HERE
+                onPressed: () => Navigator.of(context).pop(true),
                 child: const Text('Yes'),
               ),
             ],
