@@ -41,7 +41,7 @@ class RadicalPageState extends State<RadicalPage> {
 
         return Scaffold(
             appBar: AppBar(
-                title: const Text('Radicals'),
+                title: Text(widget.selectedRadicals.toString()),
                 leading: IconButton(
                     icon: const Icon(Icons.arrow_back),
                     onPressed: () => Navigator.pop(context, widget.selectedRadicals))),
