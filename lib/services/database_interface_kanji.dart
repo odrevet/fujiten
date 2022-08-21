@@ -10,7 +10,11 @@ class DatabaseInterfaceKanji extends DatabaseInterface {
   Future<List<KanjiEntry>> search(String input, [resultsPerPage = 10, currentPage = 0]) async {
     String where;
 
-    if (kanaKit.isHiragana(input)) {
+    Iterable<RegExpMatch> matchesKanji = RegExp(regexKanji).allMatches(input);
+
+    if (matchesKanji.isNotEmpty) {
+      where = "WHERE character.id IN (${matchesKanji.map((m) => "'${m.group(0)}'").join(',')})";
+    } else if (kanaKit.isHiragana(input)) {
       where = '''WHERE character.id IN (SELECT character.id
         FROM character 
         INNER JOIN kun_yomi ON kun_yomi.id_character = character.id 
