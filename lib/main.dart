@@ -19,7 +19,7 @@ class App extends StatelessWidget {
         create: (_) => ThemeCubit(),
         child: BlocBuilder<ThemeCubit, ThemeData>(
           builder: (context, themeData) => MaterialApp(
-            title: "Japanese Dictionary",
+            title: "fujiten",
             theme: themeData,
             home: BlocProvider(create: (_) => SearchCubit(), child: MainWidget()),
           ),

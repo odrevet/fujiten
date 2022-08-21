@@ -191,7 +191,7 @@ class _ResultsWidgetState extends State<ResultsWidget> {
           child = Text("No results for '${search.input}'");
         } else {
           if (search.input.isEmpty) {
-            child = const Text("Welcome to Japanese Dictionary Flutter");
+            child = const Text("Welcome to fujiten");
           } else {
             child = ListView.separated(
                 separatorBuilder: (context, index) {
