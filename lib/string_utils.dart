@@ -1,4 +1,4 @@
-import 'package:japanese_dictionary/services/database_interface_kanji.dart';
+import 'package:fujiten/services/database_interface_kanji.dart';
 import 'package:kana_kit/kana_kit.dart';
 
 const kanaKit = KanaKit();

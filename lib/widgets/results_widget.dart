@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:japanese_dictionary/cubits/search_cubit.dart';
-import 'package:japanese_dictionary/services/database_interface_kanji.dart';
+import 'package:fujiten/cubits/search_cubit.dart';
+import 'package:fujiten/services/database_interface_kanji.dart';
 
 import '../models/entry.dart';
 import '../models/kanji.dart';

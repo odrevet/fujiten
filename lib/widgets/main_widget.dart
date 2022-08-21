@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:japanese_dictionary/cubits/search_cubit.dart';
-import 'package:japanese_dictionary/models/search.dart';
+import 'package:fujiten/cubits/search_cubit.dart';
+import 'package:fujiten/models/search.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../services/database_interface_expression.dart';

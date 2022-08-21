@@ -1,5 +1,5 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:japanese_dictionary/services/database_interface.dart';
+import 'package:fujiten/services/database_interface.dart';
 
 import '../models/search.dart';
 

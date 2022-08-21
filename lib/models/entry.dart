@@ -1,5 +1,5 @@
-import 'package:japanese_dictionary/models/kanji.dart';
-import 'package:japanese_dictionary/models/sense.dart';
+import 'package:fujiten/models/kanji.dart';
+import 'package:fujiten/models/sense.dart';
 
 abstract class Entry {}
 

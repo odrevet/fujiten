@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:japanese_dictionary/services/database_interface_kanji.dart';
-import 'package:japanese_dictionary/widgets/toggle_search_type_button.dart';
+import 'package:fujiten/services/database_interface_kanji.dart';
+import 'package:fujiten/widgets/toggle_search_type_button.dart';
 
 import '../models/search.dart';
 import '../string_utils.dart';

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:japanese_dictionary/widgets/settings/database_settings_widget.dart';
+import 'package:fujiten/widgets/settings/database_settings_widget.dart';
 
 class DatasetPage extends StatelessWidget {
   final Future<void> Function(String) setExpressionDb;
