@@ -146,33 +146,29 @@ class RadicalPageState extends State<RadicalPage> {
     );
   }
 
-  Widget radicalListView(List<Kanji> radicals) => ListView.separated(
-        itemCount: radicals.length,
-        separatorBuilder: (BuildContext context, int index) => const Divider(),
-        itemBuilder: (BuildContext context, int index) {
-          var radical = radicals[index];
-          bool selectable = _validRadicals.isEmpty || _validRadicals.contains(radical.literal);
-          bool selected = widget.selectedRadicals.contains(radical.literal);
+  Widget radicalListView(List<Kanji> radicals) {
+    // remove not selectable radicals
+    radicals = radicals
+        .where((radical) => _validRadicals.isEmpty || _validRadicals.contains(radical.literal))
+        .toList();
 
-          var kanjiListTile = KanjiListTile(
-            kanji: radicals[index],
-            onTap: () => onRadicalButtonPress(radical.literal),
-            selected: selected,
-          );
+    return ListView.separated(
+      itemCount: radicals.length,
+      separatorBuilder: (BuildContext context, int index) => const Divider(),
+      itemBuilder: (BuildContext context, int index) {
+        var radical = radicals[index];
+        bool selected = widget.selectedRadicals.contains(radical.literal);
 
-          if (!selectable) {
-            return ColorFiltered(
-              colorFilter: const ColorFilter.mode(
-                Colors.grey,
-                BlendMode.saturation,
-              ),
-              child: kanjiListTile,
-            );
-          }
+        var kanjiListTile = KanjiListTile(
+          kanji: radicals[index],
+          onTap: () => onRadicalButtonPress(radical.literal),
+          selected: selected,
+        );
 
-          return kanjiListTile;
-        },
-      );
+        return kanjiListTile;
+      },
+    );
+  }
 
   Widget radicalGridView(List<Kanji> radicals) => GridView.builder(
       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 5),
