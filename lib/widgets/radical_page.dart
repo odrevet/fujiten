@@ -128,7 +128,13 @@ class RadicalPageState extends State<RadicalPage> {
                     onPressed: () => Navigator.pop(context, widget.selectedRadicals)),
                 actions: <Widget>[
                   IconButton(
-                      icon: const Icon(Icons.list_rounded),
+                      icon: const Icon(Icons.clear),
+                      tooltip: 'Clear selection',
+                      onPressed: ()  {setState(() => widget.selectedRadicals.clear()); updateSelection();}),
+                  IconButton(
+                      icon: listViewDisplay
+                          ? const Icon(Icons.list_rounded)
+                          : const Icon(Icons.grid_4x4_sharp),
                       tooltip: 'Toggle view',
                       onPressed: () => setState(() => listViewDisplay = !listViewDisplay)),
                 ]),
@@ -137,11 +143,11 @@ class RadicalPageState extends State<RadicalPage> {
     );
   }
 
-  Widget radicalListView(List<Kanji> radicals) => ListView.builder(
+  Widget radicalListView(List<Kanji> radicals) => ListView.separated(
         itemCount: radicals.length,
-        itemBuilder: (context, index) {
-          return KanjiListTile(
-              kanji: radicals[index], onTap: onRadicalButtonPress);
+        separatorBuilder: (BuildContext context, int index) => const Divider(),
+        itemBuilder: (BuildContext context, int index) {
+          return KanjiListTile(kanji: radicals[index], onTap: onRadicalButtonPress);
         },
       );
 
@@ -169,6 +175,10 @@ class RadicalPageState extends State<RadicalPage> {
         }
       });
 
+  updateSelection() => widget.databaseInterfaceKanji
+      .getRadicalsForSelection(widget.selectedRadicals)
+      .then((validRadicals) => setState(() => _validRadicals = validRadicals));
+
   onRadicalButtonPress(String character) {
     setState(() {
       widget.selectedRadicals.contains(character)
@@ -176,9 +186,7 @@ class RadicalPageState extends State<RadicalPage> {
           : widget.selectedRadicals.add(character);
     });
 
-    widget.databaseInterfaceKanji
-        .getRadicalsForSelection(widget.selectedRadicals)
-        .then((validRadicals) => setState(() => _validRadicals = validRadicals));
+    updateSelection();
   }
 
   Widget radicalButton(Kanji radical) => TextButton(
