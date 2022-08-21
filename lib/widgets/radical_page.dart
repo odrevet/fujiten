@@ -1,11 +1,10 @@
-import 'dart:developer';
-
 import 'package:flutter/material.dart';
 
 import '../models/kanji.dart';
 import '../services/database_interface_kanji.dart';
 import '../string_utils.dart';
 import 'convert_button.dart';
+import 'kanjiListTile.dart';
 
 class RadicalPage extends StatefulWidget {
   final DatabaseInterfaceKanji databaseInterfaceKanji;
@@ -23,6 +22,7 @@ class RadicalPageState extends State<RadicalPage> {
   List<String?> _validRadicals = [];
   String filter = "";
   final TextEditingController filterController = TextEditingController();
+  bool listViewDisplay = false;
 
   @override
   void initState() {
@@ -60,88 +60,114 @@ class RadicalPageState extends State<RadicalPage> {
           return Center(child: Text(snapshot.error.toString()));
         }
 
+        Widget body;
+
+        if (snapshot.hasData) {
+          var radicals = snapshot.data!;
+
+          if (filter.isNotEmpty) {
+            if (kanaKit.isRomaji(filter)) {
+              radicals = radicals
+                  .where((radical) => radical.meanings == null
+                      ? false
+                      : radical.meanings!.any((meaning) => meaning.contains(filter)))
+                  .toList();
+            } else if (kanaKit.isHiragana(filter)) {
+              radicals = radicals
+                  .where((radical) =>
+                      radical.kun == null ? false : radical.kun!.any((kun) => kun.contains(filter)))
+                  .toList();
+            } else if (kanaKit.isKatakana(filter)) {
+              radicals = radicals
+                  .where((radical) =>
+                      radical.on == null ? false : radical.on!.any((on) => on.contains(filter)))
+                  .toList();
+            }
+          }
+
+          body = Column(
+            children: [
+              Row(
+                children: [
+                  Expanded(
+                    child: TextField(
+                      controller: filterController,
+                      decoration:
+                          const InputDecoration(hintText: 'Filter by meaning, on yomi, kun yomi'),
+                      onChanged: (value) => setState(() {
+                        filter = value;
+                      }),
+                    ),
+                  ),
+                  IconButton(
+                      icon: const Icon(Icons.clear),
+                      onPressed: () {
+                        filterController.text = "";
+                        setState(() {
+                          filter = "";
+                        });
+                      }),
+                  ConvertButton(onPressed: convert)
+                ],
+              ),
+              Expanded(
+                  child: listViewDisplay == true
+                      ? radicalListView(radicals)
+                      : radicalGridView(radicals)),
+            ],
+          );
+        } else {
+          body = const Center(child: CircularProgressIndicator());
+        }
+
         return Scaffold(
             appBar: AppBar(
                 title: Text(widget.selectedRadicals.toString()),
                 leading: IconButton(
                     icon: const Icon(Icons.arrow_back),
-                    onPressed: () => Navigator.pop(context, widget.selectedRadicals))),
-            body: snapshot.hasData
-                ? Column(
-                    children: [
-                      Row(
-                        children: [
-                          Expanded(
-                            child: TextField(
-                              controller: filterController,
-                              decoration: const InputDecoration(
-                                  hintText: 'Filter by meaning, on yomi, kun yomi'),
-                              onChanged: (value) => setState(() {
-                                filter = value;
-                              }),
-                            ),
-                          ),
-                          IconButton(
-                              icon: const Icon(Icons.clear),
-                              onPressed: () {filterController.text = ""; setState(() {
-                                filter = "";
-                              });}),
-                          ConvertButton(onPressed: convert)
-                        ],
-                      ),
-                      Expanded(child: radicalGridView(snapshot.data!)),
-                    ],
-                  )
-                : const Center(child: CircularProgressIndicator()));
+                    onPressed: () => Navigator.pop(context, widget.selectedRadicals)),
+                actions: <Widget>[
+                  IconButton(
+                      icon: const Icon(Icons.list_rounded),
+                      tooltip: 'Toggle view',
+                      onPressed: () => setState(() => listViewDisplay = !listViewDisplay)),
+                ]),
+            body: body);
       },
     );
   }
 
-  Widget radicalGridView(List<Kanji> radicals) {
-    if (filter.isNotEmpty) {
-      if (kanaKit.isRomaji(filter)) {
-        radicals = radicals
-            .where((radical) => radical.meanings == null
-                ? false
-                : radical.meanings!.any((meaning) => meaning.contains(filter)))
-            .toList();
-      } else if (kanaKit.isHiragana(filter)) {
-        radicals = radicals
-            .where((radical) =>
-                radical.kun == null ? false : radical.kun!.any((kun) => kun.contains(filter)))
-            .toList();
-      } else if (kanaKit.isKatakana(filter)) {
-        radicals = radicals
-            .where((radical) =>
-                radical.on == null ? false : radical.on!.any((on) => on.contains(filter)))
-            .toList();
-      }
-    }
-
-    return GridView.builder(
-        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 5),
+  Widget radicalListView(List<Kanji> radicals) => ListView.builder(
         itemCount: radicals.length,
-        itemBuilder: (BuildContext context, int index) {
-          if (index == 0 || radicals[index].strokeCount != radicals[index - 1].strokeCount) {
-            return Stack(
-              children: <Widget>[
-                Positioned.fill(
-                  child: radicalButton(radicals[index]),
-                ),
-                Stack(children: [
-                  Icon(Icons.bookmark,
-                      color: Theme.of(context).brightness == Brightness.light
-                          ? Colors.white
-                          : Colors.black),
-                  Positioned(top: 3, left: 5, child: Text(radicals[index].strokeCount.toString()))
-                ]),
-              ],
-            );
-          } else {
-            return radicalButton(radicals[index]);
-          }
-        });
-  }
+        itemBuilder: (context, index) {
+          return KanjiListTile(
+              kanji: radicals[index], onTap: onRadicalButtonPress);
+        },
+      );
+
+  Widget radicalGridView(List<Kanji> radicals) => GridView.builder(
+      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 5),
+      itemCount: radicals.length,
+      itemBuilder: (BuildContext context, int index) {
+        if (index == 0 || radicals[index].strokeCount != radicals[index - 1].strokeCount) {
+          return Stack(
+            children: <Widget>[
+              Positioned.fill(
+                child: radicalButton(radicals[index]),
+              ),
+              Stack(children: [
+                Icon(Icons.bookmark,
+                    color: Theme.of(context).brightness == Brightness.light
+                        ? Colors.white
+                        : Colors.black),
+                Positioned(top: 3, left: 5, child: Text(radicals[index].strokeCount.toString()))
+              ]),
+            ],
+          );
+        } else {
+          return radicalButton(radicals[index]);
+        }
+      });
 
   onRadicalButtonPress(String character) {
     setState(() {

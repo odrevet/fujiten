@@ -9,7 +9,7 @@ import '../models/kanji.dart';
 import '../models/search.dart';
 import '../models/sense.dart';
 import '../string_utils.dart' show kanaKit;
-import 'kanji_widget.dart';
+import 'kanjiListTile.dart';
 
 class ResultsWidget extends StatefulWidget {
   final DatabaseInterfaceKanji databaseInterfaceKanji;
@@ -57,7 +57,9 @@ class _ResultsWidgetState extends State<ResultsWidget> {
   }
 
   Widget _buildResultKanji(result) {
-    return KanjiWidget(result.kanji);
+    return KanjiListTile(
+        kanji: result.kanji,
+        onTap: () => Clipboard.setData(ClipboardData(text: result.kanji.literal)));
   }
 
   Widget _buildResultExpression(searchResult) {
@@ -151,8 +153,9 @@ class _ResultsWidgetState extends State<ResultsWidget> {
                     },
                     itemCount: snapshot.data!.length,
                     itemBuilder: (BuildContext context, int index) {
-                      return KanjiWidget(snapshot.data!
-                          .firstWhere((kanji) => kanji.literal == kanjiReading[index]));
+                      return KanjiListTile(
+                          kanji: snapshot.data!
+                              .firstWhere((kanji) => kanji.literal == kanjiReading[index]));
                     });
               }
             } else if (snapshot.hasError) {
