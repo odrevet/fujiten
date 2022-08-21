@@ -4,7 +4,7 @@ import '../models/kanji.dart';
 import '../services/database_interface_kanji.dart';
 import '../string_utils.dart';
 import 'convert_button.dart';
-import 'kanjiListTile.dart';
+import 'kanji_list_tile.dart';
 
 class RadicalPage extends StatefulWidget {
   final DatabaseInterfaceKanji databaseInterfaceKanji;
@@ -130,7 +130,10 @@ class RadicalPageState extends State<RadicalPage> {
                   IconButton(
                       icon: const Icon(Icons.clear),
                       tooltip: 'Clear selection',
-                      onPressed: ()  {setState(() => widget.selectedRadicals.clear()); updateSelection();}),
+                      onPressed: () {
+                        setState(() => widget.selectedRadicals.clear());
+                        updateSelection();
+                      }),
                   IconButton(
                       icon: listViewDisplay
                           ? const Icon(Icons.list_rounded)

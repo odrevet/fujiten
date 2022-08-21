@@ -4,6 +4,7 @@ import 'package:fujiten/cubits/search_cubit.dart';
 import 'package:fujiten/models/search.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../cubits/theme_cubit.dart';
 import '../services/database_interface_expression.dart';
 import '../services/database_interface_kanji.dart';
 import '../string_utils.dart';
@@ -37,6 +38,12 @@ class _MainWidgetState extends State<MainWidget> {
     super.initState();
     databaseInterfaceExpression = DatabaseInterfaceExpression();
     databaseInterfaceKanji = DatabaseInterfaceKanji();
+    _prefs.then((SharedPreferences prefs) async {
+      bool? isLight = prefs.getBool("darkTheme");
+      if (isLight == true) {
+        context.read<ThemeCubit>().updateTheme(ThemeData(brightness: Brightness.dark));
+      }
+    });
   }
 
   initDb() async {

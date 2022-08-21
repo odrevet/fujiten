@@ -9,7 +9,7 @@ import '../models/kanji.dart';
 import '../models/search.dart';
 import '../models/sense.dart';
 import '../string_utils.dart' show kanaKit;
-import 'kanjiListTile.dart';
+import 'kanji_list_tile.dart';
 
 class ResultsWidget extends StatefulWidget {
   final DatabaseInterfaceKanji databaseInterfaceKanji;
