@@ -140,7 +140,7 @@ class DatabaseInterfaceKanji extends DatabaseInterface {
   Future<List<String?>> getRadicalsForSelection(selectedRadicals) async {
     String sql = 'SELECT DISTINCT id_radical FROM character_radical WHERE id_character IN (';
     selectedRadicals.asMap().forEach((i, radical) {
-      sql += 'SELECT DISTINCT id_character FROM character_radical WHERE id_radical = "$radical"';
+      sql += "SELECT DISTINCT id_character FROM character_radical WHERE id_radical = '$radical'";
       if (i < selectedRadicals.length - 1) sql += ' INTERSECT ';
     });
     sql += ')';
