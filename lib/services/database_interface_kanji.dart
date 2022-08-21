@@ -23,7 +23,7 @@ class DatabaseInterfaceKanji extends DatabaseInterface {
     } else if (kanaKit.isKatakana(input)) {
       where = '''WHERE character.id IN (SELECT character.id
         FROM character 
-        INNER JOIN on_yomi ON on_yomi.id_kanji = character.id 
+        INNER JOIN on_yomi ON on_yomi.id_character = character.id 
         WHERE on_yomi.reading = "$input"
         GROUP BY character.id)''';
     } else if (kanaKit.isRomaji(input)) {
