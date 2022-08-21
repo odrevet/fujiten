@@ -1,14 +1,13 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 
 import '../models/kanji.dart';
 import 'kanji_widget.dart';
 
-class KanjiListTile extends StatelessWidget {
+class KanjiListTile extends ListTile {
   final Kanji kanji;
-  final Function? onTap;
 
-  const KanjiListTile({required this.kanji, this.onTap, Key? key}) : super(key: key);
+  const KanjiListTile({required this.kanji, required onTap, required selected, Key? key})
+      : super(key: key, onTap: onTap, selected: selected);
 
   @override
   Widget build(BuildContext context) {
@@ -22,15 +21,11 @@ class KanjiListTile extends StatelessWidget {
     return ListTile(
         leading: KanjiCharacterWidget(
             kanji: kanji,
-            style: const TextStyle(fontSize: 40.0)),
-        onTap: () => onTap != null ? onTap!(kanji.literal) : null,
+            style: TextStyle(fontSize: 40.0, color: selected == true ? Colors.red : null)),
+        onTap: onTap,
         title: Table(children: <TableRow>[
           TableRow(children: <Widget>[Text(stroke)]),
-          TableRow(children: <Widget>[
-            InkWell(
-                child: Text(radicals),
-                /*onTap: () => Clipboard.setData(ClipboardData(text: radicals))*/)
-          ]),
+          TableRow(children: <Widget>[InkWell(child: Text(radicals))]),
           TableRow(children: <Widget>[Text(on)]),
           TableRow(children: <Widget>[Text(kun)]),
           TableRow(children: <Widget>[Text(meaning)])

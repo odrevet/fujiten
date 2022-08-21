@@ -150,7 +150,27 @@ class RadicalPageState extends State<RadicalPage> {
         itemCount: radicals.length,
         separatorBuilder: (BuildContext context, int index) => const Divider(),
         itemBuilder: (BuildContext context, int index) {
-          return KanjiListTile(kanji: radicals[index], onTap: onRadicalButtonPress);
+          var radical = radicals[index];
+          bool selectable = _validRadicals.isEmpty || _validRadicals.contains(radical.literal);
+          bool selected = widget.selectedRadicals.contains(radical.literal);
+
+          var kanjiListTile = KanjiListTile(
+            kanji: radicals[index],
+            onTap: () => onRadicalButtonPress(radical.literal),
+            selected: selected,
+          );
+
+          if (!selectable) {
+            return ColorFiltered(
+              colorFilter: const ColorFilter.mode(
+                Colors.grey,
+                BlendMode.saturation,
+              ),
+              child: kanjiListTile,
+            );
+          }
+
+          return kanjiListTile;
         },
       );
 
