@@ -38,7 +38,7 @@ class DatabaseInterfaceExpression extends DatabaseInterface {
                   (SELECT GROUP_CONCAT(reb) FROM r_ele WHERE r_ele.id_entry = entry.id AND r_ele.id NOT IN (SELECT DISTINCT id_r_ele FROM k_ele WHERE k_ele.id_entry = entry.id)) reb_group,
                   (SELECT GROUP_CONCAT(keb || ':' || (SELECT reb FROM r_ele WHERE r_ele.id_entry = entry.id AND id = k_ele.id_r_ele), ',') FROM k_ele WHERE k_ele.id_entry = entry.id) keb_reb_group,
                   GROUP_CONCAT(DISTINCT gloss.content) gloss_group,
-                  GROUP_CONCAT(DISTINCT pos.name) pos_group,
+                  GROUP_CONCAT(DISTINCT pos.description) pos_group,
                   GROUP_CONCAT(DISTINCT dial.name) dial_group,
                   GROUP_CONCAT(DISTINCT field.name) field_group,
                   GROUP_CONCAT(DISTINCT misc.name) misc_group
