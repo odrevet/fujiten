@@ -1,11 +1,11 @@
-Fujiten is a japanese dictionary application made with the flutter framework.
+Fujiten is a Japanese dictionary application made with the flutter framework.
 
 Definition and kanji comes from the EDICT dictionary, compiled as a database from the edict_database project.
 
 
 # Setup
 
-In order to fukiten to work, the Expression Datase and the Kanji Database are needed.
+In order to fujiten to work, the Expression Database and the Kanji Database are needed.
 
 The databases can be downloaded and installed from fujiten via the "settings/databases menu or by downloading the database manually from https://github.com/odrevet/edict_database
 
@@ -15,7 +15,7 @@ The databases can be downloaded and installed from fujiten via the "settings/dat
 
 Access the settings menu.
 
-The settings menu allow you to download the dictionaries, set brightness and read legal informations.
+The settings menu allow you to download the dictionaries, set brightness and read legal information.
 
 ## Insert
 
@@ -37,9 +37,9 @@ Any match
 
 ## Convert
 
-In case your device is not equiped with a japanese input keyboard, fujiten can convert latin character (romaji) to hiragana or katakana.
+In case your device is not equipped with a Japanese input keyboard, fujiten can convert Latin character (romaji) to hiragana or katakana.
 
-Lowercase romaji will be converted to hiragana, upercase romaji will be converted to katakana.
+Lowercase romaji will be converted to hiragana, uppercase romaji will be converted to katakana.
 
 
 # Kotoba / Kanji search
@@ -58,8 +58,8 @@ Run the search.
 
 # Tips
 
-* Search are performed with regular expression, quantifiers "{}" and metacharacters like "." and others can be use
+* Search are performed with regular expression, quantifiers "{}" and meta-characters like "." and others can be use
 
-* Use search by radical < > when searching for an expression which you do not know a kanji but reconize some of it's radical example: ＜化＞
+* Use search by radical < > when searching for an expression which you do not know a kanji but recognize some of it's radical example: ＜化＞
 
 * When no results, add ".*" at the beginning or the end of your search
