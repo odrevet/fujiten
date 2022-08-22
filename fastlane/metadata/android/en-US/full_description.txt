@@ -1,1 +1,1 @@
-TODO
+Fujiten is a Japanese dictionary made with flutter
