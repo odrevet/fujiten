@@ -1,1 +1,14 @@
-Fujiten is a Japanese dictionary made with flutter
+<p>Fujiten is a japanese dictionary application made with the flutter framework.</p>
+<p>Definition and kanji comes from the EDICT dictionary, compiled as a database from the edict_database project.</p>
+<h1 id="setup">Setup</h1>
+<p>In order to fukiten to work, the Expression Datase and the Kanji Database are needed.</p>
+<p>The databases can be downloaded and installed from fujiten via the &quot;settings/databases menu or by downloading the database manually from <a href="https://github.com/odrevet/edict_database">https://github.com/odrevet/edict_database</a></p>
+<br/>
+<ul>
+<li><p>Search are performed with regular expression, quantifiers &quot;{}&quot; and metacharacters like &quot;.&quot; and others can be use</p>
+</li>
+<li><p>Use search by radical &lt; &gt; when searching for an expression which you do not know a kanji but reconize some of it&#39;s radical example: ＜化＞</p>
+</li>
+<li><p>When no results, add &quot;.*&quot; at the beginning or the end of your search</p>
+</li>
+</ul>
