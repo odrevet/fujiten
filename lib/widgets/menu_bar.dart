@@ -72,7 +72,7 @@ class _MenuBarState extends State<MenuBar> {
         const PopupMenuItem(value: 0, child: Text('<> Radicals')),
         const PopupMenuItem(value: 1, child: Text('$charKanji Kanji')),
         const PopupMenuItem(value: 2, child: Text('$charKana Kana')),
-        const PopupMenuItem(value: 3, child: Text('Joker .*')),
+        const PopupMenuItem(value: 3, child: Text('.* Joker')),
       ],
     );
 
