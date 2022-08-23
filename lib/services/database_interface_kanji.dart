@@ -30,10 +30,10 @@ class DatabaseInterfaceKanji extends DatabaseInterface {
       where = '''WHERE character.id IN (SELECT character.id
         FROM character 
         LEFT JOIN meaning ON meaning.id_character = character.id
-        WHERE meaning.content REGEXP "$input"
+        WHERE meaning.content LIKE "$input"
         GROUP BY character.id)''';
     } else {
-      where = 'WHERE character.id REGEXP "$input"';
+      where = 'WHERE character.id LIKE "$input"';
     }
 
     String sql = '''SELECT character.*,

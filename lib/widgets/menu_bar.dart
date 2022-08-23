@@ -55,24 +55,16 @@ class _MenuBarState extends State<MenuBar> {
       onSelected: (dynamic result) {
         switch (result) {
           case 0:
-            displayRadicalWidget(context);
+            addStringInController('-');
             break;
           case 1:
-            addStringInController(charKanji);
-            break;
-          case 2:
-            addStringInController(charKana);
-            break;
-          case 3:
-            addStringInController('.*');
+            addStringInController('%');
             break;
         }
       },
       itemBuilder: (context) => [
-        const PopupMenuItem(value: 0, child: Text('<> Radicals')),
-        const PopupMenuItem(value: 1, child: Text('$charKanji Kanji')),
-        const PopupMenuItem(value: 2, child: Text('$charKana Kana')),
-        const PopupMenuItem(value: 3, child: Text('.* Joker')),
+        const PopupMenuItem(value: 0, child: Text('- Any character')),
+        const PopupMenuItem(value: 1, child: Text('% Joker')),
       ],
     );
 

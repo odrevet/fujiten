@@ -28,7 +28,7 @@ class DatabaseInterfaceExpression extends DatabaseInterface {
       var regExp = RegExp(regexKanji);
       var hasKanji = regExp.hasMatch(input);
 
-      where = "WHERE (keb REGEXP '$input' ${hasKanji ? "" : "OR reb REGEXP '$input'"})";
+      where = "WHERE (keb LIKE '$input' ${hasKanji ? "" : "OR reb LIKE '$input'"})";
       joins += '''\nJOIN r_ele on entry.id = r_ele.id_entry
                 LEFT JOIN k_ele on entry.id = k_ele.id_entry''';
     }
