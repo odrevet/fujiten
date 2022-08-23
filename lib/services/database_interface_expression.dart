@@ -49,7 +49,7 @@ class DatabaseInterfaceExpression extends DatabaseInterface {
                   LIMIT $resultsPerPage OFFSET ${currentPage * resultsPerPage}''';
     List<Map<String, dynamic>> queryResults;
     try {
-      queryResults = await database!.rawQuery(sql);
+      queryResults = database!.select(sql);
     } catch (e) {
       //throw ('ERROR $e');
       return [];

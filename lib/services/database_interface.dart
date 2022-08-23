@@ -1,4 +1,4 @@
-import 'package:sqflite/sqflite.dart';
+import 'package:sqlite3/sqlite3.dart';
 
 import '../models/entry.dart';
 
@@ -8,11 +8,10 @@ abstract class DatabaseInterface {
   DatabaseInterface({this.database});
 
   Future<void> open(String path) async {
-    database = await openDatabase(path, readOnly: true);
+    database = sqlite3.open(path, mode: OpenMode.readOnly);
   }
 
   Future<void> dispose() async {
-    database?.close();
   }
 
   Future<List<Entry>> search(String input, [resultsPerPage = 10, currentPage = 0]);
