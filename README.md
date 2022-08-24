@@ -63,3 +63,12 @@ Run the search.
 * Use search by radical < > when searching for an expression which you do not know a kanji but recognize some of it's radical example: ＜化＞
 
 * When no results, add ".*" at the beginning or the end of your search
+
+# Platforms
+
+The Android releases are build from the main branch using the sqflite package to access the databases. 
+
+The Linux releases are build from the sqlite3 branch using the sqlite3 package to access the databases. 
+
+Fujiten may be build for Windows, Mac and IOS but I cannot provide release for those OS at this moment. 
+
