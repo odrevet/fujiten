@@ -34,8 +34,8 @@ class _MainWidgetState extends State<MainWidget> {
 
   @override
   initState() {
-    initDb();
     super.initState();
+    initDb();
     databaseInterfaceExpression = DatabaseInterfaceExpression();
     databaseInterfaceKanji = DatabaseInterfaceKanji();
     _prefs.then((SharedPreferences prefs) async {
