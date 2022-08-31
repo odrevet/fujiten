@@ -56,14 +56,14 @@ class _ResultsWidgetState extends State<ResultsWidget> {
     }
   }
 
-  Widget _buildResultKanji(result) {
+  Widget buildResultKanji(result) {
     return KanjiListTile(
         kanji: result.kanji,
         selected: false,
         onTap: () => Clipboard.setData(ClipboardData(text: result.kanji.literal)));
   }
 
-  Widget _buildResultExpression(searchResult) {
+  Widget buildResultExpression(searchResult) {
     var japaneseReading = Text(
       '${searchResult.reading.isNotEmpty ? searchResult.reading[0] : ''}',
       style: const TextStyle(fontSize: 20.0),
@@ -92,10 +92,10 @@ class _ResultsWidgetState extends State<ResultsWidget> {
               context: context,
               builder: (_) => AlertDialog(
                     title: const Text('Kanji'),
-                    content: _kanjiDialogContent(searchResult.kanji[0]),
+                    content: _kanjiDialogContent(searchResult.reading[0]),
                   )),
           onDoubleTap: () =>
-              Clipboard.setData(ClipboardData(text: searchResult.kanji ?? searchResult.reading)),
+              Clipboard.setData(ClipboardData(text: searchResult.reading)),
           child: japaneseReading,
         ),
         japaneseReadingOtherForms,
@@ -202,9 +202,9 @@ class _ResultsWidgetState extends State<ResultsWidget> {
                 itemBuilder: (BuildContext context, int index) {
                   if (search.searchResults[index] is KanjiEntry) {
                     KanjiEntry searchResult = search.searchResults[index] as KanjiEntry;
-                    return _buildResultKanji(searchResult);
+                    return buildResultKanji(searchResult);
                   } else {
-                    return _buildResultExpression(search.searchResults[index]);
+                    return buildResultExpression(search.searchResults[index]);
                   }
                 });
           }
