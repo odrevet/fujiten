@@ -65,12 +65,12 @@ class _ResultsWidgetState extends State<ResultsWidget> {
 
   Widget _buildResultExpression(searchResult) {
     var japaneseReading = Text(
-      '${searchResult.reading.isNotEmpty ? searchResult.reading[0] : ''}\n${searchResult.kanji.isNotEmpty ? searchResult.kanji[0] : ''}',
+      '${searchResult.reading.isNotEmpty ? searchResult.reading[0] : ''}',
       style: const TextStyle(fontSize: 20.0),
     );
 
     var japaneseReadingOtherForms = Text(
-      '${searchResult.reading.skip(1).join(", ")} ${searchResult.kanji.skip(1).join(", ")}',
+      '${searchResult.reading.skip(1).join(", ")}',
       style: const TextStyle(fontSize: 16.0),
     );
 

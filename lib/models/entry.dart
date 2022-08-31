@@ -4,11 +4,10 @@ import 'package:fujiten/models/sense.dart';
 abstract class Entry {}
 
 class ExpressionEntry extends Entry {
-  List<String>? kanji;
   List<String> reading;
   List<Sense> senses;
 
-  ExpressionEntry({this.kanji, required this.reading, required this.senses});
+  ExpressionEntry({required this.reading, required this.senses});
 }
 
 class KanjiEntry extends Entry {

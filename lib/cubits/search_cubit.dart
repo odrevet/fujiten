@@ -7,7 +7,7 @@ class SearchCubit extends Cubit<Search> {
   SearchCubit() : super(Search());
 
   void reset() => emit(state.copyWith(
-      input: '', searchResults: [], isLoading: false, isLoadingNextPage: false, totalResult: 0));
+      input: '', searchResults: [], isLoading: false, isLoadingNextPage: false, totalResult: 0, page: 0));
 
   void setInput(String input) => emit(state.copyWith(input: input));
 
