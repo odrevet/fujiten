@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import '../models/entry.dart';
 import '../models/sense.dart';
 import '../string_utils.dart';
