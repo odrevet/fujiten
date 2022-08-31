@@ -35,8 +35,16 @@ class DatabaseInterfaceExpression extends DatabaseInterface {
 
     String sql = '''SELECT entry.id as entry_id,
                   sense.id as sense_id, 
-                  (SELECT GROUP_CONCAT(reb) FROM r_ele WHERE r_ele.id_entry = entry.id AND r_ele.id NOT IN (SELECT DISTINCT id_r_ele FROM k_ele WHERE k_ele.id_entry = entry.id)) reb_group,
-                  (SELECT GROUP_CONCAT(keb || ':' || (SELECT reb FROM r_ele WHERE r_ele.id_entry = entry.id AND id = k_ele.id_r_ele), ',') FROM k_ele WHERE k_ele.id_entry = entry.id) keb_reb_group,
+                  (
+                    SELECT
+                      GROUP_CONCAT(IFNULL(keb || ':', '') || reb)
+                    FROM
+                      r_ele r_ele_sub
+                      LEFT JOIN r_ele_k_ele ON r_ele_k_ele.id_r_ele = r_ele_sub.id
+                      LEFT JOIN k_ele k_ele_sub ON r_ele_k_ele.id_k_ele = k_ele_sub.id
+                    WHERE
+                      r_ele_sub.id_entry = entry.id
+                  ) keb_reb_group,
                   GROUP_CONCAT(DISTINCT gloss.content) gloss_group,
                   GROUP_CONCAT(DISTINCT pos.description) pos_group,
                   GROUP_CONCAT(DISTINCT dial.name) dial_group,
@@ -65,9 +73,8 @@ class DatabaseInterfaceExpression extends DatabaseInterface {
       if (queryResult['entry_id'] != entryId) {
         senses = [];
         entries.add(ExpressionEntry(
-            kanji:
+            reading:
                 queryResult['keb_reb_group'] != null ? queryResult['keb_reb_group'].split(',') : [],
-            reading: queryResult['reb_group'] != null ? queryResult['reb_group'].split(',') : [],
             senses: senses));
         entryId = queryResult['entry_id'];
       }
