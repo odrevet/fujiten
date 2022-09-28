@@ -75,7 +75,10 @@ class _MainWidgetState extends State<MainWidget> {
     String input = widget._textEditingController.text;
     if (kanaKit.isRomaji(input)) {
       widget._textEditingController.text = kanaKit.toKana(input);
-    } else {
+    } else if(kanaKit.isHiragana(input)){
+      widget._textEditingController.text = kanaKit.toKatakana(input);
+    }
+    else if(kanaKit.isKatakana(input)){
       widget._textEditingController.text = kanaKit.toRomaji(input);
     }
   }
