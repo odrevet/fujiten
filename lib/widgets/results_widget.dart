@@ -161,7 +161,7 @@ class _ResultsWidgetState extends State<ResultsWidget> {
                     itemCount: snapshot.data!.length,
                     itemBuilder: (BuildContext context, int index) {
                       return KanjiListTile(
-                        onTap: null,
+                        onTap: () => Clipboard.setData(ClipboardData(text: kanjiReading[index])),
                         selected: false,
                           kanji: snapshot.data!
                               .firstWhere((kanji) => kanji.literal == kanjiReading[index]));
