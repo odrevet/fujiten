@@ -24,11 +24,11 @@ class KanjiListTile extends ListTile {
             style: TextStyle(fontSize: 40.0, color: selected == true ? Colors.red : null)),
         onTap: onTap,
         title: Table(children: <TableRow>[
-          TableRow(children: <Widget>[Text(stroke)]),
-          TableRow(children: <Widget>[InkWell(child: Text(radicals))]),
-          TableRow(children: <Widget>[Text(on)]),
-          TableRow(children: <Widget>[Text(kun)]),
-          TableRow(children: <Widget>[Text(meaning)])
+          TableRow(children: <Widget>[SelectableText(stroke)]),
+          TableRow(children: <Widget>[SelectableText(radicals)]),
+          TableRow(children: <Widget>[SelectableText(on)]),
+          TableRow(children: <Widget>[SelectableText(kun)]),
+          TableRow(children: <Widget>[SelectableText(meaning)])
         ]));
   }
 }

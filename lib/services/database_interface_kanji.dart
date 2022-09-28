@@ -1,5 +1,3 @@
-import 'dart:developer';
-
 import '../models/entry.dart';
 import '../models/kanji.dart';
 import '../string_utils.dart';
@@ -52,8 +50,6 @@ class DatabaseInterfaceKanji extends DatabaseInterface {
         GROUP BY character.id
         ORDER BY character.freq NULLS LAST, character.stroke_count
         LIMIT $resultsPerPage OFFSET ${currentPage * resultsPerPage}''';
-
-    log(sql);
 
     final List<Map<String, dynamic>> kanjiMaps = await database!.rawQuery(sql);
 
