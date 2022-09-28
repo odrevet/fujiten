@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import '../models/entry.dart';
 import '../models/kanji.dart';
 import '../string_utils.dart';
@@ -18,22 +20,22 @@ class DatabaseInterfaceKanji extends DatabaseInterface {
       where = '''WHERE character.id IN (SELECT character.id
         FROM character 
         INNER JOIN kun_yomi ON kun_yomi.id_character = character.id 
-        WHERE REPLACE(kun_yomi.reading,'.','') = "$input"
+        WHERE REPLACE(REPLACE(kun_yomi.reading,'-',''),'.','') = '$input'
         GROUP BY character.id)''';
     } else if (kanaKit.isKatakana(input)) {
       where = '''WHERE character.id IN (SELECT character.id
         FROM character 
         INNER JOIN on_yomi ON on_yomi.id_character = character.id 
-        WHERE on_yomi.reading = "$input"
+        WHERE on_yomi.reading = '$input'
         GROUP BY character.id)''';
     } else if (kanaKit.isRomaji(input)) {
       where = '''WHERE character.id IN (SELECT character.id
         FROM character 
         LEFT JOIN meaning ON meaning.id_character = character.id
-        WHERE meaning.content REGEXP "$input"
+        WHERE meaning.content REGEXP '$input'
         GROUP BY character.id)''';
     } else {
-      where = 'WHERE character.id REGEXP "$input"';
+      where = "WHERE character.id REGEXP '$input'";
     }
 
     String sql = '''SELECT character.*,
@@ -50,6 +52,8 @@ class DatabaseInterfaceKanji extends DatabaseInterface {
         GROUP BY character.id
         ORDER BY character.freq NULLS LAST, character.stroke_count
         LIMIT $resultsPerPage OFFSET ${currentPage * resultsPerPage}''';
+
+    log(sql);
 
     final List<Map<String, dynamic>> kanjiMaps = await database!.rawQuery(sql);
 
