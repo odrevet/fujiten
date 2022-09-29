@@ -87,30 +87,51 @@ class RadicalPageState extends State<RadicalPage> {
 
           body = Column(
             children: [
-              Row(
-                children: [
-                  Expanded(
-                    child: TextField(
-                      controller: filterController,
-                      decoration:
-                          const InputDecoration(hintText: 'Filter by meaning, on yomi, kun yomi'),
-                      onChanged: (value) => setState(() {
-                        filter = value;
-                      }),
-                    ),
-                  ),
-                  IconButton(
-                      icon: const Icon(Icons.clear),
-                      onPressed: () {
-                        filterController.text = "";
-                        setState(() {
-                          filter = "";
-                        });
-                      }),
-                  ConvertButton(onPressed: convert)
-                ],
+              Expanded(
+                flex: 1,
+                child: FutureBuilder<String>(
+                    future: widget.databaseInterfaceKanji
+                        .getKanjiFromRadicals(widget.selectedRadicals.join()),
+                    builder: (BuildContext context, AsyncSnapshot<String> snapshot) {
+                      if (snapshot.hasData) {
+                        var buttonList = snapshot.data!
+                            .split("")
+                            .map<Widget>((kanji) => kanjiButton(kanji))
+                            .toList();
+                        return ListView(scrollDirection: Axis.horizontal, children: buttonList);
+                      } else {
+                        return const Center(child: Text("Matched Kanji will appears here"));
+                      }
+                    }),
               ),
               Expanded(
+                flex: 1,
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: TextField(
+                        controller: filterController,
+                        decoration:
+                            const InputDecoration(hintText: 'Filter by meaning, on yomi, kun yomi'),
+                        onChanged: (value) => setState(() {
+                          filter = value;
+                        }),
+                      ),
+                    ),
+                    IconButton(
+                        icon: const Icon(Icons.clear),
+                        onPressed: () {
+                          filterController.text = "";
+                          setState(() {
+                            filter = "";
+                          });
+                        }),
+                    ConvertButton(onPressed: convert)
+                  ],
+                ),
+              ),
+              Expanded(
+                flex: 8,
                   child: listViewDisplay == true
                       ? radicalListView(radicals)
                       : radicalGridView(radicals)),
@@ -125,7 +146,7 @@ class RadicalPageState extends State<RadicalPage> {
                 title: Text(widget.selectedRadicals.toString()),
                 leading: IconButton(
                     icon: const Icon(Icons.arrow_back),
-                    onPressed: () => Navigator.pop(context, widget.selectedRadicals)),
+                    onPressed: () => Navigator.pop(context, [true, widget.selectedRadicals])),
                 actions: <Widget>[
                   IconButton(
                       icon: const Icon(Icons.clear),
@@ -218,7 +239,14 @@ class RadicalPageState extends State<RadicalPage> {
           : null,
       child: Text(radical.literal,
           style: TextStyle(
-            fontSize: 40,
+            fontSize: 35,
             color: widget.selectedRadicals.contains(radical.literal) ? Colors.red : null,
+          )));
+
+  Widget kanjiButton(String kanji) => TextButton(
+      onPressed: () => Navigator.pop(context, [false, kanji]),
+      child: Text(kanji,
+          style: const TextStyle(
+            fontSize: 35,
           )));
 }

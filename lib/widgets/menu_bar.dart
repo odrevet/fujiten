@@ -37,10 +37,10 @@ class MenuBar extends StatefulWidget {
 }
 
 class _MenuBarState extends State<MenuBar> {
-  addStringInController(String input){
+  addStringInController(String input) {
     if (widget.insertPosition >= 0) {
-      widget.textEditingController!.text = addCharAtPosition(
-          widget.textEditingController!.text, input, widget.insertPosition);
+      widget.textEditingController!.text =
+          addCharAtPosition(widget.textEditingController!.text, input, widget.insertPosition);
       widget.textEditingController!.selection =
           TextSelection.fromPosition(TextPosition(offset: widget.insertPosition + 1));
     } else {
@@ -135,14 +135,28 @@ class _MenuBarState extends State<MenuBar> {
     Navigator.push(
       context,
       MaterialPageRoute(builder: (context) => RadicalPage(widget.databaseInterfaceKanji, radicals)),
-    ).then((selectedRadicals) {
-      if (selectedRadicals.isNotEmpty) {
+    ).then((results) {
+      var isRadicalList = results[0];
+      var selectedRadicalsorKanji = results[1];
+      if (isRadicalList) {
+        if (selectedRadicalsorKanji.isNotEmpty) {
+          if (matchAtCursor == null) {
+            widget.textEditingController!.text = addCharAtPosition(
+                widget.textEditingController!.text,
+                '<${selectedRadicalsorKanji.join()}>',
+                insertPosition);
+          } else {
+            widget.textEditingController!.text = widget.textEditingController!.text.replaceRange(
+                matchAtCursor.start, matchAtCursor.end, '<${selectedRadicalsorKanji.join()}>');
+          }
+        }
+      } else {
         if (matchAtCursor == null) {
           widget.textEditingController!.text = addCharAtPosition(
-              widget.textEditingController!.text, '<${selectedRadicals.join()}>', insertPosition);
+              widget.textEditingController!.text, selectedRadicalsorKanji, insertPosition);
         } else {
           widget.textEditingController!.text = widget.textEditingController!.text
-              .replaceRange(matchAtCursor.start, matchAtCursor.end, '<${selectedRadicals.join()}>');
+              .replaceRange(matchAtCursor.start, matchAtCursor.end, selectedRadicalsorKanji);
         }
       }
     });
