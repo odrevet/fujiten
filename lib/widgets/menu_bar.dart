@@ -137,26 +137,26 @@ class _MenuBarState extends State<MenuBar> {
       MaterialPageRoute(builder: (context) => RadicalPage(widget.databaseInterfaceKanji, radicals)),
     ).then((results) {
       var isRadicalList = results[0];
-      var selectedRadicalsorKanji = results[1];
+      var selectedRadicalsOrKanji = results[1];
       if (isRadicalList) {
-        if (selectedRadicalsorKanji.isNotEmpty) {
+        if (selectedRadicalsOrKanji.isNotEmpty) {
           if (matchAtCursor == null) {
             widget.textEditingController!.text = addCharAtPosition(
                 widget.textEditingController!.text,
-                '<${selectedRadicalsorKanji.join()}>',
+                '<${selectedRadicalsOrKanji.join()}>',
                 insertPosition);
           } else {
             widget.textEditingController!.text = widget.textEditingController!.text.replaceRange(
-                matchAtCursor.start, matchAtCursor.end, '<${selectedRadicalsorKanji.join()}>');
+                matchAtCursor.start, matchAtCursor.end, '<${selectedRadicalsOrKanji.join()}>');
           }
         }
       } else {
         if (matchAtCursor == null) {
           widget.textEditingController!.text = addCharAtPosition(
-              widget.textEditingController!.text, selectedRadicalsorKanji, insertPosition);
+              widget.textEditingController!.text, selectedRadicalsOrKanji, insertPosition);
         } else {
           widget.textEditingController!.text = widget.textEditingController!.text
-              .replaceRange(matchAtCursor.start, matchAtCursor.end, selectedRadicalsorKanji);
+              .replaceRange(matchAtCursor.start, matchAtCursor.end, selectedRadicalsOrKanji);
         }
       }
     });
