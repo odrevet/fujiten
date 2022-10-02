@@ -36,6 +36,8 @@ class _MainWidgetState extends State<MainWidget> {
   initState() {
     super.initState();
 
+    context.read<SearchCubit>().addInput();
+
     databaseInterfaceExpression = DatabaseInterfaceExpression();
     databaseInterfaceKanji = DatabaseInterfaceKanji();
     initDb();
@@ -75,13 +77,11 @@ class _MainWidgetState extends State<MainWidget> {
     String input = widget._textEditingController.text;
     if (kanaKit.isRomaji(input)) {
       widget._textEditingController.text = kanaKit.toKana(input);
-    } else if(kanaKit.isHiragana(input)){
+    } else if (kanaKit.isHiragana(input)) {
       widget._textEditingController.text = kanaKit.toKatakana(input);
-    }
-    else if(kanaKit.isKatakana(input)){
+    } else if (kanaKit.isKatakana(input)) {
       widget._textEditingController.text = kanaKit.toRomaji(input);
-    }
-    else{
+    } else {
       // mixed string
       widget._textEditingController.text = kanaKit.toRomaji(input);
     }
@@ -90,7 +90,7 @@ class _MainWidgetState extends State<MainWidget> {
   onSearch() => formatInput(widget._textEditingController.text, databaseInterfaceKanji)
           .then((formattedInput) {
         context.read<SearchCubit>().reset();
-        context.read<SearchCubit>().setInput(formattedInput);
+        context.read<SearchCubit>().setFormattedInput(formattedInput);
         context.read<SearchCubit>().runSearch(
             context.read<SearchCubit>().state.searchType == SearchType.kanji
                 ? databaseInterfaceKanji
@@ -113,7 +113,22 @@ class _MainWidgetState extends State<MainWidget> {
   Widget body() {
     return Column(
       children: <Widget>[
-        SearchInput(widget._textEditingController, onSearch, onFocusChanged, focusNode),
+        Row(
+          children: [
+            Expanded(
+                child: SearchInput(
+                    widget._textEditingController, onSearch, onFocusChanged, focusNode)),
+            /*IconButton(
+                icon: const Icon(Icons.clear),
+                onPressed: () {
+                  widget._textEditingController!.clear();
+                }),*/
+            IconButton(
+              icon: const Icon(Icons.search),
+              onPressed: () => onSearch(),
+            )
+          ],
+        ),
         ResultsWidget(
             databaseInterfaceKanji,
             onEndReached,

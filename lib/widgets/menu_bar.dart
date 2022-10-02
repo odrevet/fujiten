@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:fujiten/cubits/search_cubit.dart';
 import 'package:fujiten/services/database_interface_kanji.dart';
 import 'package:fujiten/widgets/toggle_search_type_button.dart';
 
@@ -67,6 +69,7 @@ class _MenuBarState extends State<MenuBar> {
             addStringInController('.*');
             break;
         }
+        context.read<SearchCubit>().setInput(widget.textEditingController!.text);
       },
       itemBuilder: (context) => [
         const PopupMenuItem(value: 0, child: Text('<> Radicals')),
@@ -74,6 +77,23 @@ class _MenuBarState extends State<MenuBar> {
         const PopupMenuItem(value: 2, child: Text('$charKana Kana')),
         const PopupMenuItem(value: 3, child: Text('.* Joker')),
       ],
+    );
+
+    var popupMenuButtonInputs = PopupMenuButton(
+      icon: const Icon(Icons.list),
+      onSelected: (dynamic result) {
+        context.read<SearchCubit>().setSearchIndex(result);
+        widget.textEditingController!.text = context.read<SearchCubit>().state.input[result];
+      },
+      itemBuilder: (itemBuilderContext) => context
+          .read<SearchCubit>()
+          .state
+          .input
+          .asMap()
+          .entries
+          .map<PopupMenuEntry<dynamic>>(
+              (entry) => PopupMenuItem(value: entry.key, child: Text(entry.value)))
+          .toList(),
     );
 
     return AppBar(
@@ -91,18 +111,29 @@ class _MenuBarState extends State<MenuBar> {
             popupMenuButtonInsert,
             widget.convertButton,
             const ToggleSearchTypeButton(),
-            IconButton(
+            /*IconButton(
                 icon: const Icon(Icons.clear),
                 onPressed: () {
                   widget.textEditingController!.clear();
                   widget.search!.searchResults.clear();
-                  widget.search!.input = '';
+                  //widget.search!.input = '';
                   widget.focusNode.requestFocus();
-                }),
+                }),*/
+            popupMenuButtonInputs,
             IconButton(
+              icon: const Icon(Icons.add),
+              onPressed: () {
+                context.read<SearchCubit>().addInput();
+                int searchIndex = context.read<SearchCubit>().state.input.length - 1;
+                context.read<SearchCubit>().setSearchIndex(searchIndex);
+                widget.textEditingController!.text =
+                    context.read<SearchCubit>().state.input[searchIndex];
+              },
+            )
+            /*IconButton(
               icon: const Icon(Icons.search),
               onPressed: () => widget.onSearch(),
-            )
+            )*/
           ],
         ),
       ]),
@@ -159,6 +190,8 @@ class _MenuBarState extends State<MenuBar> {
               .replaceRange(matchAtCursor.start, matchAtCursor.end, selectedRadicalsOrKanji);
         }
       }
+
+      context.read<SearchCubit>().setInput(widget.textEditingController!.text);
     });
   }
 }

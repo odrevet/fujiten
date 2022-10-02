@@ -94,8 +94,7 @@ class _ResultsWidgetState extends State<ResultsWidget> {
                     title: const Text('Kanji'),
                     content: _kanjiDialogContent(searchResult.reading[0]),
                   )),
-          onDoubleTap: () =>
-              Clipboard.setData(ClipboardData(text: searchResult.reading)),
+          onDoubleTap: () => Clipboard.setData(ClipboardData(text: searchResult.reading)),
           child: japaneseReading,
         ),
         japaneseReadingOtherForms,
@@ -161,9 +160,10 @@ class _ResultsWidgetState extends State<ResultsWidget> {
                     itemCount: snapshot.data!.length,
                     itemBuilder: (BuildContext context, int index) {
                       return KanjiListTile(
-                        onTap: null,
-                        onTapLeading: () => Clipboard.setData(ClipboardData(text: kanjiReading[index])),
-                        selected: false,
+                          onTap: null,
+                          onTapLeading: () =>
+                              Clipboard.setData(ClipboardData(text: kanjiReading[index])),
+                          selected: false,
                           kanji: snapshot.data!
                               .firstWhere((kanji) => kanji.literal == kanjiReading[index]));
                     });
@@ -189,7 +189,8 @@ class _ResultsWidgetState extends State<ResultsWidget> {
         child = const CircularProgressIndicator();
       } else {
         if (search.searchResults.isEmpty && search.input.isNotEmpty) {
-          child = Text("No results for '${search.input}'");
+          child = Text(
+              "No results for '${search.input[context.read<SearchCubit>().state.searchIndex]}'");
         } else {
           if (search.input.isEmpty) {
             child = const Text("Welcome to fujiten");
