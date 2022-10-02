@@ -81,6 +81,10 @@ class _MainWidgetState extends State<MainWidget> {
     else if(kanaKit.isKatakana(input)){
       widget._textEditingController.text = kanaKit.toRomaji(input);
     }
+    else{
+      // mixed string
+      widget._textEditingController.text = kanaKit.toRomaji(input);
+    }
   }
 
   onSearch() => formatInput(widget._textEditingController.text, databaseInterfaceKanji)
