@@ -131,7 +131,7 @@ class RadicalPageState extends State<RadicalPage> {
                 ),
               ),
               Expanded(
-                flex: 8,
+                  flex: 8,
                   child: listViewDisplay == true
                       ? radicalListView(radicals)
                       : radicalGridView(radicals)),
@@ -142,6 +142,7 @@ class RadicalPageState extends State<RadicalPage> {
         }
 
         return Scaffold(
+            resizeToAvoidBottomInset: false,
             appBar: AppBar(
                 title: Text(widget.selectedRadicals.toString()),
                 leading: IconButton(
