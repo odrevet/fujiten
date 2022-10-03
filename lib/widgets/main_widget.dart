@@ -83,7 +83,7 @@ class _MainWidgetState extends State<MainWidget> {
       widget._textEditingController.text = kanaKit.toRomaji(input);
     } else {
       // mixed string
-      widget._textEditingController.text = kanaKit.toRomaji(input);
+      widget._textEditingController.text = kanaKit.toKana(input);
     }
   }
 
