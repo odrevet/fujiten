@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import '../models/kanji.dart';
 import '../services/database_interface_kanji.dart';
 import '../string_utils.dart';
-import 'convert_button.dart';
 import 'kanji_list_tile.dart';
 
 class RadicalPage extends StatefulWidget {
@@ -112,21 +111,27 @@ class RadicalPageState extends State<RadicalPage> {
                       child: TextField(
                         controller: filterController,
                         decoration:
-                            const InputDecoration(hintText: 'Filter by meaning, on yomi, kun yomi'),
+                            InputDecoration(hintText: 'Filter by meaning, on yomi, kun yomi', suffix: Align(
+                              widthFactor: 1.0,
+                              heightFactor: 1.0,
+                              child: IconButton(
+                                icon: const Icon(Icons.translate),
+                                onPressed: convert,
+                              ),
+                            )),
                         onChanged: (value) => setState(() {
                           filter = value;
                         }),
                       ),
                     ),
-                    IconButton(
+                    /*IconButton(
                         icon: const Icon(Icons.clear),
                         onPressed: () {
                           filterController.text = "";
                           setState(() {
                             filter = "";
                           });
-                        }),
-                    ConvertButton(onPressed: convert)
+                        }),*/
                   ],
                 ),
               ),
