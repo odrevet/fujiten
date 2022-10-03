@@ -38,14 +38,25 @@ class _SearchInputState extends State<SearchInput> {
     return Padding(
       padding: const EdgeInsets.only(left: 12, right: 12),
       child: TextField(
+
         onChanged: (text) => context.read<SearchCubit>().setInput(text),
         onSubmitted: (_) => widget.onSubmitted(),
         textInputAction: TextInputAction.search,
         style: const TextStyle(fontSize: 32.0),
         controller: widget.textEditingController,
         focusNode: widget.focusNode,
-        decoration: const InputDecoration(hintText: 'Enter a search term'),
+        decoration: InputDecoration(hintText: 'Enter a search term', suffixIcon: Align(
+        widthFactor: 1.0,
+        heightFactor: 1.0,
+        child: IconButton(
+          icon: const Icon(Icons.search),
+          onPressed: () => widget.onSubmitted(),
+        ),
+      )),
       ),
     );
   }
 }
+
+
+

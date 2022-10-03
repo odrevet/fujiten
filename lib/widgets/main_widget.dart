@@ -113,22 +113,8 @@ class _MainWidgetState extends State<MainWidget> {
   Widget body() {
     return Column(
       children: <Widget>[
-        Row(
-          children: [
-            Expanded(
-                child: SearchInput(
-                    widget._textEditingController, onSearch, onFocusChanged, focusNode)),
-            /*IconButton(
-                icon: const Icon(Icons.clear),
-                onPressed: () {
-                  widget._textEditingController!.clear();
-                }),*/
-            IconButton(
-              icon: const Icon(Icons.search),
-              onPressed: () => onSearch(),
-            )
-          ],
-        ),
+        SearchInput(
+            widget._textEditingController, onSearch, onFocusChanged, focusNode),
         ResultsWidget(
             databaseInterfaceKanji,
             onEndReached,

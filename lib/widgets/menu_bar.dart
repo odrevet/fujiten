@@ -102,7 +102,7 @@ class _MenuBarState extends State<MenuBar> {
           .entries
           .map<PopupMenuEntry<dynamic>>(
               (entry) => PopupMenuItem(value: entry.key, child: Text("${entry.key} : '${entry.value}'")))
-          .toList()..add(const PopupMenuItem(value: "add", child: Text("+ Add input"))),
+          .toList()..add(const PopupMenuItem(value: "add", child: Text("+ New input"))),
     );
 
     return AppBar(
