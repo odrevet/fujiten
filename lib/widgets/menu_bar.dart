@@ -82,14 +82,17 @@ class _MenuBarState extends State<MenuBar> {
     var popupMenuButtonInputs = PopupMenuButton(
       icon: const Icon(Icons.list),
       onSelected: (dynamic result) {
-        if(result == "add"){
+        if (result == "add") {
           context.read<SearchCubit>().addInput();
           int searchIndex = context.read<SearchCubit>().state.input.length - 1;
           context.read<SearchCubit>().setSearchIndex(searchIndex);
-          widget.textEditingController!.text =
-          context.read<SearchCubit>().state.input[searchIndex];
-        }
-        else {
+          widget.textEditingController!.text = context.read<SearchCubit>().state.input[searchIndex];
+        } else if (result == "remove") {
+          context.read<SearchCubit>().removeInput(context.read<SearchCubit>().state.searchIndex);
+          int searchIndex = context.read<SearchCubit>().state.searchIndex--;
+          context.read<SearchCubit>().setSearchIndex(searchIndex);
+          widget.textEditingController!.text = context.read<SearchCubit>().state.input[searchIndex];
+        } else {
           context.read<SearchCubit>().setSearchIndex(result);
           widget.textEditingController!.text = context.read<SearchCubit>().state.input[result];
         }
@@ -100,13 +103,11 @@ class _MenuBarState extends State<MenuBar> {
           .input
           .asMap()
           .entries
-          .map<PopupMenuEntry<dynamic>>(
-              (entry) => PopupMenuItem(value: entry.key, child: Row(
-                children: [
-                  Text("${entry.key} : '${entry.value}'"),
-                ],
-              )))
-          .toList()..add(const PopupMenuItem(value: "add", child: Text("+ New input"))),
+          .map<PopupMenuEntry<dynamic>>((entry) =>
+              PopupMenuItem(value: entry.key, child: Text("${entry.key} : '${entry.value}'")))
+          .toList()
+        ..add(const PopupMenuItem(value: "add", child: Text("+ New input")))
+        ..add(const PopupMenuItem(value: "remove", child: Text("- Remove input"))),
     );
 
     return AppBar(

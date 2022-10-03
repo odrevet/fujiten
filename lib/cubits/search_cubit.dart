@@ -19,11 +19,12 @@ class SearchCubit extends Cubit<Search> {
     emit(state.copyWith(formattedInput: input));
   }
 
-  void addInput() {
-    var inputs = [...state.input];
-    inputs.add('');
-    emit(state.copyWith(input: inputs));
-  }
+  void addInput() =>
+    emit(state.copyWith(input: [...state.input, '']));
+
+  void removeInput(int at) =>
+    emit(state.copyWith(input: [...state.input]..removeAt(at)));
+
 
   void setSearchIndex(int searchIndex) => emit(state.copyWith(searchIndex: searchIndex));
 
