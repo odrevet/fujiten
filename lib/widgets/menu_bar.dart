@@ -75,15 +75,24 @@ class _MenuBarState extends State<MenuBar> {
         const PopupMenuItem(value: 0, child: Text('<> Radicals')),
         const PopupMenuItem(value: 1, child: Text('$charKanji Kanji')),
         const PopupMenuItem(value: 2, child: Text('$charKana Kana')),
-        const PopupMenuItem(value: 3, child: Text('.* Joker')),
+        const PopupMenuItem(value: 3, child: Text('.* Anything')),
       ],
     );
 
     var popupMenuButtonInputs = PopupMenuButton(
       icon: const Icon(Icons.list),
       onSelected: (dynamic result) {
-        context.read<SearchCubit>().setSearchIndex(result);
-        widget.textEditingController!.text = context.read<SearchCubit>().state.input[result];
+        if(result == "add"){
+          context.read<SearchCubit>().addInput();
+          int searchIndex = context.read<SearchCubit>().state.input.length - 1;
+          context.read<SearchCubit>().setSearchIndex(searchIndex);
+          widget.textEditingController!.text =
+          context.read<SearchCubit>().state.input[searchIndex];
+        }
+        else {
+          context.read<SearchCubit>().setSearchIndex(result);
+          widget.textEditingController!.text = context.read<SearchCubit>().state.input[result];
+        }
       },
       itemBuilder: (itemBuilderContext) => context
           .read<SearchCubit>()
@@ -92,8 +101,8 @@ class _MenuBarState extends State<MenuBar> {
           .asMap()
           .entries
           .map<PopupMenuEntry<dynamic>>(
-              (entry) => PopupMenuItem(value: entry.key, child: Text(entry.value)))
-          .toList(),
+              (entry) => PopupMenuItem(value: entry.key, child: Text("${entry.key} : '${entry.value}'")))
+          .toList()..add(const PopupMenuItem(value: "add", child: Text("+ Add input"))),
     );
 
     return AppBar(
@@ -120,16 +129,6 @@ class _MenuBarState extends State<MenuBar> {
                   widget.focusNode.requestFocus();
                 }),*/
             popupMenuButtonInputs,
-            IconButton(
-              icon: const Icon(Icons.add),
-              onPressed: () {
-                context.read<SearchCubit>().addInput();
-                int searchIndex = context.read<SearchCubit>().state.input.length - 1;
-                context.read<SearchCubit>().setSearchIndex(searchIndex);
-                widget.textEditingController!.text =
-                    context.read<SearchCubit>().state.input[searchIndex];
-              },
-            )
             /*IconButton(
               icon: const Icon(Icons.search),
               onPressed: () => widget.onSearch(),
