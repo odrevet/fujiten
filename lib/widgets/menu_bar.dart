@@ -104,10 +104,13 @@ class _MenuBarState extends State<MenuBar> {
           .asMap()
           .entries
           .map<PopupMenuEntry<dynamic>>((entry) =>
-              PopupMenuItem(value: entry.key, child: Text("${entry.key} : '${entry.value}'")))
+              PopupMenuItem(value: entry.key, child: Text("${entry.key}   ${entry.value}")))
           .toList()
         ..add(const PopupMenuItem(value: "add", child: Text("+ New input")))
-        ..add(const PopupMenuItem(value: "remove", child: Text("- Remove input"))),
+        ..add(PopupMenuItem(
+            value: "remove",
+            enabled: context.read<SearchCubit>().state.input.length > 1,
+            child: const Text("- Remove input"))),
     );
 
     return AppBar(
