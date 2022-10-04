@@ -91,7 +91,7 @@ class _ResultsWidgetState extends State<ResultsWidget> {
           onTap: () => showDialog(
               context: context,
               builder: (_) => AlertDialog(
-                    title: const Text('Kanji'),
+                    title: const Center(child: Text('Kanji')),
                     content: _kanjiDialogContent(searchResult.reading[0]),
                   )),
           onDoubleTap: () => Clipboard.setData(ClipboardData(text: searchResult.reading)),
@@ -149,25 +149,21 @@ class _ResultsWidgetState extends State<ResultsWidget> {
           future: widget.databaseInterfaceKanji.getKanjiFromCharacters(kanjis),
           builder: (context, snapshot) {
             if (snapshot.hasData) {
-              if (snapshot.data == null) {
-                return const ListTile(title: Text('Cannot get kanji details'));
-              } else {
-                return ListView.separated(
-                    shrinkWrap: true,
-                    separatorBuilder: (context, index) {
-                      return const Divider();
-                    },
-                    itemCount: snapshot.data!.length,
-                    itemBuilder: (BuildContext context, int index) {
-                      return KanjiListTile(
-                          onTap: null,
-                          onTapLeading: () =>
-                              Clipboard.setData(ClipboardData(text: kanjiReading[index])),
-                          selected: false,
-                          kanji: snapshot.data!
-                              .firstWhere((kanji) => kanji.literal == kanjiReading[index]));
-                    });
-              }
+              return ListView.separated(
+                  shrinkWrap: true,
+                  separatorBuilder: (context, index) {
+                    return const Divider();
+                  },
+                  itemCount: snapshot.data!.length,
+                  itemBuilder: (BuildContext context, int index) {
+                    Kanji kanji = snapshot.data![index];
+                    return KanjiListTile(
+                        onTap: null,
+                        onTapLeading: () =>
+                            Clipboard.setData(ClipboardData(text: kanjiReading[index])),
+                        selected: false,
+                        kanji: kanji);
+                  });
             } else if (snapshot.hasError) {
               return ListTile(title: Text("${snapshot.error}"));
             }

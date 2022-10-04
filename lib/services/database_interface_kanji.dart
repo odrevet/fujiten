@@ -76,7 +76,7 @@ class DatabaseInterfaceKanji extends DatabaseInterface {
   }
 
   Future<List<Kanji>> getKanjiFromCharacters(List<String> characters) async {
-    String sqlKanji = '''SELECT character.*,
+    String sql = '''SELECT character.*,
         GROUP_CONCAT(DISTINCT character_radical.id_radical) as radicals,
         GROUP_CONCAT(DISTINCT on_yomi.reading) AS on_reading,
         GROUP_CONCAT(DISTINCT kun_yomi.reading) AS kun_reading,
@@ -89,7 +89,7 @@ class DatabaseInterfaceKanji extends DatabaseInterface {
         WHERE character.id IN (${characters.map((char) => "'$char'").join(',')})
         GROUP BY character.id''';
 
-    final List<Map<String, dynamic>> kanjiMaps = await database!.rawQuery(sqlKanji);
+    final List<Map<String, dynamic>> kanjiMaps = await database!.rawQuery(sql);
 
     return List.generate(kanjiMaps.length, (i) {
       return Kanji.fromMap(kanjiMaps[i]);
