@@ -1,3 +1,5 @@
+import 'package:sqflite/sqflite.dart';
+
 import '../models/entry.dart';
 import '../models/kanji.dart';
 import '../string_utils.dart';
@@ -56,6 +58,11 @@ class DatabaseInterfaceKanji extends DatabaseInterface {
     return List.generate(kanjiMaps.length, (i) {
       return KanjiEntry(kanji: Kanji.fromMap(kanjiMaps[i]));
     });
+  }
+
+  Future<int?> count() async {
+    String sql = "SELECT count(character.id) from character;";
+    return Sqflite.firstIntValue(await database!.rawQuery(sql));
   }
 
   Future<Kanji> getKanjiFromCharacter(String character) async {

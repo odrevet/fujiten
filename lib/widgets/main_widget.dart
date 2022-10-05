@@ -28,6 +28,7 @@ class _MainWidgetState extends State<MainWidget> {
   late DatabaseInterfaceExpression databaseInterfaceExpression;
   int cursorPosition = -1;
   FocusNode focusNode = FocusNode();
+  String dbStatus = "";
 
   final Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
 
@@ -52,18 +53,61 @@ class _MainWidgetState extends State<MainWidget> {
   initDb() async {
     _prefs.then((SharedPreferences prefs) async {
       String? path = prefs.getString("expression_path");
+      if (path != null) {
+        await setExpressionDb(path);
+      }
+    });
+
+    _prefs.then((SharedPreferences prefs) async {
+      String? path = prefs.getString("kanji_path");
+      if (path != null) {
+        await setKanjiDb(path);
+      }
+    });
+  }
+
+  checkDB() async {
+    _prefs.then((SharedPreferences prefs) async {
+      String? path = prefs.getString("expression_path");
       if (path != null) await setExpressionDb(path);
     });
 
     _prefs.then((SharedPreferences prefs) async {
       String? path = prefs.getString("kanji_path");
-      if (path != null) await setKanjiDb(path);
+      if (path != null) {
+        databaseInterfaceKanji.count().then((count) async {
+          if (count == null) {
+            dbStatus = "No character found in DB Kanji";
+          } else {
+            dbStatus = "DB Kanji loaded. $count character found";
+          }
+        });
+      } else {
+        dbStatus = "No kanji DB set";
+      }
     });
   }
 
   Future<void> setExpressionDb(String path) async => await databaseInterfaceExpression.open(path);
 
   Future<void> setKanjiDb(String path) async => databaseInterfaceKanji.open(path);
+
+  String checkKanjiDb() {
+    _prefs.then((SharedPreferences prefs) async {
+      String? path = prefs.getString("kanji_path");
+      if (path == null) {
+        return "No DB Kanji set";
+      }
+    });
+
+    databaseInterfaceKanji.count().then((count) async {
+      if (count == null) {
+        return "No character found in DB Kanji";
+      }
+    });
+
+    return "DB Kanji loaded";
+  }
 
   @override
   void dispose() {
@@ -95,19 +139,6 @@ class _MainWidgetState extends State<MainWidget> {
         searchType == SearchType.kanji ? databaseInterfaceKanji : databaseInterfaceExpression);
   }
 
-  Widget body() {
-    return Column(
-      children: <Widget>[
-        SearchInput(widget._textEditingController, onSearch, onFocusChanged, focusNode),
-        ResultsWidget(
-            databaseInterfaceKanji,
-            onEndReached,
-            context.read<SearchCubit>().state.isLoading,
-            context.read<SearchCubit>().state.isLoadingNextPage)
-      ],
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<SearchCubit, Search>(
@@ -135,6 +166,16 @@ class _MainWidgetState extends State<MainWidget> {
                     insertPosition: cursorPosition),
               ),
             ),
-            body: body()));
+            body: Column(
+              children: <Widget>[
+                //Text(dbStatus),
+                SearchInput(widget._textEditingController, onSearch, onFocusChanged, focusNode),
+                ResultsWidget(
+                    databaseInterfaceKanji,
+                    onEndReached,
+                    context.read<SearchCubit>().state.isLoading,
+                    context.read<SearchCubit>().state.isLoadingNextPage)
+              ],
+            )));
   }
 }

@@ -133,11 +133,21 @@ class _MenuBarState extends State<MenuBar> {
         IconButton(
             icon: const Icon(Icons.menu),
             onPressed: () => Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                      builder: (context) => SettingsPage(
-                          setExpressionDb: widget.setExpressionDb, setKanjiDb: widget.setKanjiDb)),
-                )),
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => SettingsPage(
+                            setExpressionDb: widget.setExpressionDb,
+                            setKanjiDb: widget.setKanjiDb))).then((x) {
+                  widget.databaseInterfaceKanji.count().then((count) async {
+                    String dbStatus = "";
+                    if (count == null) {
+                      dbStatus = "No character found in DB Kanji";
+                    } else {
+                      dbStatus = "DB Kanji loaded. $count character found";
+                    }
+                    print(dbStatus);
+                  });
+                })),
         Row(
           children: <Widget>[
             popupMenuButtonInsert,
