@@ -8,7 +8,6 @@ import '../cubits/theme_cubit.dart';
 import '../services/database_interface_expression.dart';
 import '../services/database_interface_kanji.dart';
 import '../string_utils.dart';
-import 'convert_button.dart';
 import 'menu_bar.dart';
 import 'results_widget.dart';
 import 'search_input.dart';
@@ -73,20 +72,6 @@ class _MainWidgetState extends State<MainWidget> {
     super.dispose();
   }
 
-  convert() {
-    String input = widget._textEditingController.text;
-    if (kanaKit.isRomaji(input)) {
-      widget._textEditingController.text = kanaKit.toKana(input);
-    } else if (kanaKit.isHiragana(input)) {
-      widget._textEditingController.text = kanaKit.toKatakana(input);
-    } else if (kanaKit.isKatakana(input)) {
-      widget._textEditingController.text = kanaKit.toRomaji(input);
-    } else {
-      // mixed string
-      widget._textEditingController.text = kanaKit.toKana(input);
-    }
-  }
-
   onSearch() => formatInput(widget._textEditingController.text, databaseInterfaceKanji)
           .then((formattedInput) {
         context.read<SearchCubit>().reset();
@@ -113,8 +98,7 @@ class _MainWidgetState extends State<MainWidget> {
   Widget body() {
     return Column(
       children: <Widget>[
-        SearchInput(
-            widget._textEditingController, onSearch, onFocusChanged, focusNode),
+        SearchInput(widget._textEditingController, onSearch, onFocusChanged, focusNode),
         ResultsWidget(
             databaseInterfaceKanji,
             onEndReached,
@@ -148,9 +132,6 @@ class _MainWidgetState extends State<MainWidget> {
                     textEditingController: widget._textEditingController,
                     onSearch: onSearch,
                     focusNode: focusNode,
-                    convertButton: ConvertButton(
-                      onPressed: convert,
-                    ),
                     insertPosition: cursorPosition),
               ),
             ),

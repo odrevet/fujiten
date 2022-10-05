@@ -7,7 +7,8 @@ class KanjiListTile extends ListTile {
   final Kanji kanji;
   final Function()? onTapLeading;
 
-  const KanjiListTile({required this.kanji, required onTap, required selected, this.onTapLeading,Key? key})
+  const KanjiListTile(
+      {required this.kanji, required onTap, required selected, this.onTapLeading, Key? key})
       : super(key: key, onTap: onTap, selected: selected);
 
   @override

@@ -6,7 +6,6 @@ import 'package:fujiten/widgets/toggle_search_type_button.dart';
 
 import '../models/search.dart';
 import '../string_utils.dart';
-import 'convert_button.dart';
 import 'radical_page.dart';
 import 'settings/settings.dart';
 
@@ -17,7 +16,6 @@ class MenuBar extends StatefulWidget {
   final VoidCallback onSearch;
   final Future<void> Function(String) setExpressionDb;
   final Future<void> Function(String) setKanjiDb;
-  final ConvertButton convertButton;
   final int insertPosition;
   final FocusNode focusNode;
 
@@ -27,7 +25,6 @@ class MenuBar extends StatefulWidget {
       required this.textEditingController,
       required this.onSearch,
       required this.focusNode,
-      required this.convertButton,
       required this.insertPosition,
       required this.setExpressionDb,
       required this.setKanjiDb,
@@ -47,6 +44,20 @@ class _MenuBarState extends State<MenuBar> {
           TextSelection.fromPosition(TextPosition(offset: widget.insertPosition + 1));
     } else {
       widget.textEditingController!.text += input;
+    }
+  }
+
+  convert() {
+    String? input = widget.textEditingController?.text;
+    if (kanaKit.isRomaji(input!)) {
+      widget.textEditingController?.text = kanaKit.toKana(input);
+    } else if (kanaKit.isHiragana(input)) {
+      widget.textEditingController?.text = kanaKit.toKatakana(input);
+    } else if (kanaKit.isKatakana(input)) {
+      widget.textEditingController?.text = kanaKit.toRomaji(input);
+    } else {
+      // mixed string
+      widget.textEditingController?.text = kanaKit.toKana(input);
     }
   }
 
@@ -130,7 +141,7 @@ class _MenuBarState extends State<MenuBar> {
         Row(
           children: <Widget>[
             popupMenuButtonInsert,
-            widget.convertButton,
+            IconButton(icon: const Icon(Icons.translate), onPressed: convert),
             const ToggleSearchTypeButton(),
             /*IconButton(
                 icon: const Icon(Icons.clear),

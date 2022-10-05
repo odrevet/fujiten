@@ -17,8 +17,8 @@ class ThemeTile extends StatelessWidget {
         title: Text(title),
         onTap: () {
           context.read<ThemeCubit>().updateTheme(themeData);
-          _prefs.then(
-              (prefs) => prefs.setBool('darkTheme', themeData.brightness == Brightness.dark));
+          _prefs
+              .then((prefs) => prefs.setBool('darkTheme', themeData.brightness == Brightness.dark));
         });
   }
 }

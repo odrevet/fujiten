@@ -110,8 +110,9 @@ class RadicalPageState extends State<RadicalPage> {
                     Expanded(
                       child: TextField(
                         controller: filterController,
-                        decoration:
-                            InputDecoration(hintText: 'Filter by meaning, on yomi, kun yomi', suffix: Align(
+                        decoration: InputDecoration(
+                            hintText: 'Filter by meaning, on yomi, kun yomi',
+                            suffix: Align(
                               widthFactor: 1.0,
                               heightFactor: 1.0,
                               child: IconButton(

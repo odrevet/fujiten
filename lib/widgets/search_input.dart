@@ -44,18 +44,17 @@ class _SearchInputState extends State<SearchInput> {
         style: const TextStyle(fontSize: 32.0),
         controller: widget.textEditingController,
         focusNode: widget.focusNode,
-        decoration: InputDecoration(hintText: 'Enter a search term', suffixIcon: Align(
-        widthFactor: 1.0,
-        heightFactor: 1.0,
-        child: IconButton(
-          icon: const Icon(Icons.search),
-          onPressed: () => widget.onSubmitted(),
-        ),
-      )),
+        decoration: InputDecoration(
+            hintText: 'Enter a search term',
+            suffixIcon: Align(
+              widthFactor: 1.0,
+              heightFactor: 1.0,
+              child: IconButton(
+                icon: const Icon(Icons.search),
+                onPressed: () => widget.onSubmitted(),
+              ),
+            )),
       ),
     );
   }
 }
-
-
-
