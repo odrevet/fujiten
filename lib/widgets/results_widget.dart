@@ -146,7 +146,7 @@ class _ResultsWidgetState extends State<ResultsWidget> {
     return SizedBox(
       width: double.maxFinite,
       child: FutureBuilder<List<Kanji>>(
-          future: widget.databaseInterfaceKanji.getKanjiFromCharacters(kanjis),
+          future: widget.databaseInterfaceKanji.getCharactersFromLiterals(kanjis),
           builder: (context, snapshot) {
             if (snapshot.hasData) {
               return ListView.separated(

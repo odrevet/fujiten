@@ -90,7 +90,7 @@ class RadicalPageState extends State<RadicalPage> {
                 flex: 1,
                 child: FutureBuilder<String>(
                     future: widget.databaseInterfaceKanji
-                        .getKanjiFromRadicals(widget.selectedRadicals.join()),
+                        .getCharactersFromRadicals(widget.selectedRadicals.join()),
                     builder: (BuildContext context, AsyncSnapshot<String> snapshot) {
                       if (snapshot.hasData) {
                         var buttonList = snapshot.data!

@@ -60,29 +60,10 @@ class DatabaseInterfaceKanji extends DatabaseInterface {
     });
   }
 
-  Future<int?> count() async {
-    String sql = "SELECT count(character.id) from character;";
-    return Sqflite.firstIntValue(await database!.rawQuery(sql));
-  }
-
-  Future<Kanji> getKanjiFromCharacter(String character) async {
-    String sqlKanji = '''SELECT character.*,
-        GROUP_CONCAT(DISTINCT character_radical.id_radical) as radicals,
-        GROUP_CONCAT(DISTINCT on_yomi.reading) AS on_reading,
-        GROUP_CONCAT(DISTINCT kun_yomi.reading) AS kun_reading,
-        GROUP_CONCAT(DISTINCT meaning.content) AS meanings
-        FROM character
-        LEFT JOIN character_radical ON character.id = character_radical.id_character
-        LEFT JOIN on_yomi ON character.id = on_yomi.id_character
-        LEFT JOIN kun_yomi ON kun_yomi.id_character = character.id
-        LEFT JOIN meaning ON meaning.id_character = character.id
-        WHERE character.id = '$character';''';
-
-    final List<Map<String, dynamic>> kanjiMaps = await database!.rawQuery(sqlKanji);
-    return Kanji.fromMap(kanjiMaps.first);
-  }
-
-  Future<List<Kanji>> getKanjiFromCharacters(List<String> characters) async {
+  Future<int?> count() async =>
+      Sqflite.firstIntValue(await database!.rawQuery("SELECT count(character.id) from character;"));
+  
+  Future<List<Kanji>> getCharactersFromLiterals(List<String> characters) async {
     String sql = '''SELECT character.*,
         GROUP_CONCAT(DISTINCT character_radical.id_radical) as radicals,
         GROUP_CONCAT(DISTINCT on_yomi.reading) AS on_reading,
@@ -103,7 +84,7 @@ class DatabaseInterfaceKanji extends DatabaseInterface {
     });
   }
 
-  Future<String> getKanjiFromRadicals(String radicals) async {
+  Future<String> getCharactersFromRadicals(String radicals) async {
     String sql = ' SELECT id FROM character WHERE id IN (';
     radicals.split('').asMap().forEach((i, radical) {
       sql += "SELECT id_character FROM character_radical WHERE id_radical = '$radical'";
