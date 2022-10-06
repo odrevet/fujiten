@@ -12,6 +12,12 @@ import 'menu_bar.dart';
 import 'results_widget.dart';
 import 'search_input.dart';
 
+enum DatabaseStatus {
+  ok,
+  pathNotSet,
+  noResults,
+}
+
 class MainWidget extends StatefulWidget {
   final String? title;
   final TextEditingController _textEditingController = TextEditingController();
@@ -28,7 +34,8 @@ class _MainWidgetState extends State<MainWidget> {
   late DatabaseInterfaceExpression databaseInterfaceExpression;
   int cursorPosition = -1;
   FocusNode focusNode = FocusNode();
-  String dbStatus = "";
+  DatabaseStatus? databaseStatusKanji;
+  DatabaseStatus? databaseStatusExpression;
 
   final Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
 
@@ -74,14 +81,30 @@ class _MainWidgetState extends State<MainWidget> {
         if (path != null) {
           databaseInterfaceKanji.count().then((count) async {
             if (count == 0) {
-              dbStatus = "No character found in DB Kanji";
+              databaseStatusKanji = DatabaseStatus.noResults;
             } else {
-              //dbStatus = "DB Kanji loaded. $count character found";
-              dbStatus = "";
+              databaseStatusKanji = DatabaseStatus.ok;
             }
           });
         } else {
-          dbStatus = "No kanji DB set";
+          databaseStatusKanji = DatabaseStatus.pathNotSet;
+        }
+      });
+    });
+
+    _prefs.then((SharedPreferences prefs) async {
+      String? path = prefs.getString("expression_path");
+      setState(() {
+        if (path != null) {
+          databaseInterfaceExpression.count().then((count) async {
+            if (count == 0) {
+              databaseStatusExpression = DatabaseStatus.noResults;
+            } else {
+              databaseStatusExpression = DatabaseStatus.ok;
+            }
+          });
+        } else {
+          databaseStatusExpression = DatabaseStatus.pathNotSet;
         }
       });
     });
@@ -140,6 +163,22 @@ class _MainWidgetState extends State<MainWidget> {
 
   @override
   Widget build(BuildContext context) {
+    List<String> databaseStatus = [];
+    
+    if(databaseStatusKanji == DatabaseStatus.pathNotSet){
+      databaseStatus.add("Kanji Database not set");
+    }
+    else if (databaseStatusKanji == DatabaseStatus.noResults){
+      databaseStatus.add("No Kanji found in the Kanji Database");
+    }
+
+    if(databaseStatusExpression == DatabaseStatus.pathNotSet){
+      databaseStatus.add("Expression Database not set");
+    }
+    else if (databaseStatusExpression == DatabaseStatus.noResults){
+      databaseStatus.add("No Expression found in the Expression Database");
+    }
+    
     return BlocBuilder<SearchCubit, Search>(
         builder: (context, search) => Scaffold(
             key: _scaffoldKey,
@@ -169,7 +208,15 @@ class _MainWidgetState extends State<MainWidget> {
             body: Column(
               children: <Widget>[
                 SearchInput(widget._textEditingController, onSearch, onFocusChanged, focusNode),
-                dbStatus != "" ? Text(dbStatus) : ResultsWidget(
+                if (databaseStatus.isNotEmpty) Expanded(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Text(databaseStatus.join("\n"), style: const TextStyle(color: Colors.red, fontSize: 18),),
+                    ],
+                  ),
+                ) else ResultsWidget(
                     databaseInterfaceKanji,
                     onEndReached,
                     context.read<SearchCubit>().state.isLoading,

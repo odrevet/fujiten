@@ -1,3 +1,5 @@
+import 'package:sqflite/sqflite.dart';
+
 import '../models/entry.dart';
 import '../models/sense.dart';
 import '../string_utils.dart';
@@ -94,5 +96,14 @@ class DatabaseInterfaceExpression extends DatabaseInterface {
     }
 
     return entries;
+  }
+
+  Future<int?> count() async {
+    try {
+      var x = await database!.rawQuery("SELECT count(entry.id) from entry;");
+      return Sqflite.firstIntValue(x);
+    } catch (_) {
+      return 0;
+    }
   }
 }

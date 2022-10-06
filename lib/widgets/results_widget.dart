@@ -184,11 +184,12 @@ class _ResultsWidgetState extends State<ResultsWidget> {
       if (search.isLoading && !search.isLoadingNextPage) {
         child = const CircularProgressIndicator();
       } else {
-        if (search.searchResults.isEmpty && search.input.isNotEmpty) {
+        if (search.searchResults.isEmpty &&
+            search.input[context.read<SearchCubit>().state.searchIndex].isNotEmpty) {
           child = Text(
               "No results for '${search.input[context.read<SearchCubit>().state.searchIndex]}'");
         } else {
-          if (search.input.isEmpty) {
+          if (search.input[context.read<SearchCubit>().state.searchIndex].isEmpty) {
             child = const Text("Welcome to fujiten");
           } else {
             child = ListView.separated(
