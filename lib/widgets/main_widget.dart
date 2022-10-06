@@ -164,21 +164,19 @@ class _MainWidgetState extends State<MainWidget> {
   @override
   Widget build(BuildContext context) {
     List<String> databaseStatus = [];
-    
-    if(databaseStatusKanji == DatabaseStatus.pathNotSet){
+
+    if (databaseStatusKanji == DatabaseStatus.pathNotSet) {
       databaseStatus.add("Kanji Database not set");
-    }
-    else if (databaseStatusKanji == DatabaseStatus.noResults){
+    } else if (databaseStatusKanji == DatabaseStatus.noResults) {
       databaseStatus.add("No Kanji found in the Kanji Database");
     }
 
-    if(databaseStatusExpression == DatabaseStatus.pathNotSet){
+    if (databaseStatusExpression == DatabaseStatus.pathNotSet) {
       databaseStatus.add("Expression Database not set");
-    }
-    else if (databaseStatusExpression == DatabaseStatus.noResults){
+    } else if (databaseStatusExpression == DatabaseStatus.noResults) {
       databaseStatus.add("No Expression found in the Expression Database");
     }
-    
+
     return BlocBuilder<SearchCubit, Search>(
         builder: (context, search) => Scaffold(
             key: _scaffoldKey,
@@ -208,19 +206,25 @@ class _MainWidgetState extends State<MainWidget> {
             body: Column(
               children: <Widget>[
                 SearchInput(widget._textEditingController, onSearch, onFocusChanged, focusNode),
-                if (databaseStatus.isNotEmpty) Expanded(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      Text(databaseStatus.join("\n"), style: const TextStyle(color: Colors.red, fontSize: 18),),
-                    ],
-                  ),
-                ) else ResultsWidget(
-                    databaseInterfaceKanji,
-                    onEndReached,
-                    context.read<SearchCubit>().state.isLoading,
-                    context.read<SearchCubit>().state.isLoadingNextPage)
+                if (databaseStatus.isNotEmpty)
+                  Expanded(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        Text(
+                          databaseStatus.join("\n"),
+                          style: const TextStyle(color: Colors.red, fontSize: 18),
+                        ),
+                      ],
+                    ),
+                  )
+                else
+                  ResultsWidget(
+                      databaseInterfaceKanji,
+                      onEndReached,
+                      context.read<SearchCubit>().state.isLoading,
+                      context.read<SearchCubit>().state.isLoadingNextPage)
               ],
             )));
   }
