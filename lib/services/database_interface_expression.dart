@@ -1,5 +1,3 @@
-import 'dart:developer';
-
 import 'package:sqflite/sqflite.dart';
 
 import '../models/entry.dart';
@@ -59,8 +57,6 @@ class DatabaseInterfaceExpression extends DatabaseInterface {
                   $where
                   GROUP BY sense.id
                   LIMIT $resultsPerPage OFFSET ${currentPage * resultsPerPage}''';
-
-    log(sql);
 
     List<Map<String, dynamic>> queryResults;
     try {
