@@ -21,7 +21,7 @@ Future<String> formatInput(String input, DatabaseInterfaceKanji databaseInterfac
   input.trim().replaceAll(RegExp(r'\s+'), ' ');
 
   //replace every radicals into < > with matching kanji in [ ] for regexp
-  List<String> kanjis = [];
+  List<List<String>> kanjis = [];
   var exp = RegExp(r'<(.*?)>');
   Iterable<RegExpMatch> matches = exp.allMatches(input);
 
@@ -33,14 +33,15 @@ Future<String> formatInput(String input, DatabaseInterfaceKanji databaseInterfac
       String radicals = match[1];
       //remove all characters that are not a radical
       radicals = radicals.replaceAll(RegExp('[^$radicalsString]'), '');
-
-      kanjis.addAll(await databaseInterfaceKanji.getCharactersFromRadicals(radicals.split("")));
+      var characters = await databaseInterfaceKanji.getCharactersFromRadicals(radicals.split(""));
+      kanjis.add(characters);
     });
 
+    // replace the radicals <> width regex []
     int index = 0;
     input = input.replaceAllMapped(exp, (Match m) {
-      if (kanjis[index] == '') return m.group(0)!;
-      return '[${kanjis[index++]}]';
+      if (kanjis[index].isEmpty) return m.group(0)!;
+      return '[${kanjis[index++].join((','))}]';
     });
   }
 
