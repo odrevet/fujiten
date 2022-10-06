@@ -34,7 +34,7 @@ Future<String> formatInput(String input, DatabaseInterfaceKanji databaseInterfac
       //remove all characters that are not a radical
       radicals = radicals.replaceAll(RegExp('[^$radicalsString]'), '');
 
-      kanjis.add(await databaseInterfaceKanji.getCharactersFromRadicals(radicals));
+      kanjis.addAll(await databaseInterfaceKanji.getCharactersFromRadicals(radicals.split("")));
     });
 
     int index = 0;

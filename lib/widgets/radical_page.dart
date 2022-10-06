@@ -88,15 +88,13 @@ class RadicalPageState extends State<RadicalPage> {
             children: [
               Expanded(
                 flex: 1,
-                child: FutureBuilder<String>(
+                child: FutureBuilder<List<String>>(
                     future: widget.databaseInterfaceKanji
-                        .getCharactersFromRadicals(widget.selectedRadicals.join()),
-                    builder: (BuildContext context, AsyncSnapshot<String> snapshot) {
+                        .getCharactersFromRadicals(widget.selectedRadicals),
+                    builder: (BuildContext context, AsyncSnapshot<List<String>> snapshot) {
                       if (snapshot.hasData) {
-                        var buttonList = snapshot.data!
-                            .split("")
-                            .map<Widget>((kanji) => kanjiButton(kanji))
-                            .toList();
+                        var buttonList =
+                            snapshot.data!.map<Widget>((kanji) => kanjiButton(kanji)).toList();
                         return ListView(scrollDirection: Axis.horizontal, children: buttonList);
                       } else {
                         return const Center(child: Text("Matched Kanji will appears here"));

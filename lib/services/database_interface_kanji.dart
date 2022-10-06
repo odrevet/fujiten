@@ -62,7 +62,7 @@ class DatabaseInterfaceKanji extends DatabaseInterface {
 
   Future<int?> count() async =>
       Sqflite.firstIntValue(await database!.rawQuery("SELECT count(character.id) from character;"));
-  
+
   Future<List<Kanji>> getCharactersFromLiterals(List<String> characters) async {
     String sql = '''SELECT character.*,
         GROUP_CONCAT(DISTINCT character_radical.id_radical) as radicals,
@@ -84,9 +84,9 @@ class DatabaseInterfaceKanji extends DatabaseInterface {
     });
   }
 
-  Future<String> getCharactersFromRadicals(String radicals) async {
+  Future<List<String>> getCharactersFromRadicals(List<String> radicals) async {
     String sql = ' SELECT id FROM character WHERE id IN (';
-    radicals.split('').asMap().forEach((i, radical) {
+    radicals.asMap().forEach((i, radical) {
       sql += "SELECT id_character FROM character_radical WHERE id_radical = '$radical'";
       sql += i < radicals.length - 1 ? ' INTERSECT ' : ') ORDER BY stroke_count;';
     });
@@ -95,7 +95,7 @@ class DatabaseInterfaceKanji extends DatabaseInterface {
 
     return List.generate(kanjiMaps.length, (i) {
       return kanjiMaps[i]["id"];
-    }).join();
+    });
   }
 
   Future<List<Kanji>> getRadicals() async {
