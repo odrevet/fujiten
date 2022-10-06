@@ -41,6 +41,7 @@ class _MainWidgetState extends State<MainWidget> {
     databaseInterfaceExpression = DatabaseInterfaceExpression();
     databaseInterfaceKanji = DatabaseInterfaceKanji();
     initDb();
+    checkDb();
 
     _prefs.then((SharedPreferences prefs) async {
       bool? isLight = prefs.getBool("darkTheme");
@@ -66,25 +67,23 @@ class _MainWidgetState extends State<MainWidget> {
     });
   }
 
-  checkDB() async {
-    _prefs.then((SharedPreferences prefs) async {
-      String? path = prefs.getString("expression_path");
-      if (path != null) await setExpressionDb(path);
-    });
-
+  checkDb() async {
     _prefs.then((SharedPreferences prefs) async {
       String? path = prefs.getString("kanji_path");
-      if (path != null) {
-        databaseInterfaceKanji.count().then((count) async {
-          if (count == null) {
-            dbStatus = "No character found in DB Kanji";
-          } else {
-            dbStatus = "DB Kanji loaded. $count character found";
-          }
-        });
-      } else {
-        dbStatus = "No kanji DB set";
-      }
+      setState(() {
+        if (path != null) {
+          databaseInterfaceKanji.count().then((count) async {
+            if (count == 0) {
+              dbStatus = "No character found in DB Kanji";
+            } else {
+              //dbStatus = "DB Kanji loaded. $count character found";
+              dbStatus = "";
+            }
+          });
+        } else {
+          dbStatus = "No kanji DB set";
+        }
+      });
     });
   }
 
@@ -156,6 +155,7 @@ class _MainWidgetState extends State<MainWidget> {
               preferredSize: const Size.fromHeight(56),
               child: Builder(
                 builder: (context) => MenuBar(
+                    checkDb: checkDb,
                     setExpressionDb: setExpressionDb,
                     setKanjiDb: setKanjiDb,
                     databaseInterfaceKanji: databaseInterfaceKanji,
@@ -168,9 +168,8 @@ class _MainWidgetState extends State<MainWidget> {
             ),
             body: Column(
               children: <Widget>[
-                //Text(dbStatus),
                 SearchInput(widget._textEditingController, onSearch, onFocusChanged, focusNode),
-                ResultsWidget(
+                dbStatus != "" ? Text(dbStatus) : ResultsWidget(
                     databaseInterfaceKanji,
                     onEndReached,
                     context.read<SearchCubit>().state.isLoading,

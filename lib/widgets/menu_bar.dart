@@ -16,6 +16,7 @@ class MenuBar extends StatefulWidget {
   final VoidCallback onSearch;
   final Future<void> Function(String) setExpressionDb;
   final Future<void> Function(String) setKanjiDb;
+  final VoidCallback checkDb;
   final int insertPosition;
   final FocusNode focusNode;
 
@@ -28,6 +29,7 @@ class MenuBar extends StatefulWidget {
       required this.insertPosition,
       required this.setExpressionDb,
       required this.setKanjiDb,
+      required this.checkDb,
       Key? key})
       : super(key: key);
 
@@ -137,16 +139,8 @@ class _MenuBarState extends State<MenuBar> {
                     MaterialPageRoute(
                         builder: (context) => SettingsPage(
                             setExpressionDb: widget.setExpressionDb,
-                            setKanjiDb: widget.setKanjiDb))).then((x) {
-                  widget.databaseInterfaceKanji.count().then((count) async {
-                    String dbStatus = "";
-                    if (count == null) {
-                      dbStatus = "No character found in DB Kanji";
-                    } else {
-                      dbStatus = "DB Kanji loaded. $count character found";
-                    }
-                    print(dbStatus);
-                  });
+                            setKanjiDb: widget.setKanjiDb))).then((_) {
+                  widget.checkDb();
                 })),
         Row(
           children: <Widget>[

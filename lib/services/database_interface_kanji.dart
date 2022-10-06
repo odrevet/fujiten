@@ -60,8 +60,14 @@ class DatabaseInterfaceKanji extends DatabaseInterface {
     });
   }
 
-  Future<int?> count() async =>
-      Sqflite.firstIntValue(await database!.rawQuery("SELECT count(character.id) from character;"));
+  Future<int?> count() async {
+    try {
+      var x = await database!.rawQuery("SELECT count(character.id) from character;");
+      return Sqflite.firstIntValue(x);
+    } catch (_) {
+      return 0;
+    }
+  }
 
   Future<List<Kanji>> getCharactersFromLiterals(List<String> characters) async {
     String sql = '''SELECT character.*,
