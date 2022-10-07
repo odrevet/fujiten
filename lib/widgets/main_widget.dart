@@ -91,13 +91,13 @@ class _MainWidgetState extends State<MainWidget> {
         if (path != null) {
           databaseInterfaceExpression.count().then((count) async {
             if (count == 0) {
-              databaseInterfaceKanji.status = DatabaseStatus.noResults;
+              databaseInterfaceExpression.status = DatabaseStatus.noResults;
             } else {
-              databaseInterfaceKanji.status = DatabaseStatus.ok;
+              databaseInterfaceExpression.status = DatabaseStatus.ok;
             }
           });
         } else {
-          databaseInterfaceKanji.status = DatabaseStatus.pathNotSet;
+          databaseInterfaceExpression.status = DatabaseStatus.pathNotSet;
         }
       });
     });
@@ -143,20 +143,6 @@ class _MainWidgetState extends State<MainWidget> {
 
   @override
   Widget build(BuildContext context) {
-    List<String> databaseStatus = [];
-
-    if (databaseInterfaceKanji.status == DatabaseStatus.pathNotSet) {
-      databaseStatus.add("Kanji Database not set");
-    } else if (databaseInterfaceKanji.status == DatabaseStatus.noResults) {
-      databaseStatus.add("No Kanji found in the Kanji Database");
-    }
-
-    if (databaseInterfaceExpression.status == DatabaseStatus.pathNotSet) {
-      databaseStatus.add("Expression Database not set");
-    } else if (databaseInterfaceExpression.status == DatabaseStatus.noResults) {
-      databaseStatus.add("No Expression found in the Expression Database");
-    }
-
     return BlocBuilder<SearchCubit, Search>(
         builder: (context, search) => Scaffold(
             key: _scaffoldKey,
@@ -186,14 +172,15 @@ class _MainWidgetState extends State<MainWidget> {
             body: Column(
               children: <Widget>[
                 SearchInput(widget._textEditingController, onSearch, onFocusChanged, focusNode),
-                if (databaseStatus.isNotEmpty)
+                if (databaseInterfaceKanji.status != DatabaseStatus.ok ||
+                    databaseInterfaceExpression.status != DatabaseStatus.ok)
                   Expanded(
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
                         Text(
-                          databaseStatus.join("\n"),
+                          "Kanji DB: ${databaseInterfaceKanji.status.toString()}\n Expression DB: ${databaseInterfaceExpression.status.toString()}",
                           style: const TextStyle(color: Colors.red, fontSize: 18),
                         ),
                       ],
