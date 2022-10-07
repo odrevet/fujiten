@@ -40,7 +40,7 @@ class _MainWidgetState extends State<MainWidget> {
 
     databaseInterfaceExpression = DatabaseInterfaceExpression();
     databaseInterfaceKanji = DatabaseInterfaceKanji();
-    initDb().then((_){
+    initDb().then((_) {
       checkDb();
     });
 

@@ -99,17 +99,17 @@ class _MenuBarState extends State<MenuBar> {
           context.read<SearchCubit>().addInput();
           int searchIndex = context.read<SearchCubit>().state.inputs.length - 1;
           context.read<SearchCubit>().setSearchIndex(searchIndex);
-          widget.textEditingController!.text = context.read<SearchCubit>().state.inputs[searchIndex];
+          widget.textEditingController!.text =
+              context.read<SearchCubit>().state.inputs[searchIndex];
         } else if (result == "remove") {
           context.read<SearchCubit>().removeInput(context.read<SearchCubit>().state.searchIndex);
           int searchIndex = context.read<SearchCubit>().state.searchIndex--;
           context.read<SearchCubit>().setSearchIndex(searchIndex);
-          widget.textEditingController!.text = context.read<SearchCubit>().state.inputs[searchIndex];
-        }
-        else if (result == "clear") {
+          widget.textEditingController!.text =
+              context.read<SearchCubit>().state.inputs[searchIndex];
+        } else if (result == "clear") {
           widget.textEditingController!.text = "";
-        }
-        else {
+        } else {
           context.read<SearchCubit>().setSearchIndex(result);
           widget.textEditingController!.text = context.read<SearchCubit>().state.inputs[result];
         }
