@@ -2,8 +2,15 @@ import 'package:sqflite/sqflite.dart';
 
 import '../models/entry.dart';
 
+enum DatabaseStatus {
+  ok,
+  pathNotSet,
+  noResults,
+}
+
 abstract class DatabaseInterface {
   Database? database;
+  DatabaseStatus? status;
 
   DatabaseInterface({this.database});
 

@@ -5,18 +5,13 @@ import 'package:fujiten/models/search.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../cubits/theme_cubit.dart';
+import '../services/database_interface.dart';
 import '../services/database_interface_expression.dart';
 import '../services/database_interface_kanji.dart';
 import '../string_utils.dart';
 import 'menu_bar.dart';
 import 'results_widget.dart';
 import 'search_input.dart';
-
-enum DatabaseStatus {
-  ok,
-  pathNotSet,
-  noResults,
-}
 
 class MainWidget extends StatefulWidget {
   final String? title;
@@ -34,8 +29,6 @@ class _MainWidgetState extends State<MainWidget> {
   late DatabaseInterfaceExpression databaseInterfaceExpression;
   int cursorPosition = -1;
   FocusNode focusNode = FocusNode();
-  DatabaseStatus? databaseStatusKanji;
-  DatabaseStatus? databaseStatusExpression;
 
   final Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
 
@@ -81,13 +74,13 @@ class _MainWidgetState extends State<MainWidget> {
         if (path != null) {
           databaseInterfaceKanji.count().then((count) async {
             if (count == 0) {
-              databaseStatusKanji = DatabaseStatus.noResults;
+              databaseInterfaceKanji.status = DatabaseStatus.noResults;
             } else {
-              databaseStatusKanji = DatabaseStatus.ok;
+              databaseInterfaceKanji.status = DatabaseStatus.ok;
             }
           });
         } else {
-          databaseStatusKanji = DatabaseStatus.pathNotSet;
+          databaseInterfaceKanji.status = DatabaseStatus.pathNotSet;
         }
       });
     });
@@ -98,13 +91,13 @@ class _MainWidgetState extends State<MainWidget> {
         if (path != null) {
           databaseInterfaceExpression.count().then((count) async {
             if (count == 0) {
-              databaseStatusExpression = DatabaseStatus.noResults;
+              databaseInterfaceKanji.status = DatabaseStatus.noResults;
             } else {
-              databaseStatusExpression = DatabaseStatus.ok;
+              databaseInterfaceKanji.status = DatabaseStatus.ok;
             }
           });
         } else {
-          databaseStatusExpression = DatabaseStatus.pathNotSet;
+          databaseInterfaceKanji.status = DatabaseStatus.pathNotSet;
         }
       });
     });
@@ -114,23 +107,6 @@ class _MainWidgetState extends State<MainWidget> {
 
   Future<void> setKanjiDb(String path) async => databaseInterfaceKanji.open(path);
 
-  String checkKanjiDb() {
-    _prefs.then((SharedPreferences prefs) async {
-      String? path = prefs.getString("kanji_path");
-      if (path == null) {
-        return "No DB Kanji set";
-      }
-    });
-
-    databaseInterfaceKanji.count().then((count) async {
-      if (count == null) {
-        return "No character found in DB Kanji";
-      }
-    });
-
-    return "DB Kanji loaded";
-  }
-
   @override
   void dispose() {
     databaseInterfaceExpression.dispose();
@@ -138,7 +114,9 @@ class _MainWidgetState extends State<MainWidget> {
     super.dispose();
   }
 
-  onSearch() => formatInput(widget._textEditingController.text, databaseInterfaceKanji)
+  onSearch() {
+    if (widget._textEditingController.text != "") {
+      formatInput(widget._textEditingController.text, databaseInterfaceKanji)
           .then((formattedInput) {
         context.read<SearchCubit>().reset();
         context.read<SearchCubit>().setFormattedInput(formattedInput);
@@ -147,6 +125,8 @@ class _MainWidgetState extends State<MainWidget> {
                 ? databaseInterfaceKanji
                 : databaseInterfaceExpression);
       });
+    }
+  }
 
   void onFocusChanged(bool hasFocus) async {
     setState(() {
@@ -165,15 +145,15 @@ class _MainWidgetState extends State<MainWidget> {
   Widget build(BuildContext context) {
     List<String> databaseStatus = [];
 
-    if (databaseStatusKanji == DatabaseStatus.pathNotSet) {
+    if (databaseInterfaceKanji.status == DatabaseStatus.pathNotSet) {
       databaseStatus.add("Kanji Database not set");
-    } else if (databaseStatusKanji == DatabaseStatus.noResults) {
+    } else if (databaseInterfaceKanji.status == DatabaseStatus.noResults) {
       databaseStatus.add("No Kanji found in the Kanji Database");
     }
 
-    if (databaseStatusExpression == DatabaseStatus.pathNotSet) {
+    if (databaseInterfaceExpression.status == DatabaseStatus.pathNotSet) {
       databaseStatus.add("Expression Database not set");
-    } else if (databaseStatusExpression == DatabaseStatus.noResults) {
+    } else if (databaseInterfaceExpression.status == DatabaseStatus.noResults) {
       databaseStatus.add("No Expression found in the Expression Database");
     }
 
