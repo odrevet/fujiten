@@ -10,7 +10,7 @@ class SearchCubit extends Cubit<Search> {
       searchResults: [], isLoading: false, isLoadingNextPage: false, totalResult: 0, page: 0));
 
   void setInput(String input) {
-    var inputs = [...state.input];
+    var inputs = [...state.inputs];
     inputs[state.searchIndex] = input;
     emit(state.copyWith(input: inputs));
   }
@@ -19,9 +19,9 @@ class SearchCubit extends Cubit<Search> {
     emit(state.copyWith(formattedInput: input));
   }
 
-  void addInput() => emit(state.copyWith(input: [...state.input, '']));
+  void addInput() => emit(state.copyWith(input: [...state.inputs, '']));
 
-  void removeInput(int at) => emit(state.copyWith(input: [...state.input]..removeAt(at)));
+  void removeInput(int at) => emit(state.copyWith(input: [...state.inputs]..removeAt(at)));
 
   void setSearchIndex(int searchIndex) => emit(state.copyWith(searchIndex: searchIndex));
 

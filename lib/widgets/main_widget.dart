@@ -40,8 +40,9 @@ class _MainWidgetState extends State<MainWidget> {
 
     databaseInterfaceExpression = DatabaseInterfaceExpression();
     databaseInterfaceKanji = DatabaseInterfaceKanji();
-    initDb();
-    checkDb();
+    initDb().then((_){
+      checkDb();
+    });
 
     _prefs.then((SharedPreferences prefs) async {
       bool? isLight = prefs.getBool("darkTheme");

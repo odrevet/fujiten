@@ -97,27 +97,27 @@ class _MenuBarState extends State<MenuBar> {
       onSelected: (dynamic result) {
         if (result == "add") {
           context.read<SearchCubit>().addInput();
-          int searchIndex = context.read<SearchCubit>().state.input.length - 1;
+          int searchIndex = context.read<SearchCubit>().state.inputs.length - 1;
           context.read<SearchCubit>().setSearchIndex(searchIndex);
-          widget.textEditingController!.text = context.read<SearchCubit>().state.input[searchIndex];
+          widget.textEditingController!.text = context.read<SearchCubit>().state.inputs[searchIndex];
         } else if (result == "remove") {
           context.read<SearchCubit>().removeInput(context.read<SearchCubit>().state.searchIndex);
           int searchIndex = context.read<SearchCubit>().state.searchIndex--;
           context.read<SearchCubit>().setSearchIndex(searchIndex);
-          widget.textEditingController!.text = context.read<SearchCubit>().state.input[searchIndex];
+          widget.textEditingController!.text = context.read<SearchCubit>().state.inputs[searchIndex];
         }
         else if (result == "clear") {
           widget.textEditingController!.text = "";
         }
         else {
           context.read<SearchCubit>().setSearchIndex(result);
-          widget.textEditingController!.text = context.read<SearchCubit>().state.input[result];
+          widget.textEditingController!.text = context.read<SearchCubit>().state.inputs[result];
         }
       },
       itemBuilder: (itemBuilderContext) => context
           .read<SearchCubit>()
           .state
-          .input
+          .inputs
           .asMap()
           .entries
           .map<PopupMenuEntry<dynamic>>((entry) => PopupMenuItem(
@@ -130,7 +130,7 @@ class _MenuBarState extends State<MenuBar> {
         ..add(const PopupMenuItem(value: "add", child: Text("+ New input")))
         ..add(PopupMenuItem(
             value: "remove",
-            enabled: context.read<SearchCubit>().state.input.length > 1,
+            enabled: context.read<SearchCubit>().state.inputs.length > 1,
             child: const Text("- Remove input")))
         ..add(PopupMenuItem(
             value: "clear",

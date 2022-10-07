@@ -4,7 +4,7 @@ enum SearchType { expression, kanji }
 
 class Search {
   int searchIndex;
-  List<String> input;
+  List<String> inputs;
   String formattedInput;
   int totalResult;
   List<Entry> searchResults;
@@ -16,7 +16,7 @@ class Search {
 
   Search(
       {this.searchIndex = 0,
-      this.input = const [],
+      this.inputs = const [],
       this.formattedInput = "",
       this.totalResult = 0,
       this.isLoadingNextPage = false,
@@ -38,7 +38,7 @@ class Search {
       int? totalResult,
       SearchType? searchType}) {
     return Search(
-        input: input ?? this.input,
+        inputs: input ?? this.inputs,
         formattedInput: formattedInput ?? this.formattedInput,
         searchIndex: searchIndex ?? this.searchIndex,
         isLoading: isLoading ?? this.isLoading,
