@@ -105,7 +105,11 @@ class _MenuBarState extends State<MenuBar> {
           int searchIndex = context.read<SearchCubit>().state.searchIndex--;
           context.read<SearchCubit>().setSearchIndex(searchIndex);
           widget.textEditingController!.text = context.read<SearchCubit>().state.input[searchIndex];
-        } else {
+        }
+        else if (result == "clear") {
+          widget.textEditingController!.text = "";
+        }
+        else {
           context.read<SearchCubit>().setSearchIndex(result);
           widget.textEditingController!.text = context.read<SearchCubit>().state.input[result];
         }
@@ -127,7 +131,11 @@ class _MenuBarState extends State<MenuBar> {
         ..add(PopupMenuItem(
             value: "remove",
             enabled: context.read<SearchCubit>().state.input.length > 1,
-            child: const Text("- Remove input"))),
+            child: const Text("- Remove input")))
+        ..add(PopupMenuItem(
+            value: "clear",
+            enabled: widget.textEditingController!.text != "",
+            child: const Text("x Clear input"))),
     );
 
     return AppBar(
