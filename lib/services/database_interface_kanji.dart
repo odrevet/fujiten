@@ -9,7 +9,7 @@ class DatabaseInterfaceKanji extends DatabaseInterface {
   DatabaseInterfaceKanji({super.database});
 
   @override
-  Future<List<KanjiEntry>> search(String input, [resultsPerPage = 10, currentPage = 0]) async {
+  Future<List<KanjiEntry>> search(String input, [resultsPerPage, currentPage = 0]) async {
     String where;
 
     Iterable<RegExpMatch> matchesKanji = RegExp(regexKanji).allMatches(input);
@@ -50,8 +50,11 @@ class DatabaseInterfaceKanji extends DatabaseInterface {
         LEFT JOIN meaning ON meaning.id_character = character.id
         $where
         GROUP BY character.id
-        ORDER BY character.freq NULLS LAST, character.stroke_count
-        LIMIT $resultsPerPage OFFSET ${currentPage * resultsPerPage}''';
+        ORDER BY character.freq NULLS LAST, character.stroke_count''';
+
+    if (resultsPerPage != null) {
+      sql += " LIMIT $resultsPerPage OFFSET ${currentPage * resultsPerPage}";
+    }
 
     final List<Map<String, dynamic>> kanjiMaps = await database!.rawQuery(sql);
 

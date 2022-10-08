@@ -9,7 +9,7 @@ class DatabaseInterfaceExpression extends DatabaseInterface {
   DatabaseInterfaceExpression({super.database});
 
   @override
-  Future<List<ExpressionEntry>> search(String input, [resultsPerPage = 10, currentPage = 0]) async {
+  Future<List<ExpressionEntry>> search(String input, [resultsPerPage, currentPage = 0]) async {
     String joins = '''JOIN sense ON sense.id_entry = entry.id
                     JOIN gloss ON gloss.id_sense = sense.id
                     LEFT JOIN sense_pos on sense.id = sense_pos.id_sense 
@@ -55,8 +55,11 @@ class DatabaseInterfaceExpression extends DatabaseInterface {
                   FROM entry
                   $joins
                   $where
-                  GROUP BY sense.id
-                  LIMIT $resultsPerPage OFFSET ${currentPage * resultsPerPage}''';
+                  GROUP BY sense.id''';
+
+    if (resultsPerPage != null) {
+      sql += " LIMIT $resultsPerPage OFFSET ${currentPage * resultsPerPage}";
+    }
 
     List<Map<String, dynamic>> queryResults;
     try {

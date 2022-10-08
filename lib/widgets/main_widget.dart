@@ -40,9 +40,7 @@ class _MainWidgetState extends State<MainWidget> {
 
     databaseInterfaceExpression = DatabaseInterfaceExpression();
     databaseInterfaceKanji = DatabaseInterfaceKanji();
-    initDb().then((_) {
-      checkDb();
-    });
+    initDb();
 
     _prefs.then((SharedPreferences prefs) async {
       bool? isLight = prefs.getBool("darkTheme");
@@ -57,6 +55,7 @@ class _MainWidgetState extends State<MainWidget> {
       String? path = prefs.getString("expression_path");
       if (path != null) {
         await setExpressionDb(path);
+        await checkDb();
       }
     });
 
@@ -64,6 +63,7 @@ class _MainWidgetState extends State<MainWidget> {
       String? path = prefs.getString("kanji_path");
       if (path != null) {
         await setKanjiDb(path);
+        await checkDb();
       }
     });
   }
