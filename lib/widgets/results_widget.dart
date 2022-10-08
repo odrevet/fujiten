@@ -65,16 +65,6 @@ class _ResultsWidgetState extends State<ResultsWidget> {
   }
 
   Widget buildResultExpression(searchResult) {
-    var japaneseReading = Text(
-      '${searchResult.reading.isNotEmpty ? searchResult.reading[0] : ''}',
-      style: const TextStyle(fontSize: 20.0),
-    );
-
-    var japaneseReadingOtherForms = Text(
-      '${searchResult.reading.skip(1).join(", ")}',
-      style: const TextStyle(fontSize: 16.0),
-    );
-
     //group glosses by pos
     Map sensesGroupedByPosses = <String?, List<Sense>>{};
     searchResult.senses.forEach((sense) {
@@ -96,9 +86,24 @@ class _ResultsWidgetState extends State<ResultsWidget> {
                     content: _kanjiDialogContent(searchResult.reading[0]),
                   )),
           onDoubleTap: () => Clipboard.setData(ClipboardData(text: searchResult.reading)),
-          child: japaneseReading,
+          child: Text(
+            '${searchResult.reading.isNotEmpty ? searchResult.reading[0] : ''}',
+            style: const TextStyle(fontSize: 20.0),
+          ),
         ),
-        japaneseReadingOtherForms,
+        // Other japanese reading forms
+        Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: searchResult.reading.skip(1).map<Widget>((reading) {
+              return InkWell(
+                  onTap: () => showDialog(
+                      context: context,
+                      builder: (_) => AlertDialog(
+                            title: const Center(child: Text('Kanji')),
+                            content: _kanjiDialogContent(reading),
+                          )),
+                  child: Text(reading, style: const TextStyle(fontSize: 16.0)));
+            }).toList()),
         Align(
           alignment: Alignment.centerLeft,
           child: Column(
@@ -143,7 +148,7 @@ class _ResultsWidgetState extends State<ResultsWidget> {
         literals.add(kanjiReading[i]);
       }
     }
-    
+
     return SizedBox(
       width: double.maxFinite,
       child: FutureBuilder<List<Kanji>>(
