@@ -75,16 +75,24 @@ class _ResultsWidgetState extends State<ResultsWidget> {
       sensesGroupedByPosses[posString].add(sense);
     });
 
+    /// filter reading to keep only kanji characters
+    List<String> literals = [];
+    for (int i = 0; i < searchResult.reading[0].length; i++) {
+      if (kanaKit.isKanji(searchResult.reading[0][i])) {
+        literals.add(searchResult.reading[0][i]);
+      }
+    }
+
     return ListTile(
         title: Column(
       children: <Widget>[
         InkWell(
-          onTap: () => showDialog(
+          onTap: () => literals.isNotEmpty ? showDialog(
               context: context,
               builder: (_) => AlertDialog(
                     title: const Center(child: Text('Kanji')),
-                    content: _kanjiDialogContent(searchResult.reading[0]),
-                  )),
+                    content: _kanjiDialogContent(literals),
+                  )) : null,
           onDoubleTap: () => Clipboard.setData(ClipboardData(text: searchResult.reading)),
           child: Text(
             '${searchResult.reading.isNotEmpty ? searchResult.reading[0] : ''}',
@@ -95,13 +103,19 @@ class _ResultsWidgetState extends State<ResultsWidget> {
         Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: searchResult.reading.skip(1).map<Widget>((reading) {
+              List<String> literals = [];
+              for (int i = 0; i < reading.length; i++) {
+                if (kanaKit.isKanji(reading[i])) {
+                  literals.add(reading[i]);
+                }
+              }
               return InkWell(
-                  onTap: () => showDialog(
+                  onTap: () => literals.isNotEmpty ? showDialog(
                       context: context,
                       builder: (_) => AlertDialog(
                             title: const Center(child: Text('Kanji')),
-                            content: _kanjiDialogContent(reading),
-                          )),
+                            content: _kanjiDialogContent(literals),
+                          )) : null,
                   child: Text(reading, style: const TextStyle(fontSize: 16.0)));
             }).toList()),
         Align(
@@ -140,15 +154,7 @@ class _ResultsWidgetState extends State<ResultsWidget> {
     ));
   }
 
-  Widget _kanjiDialogContent(String kanjiReading) {
-    /// filter reading to keep only kanji characters
-    List<String> literals = [];
-    for (int i = 0; i < kanjiReading.length; i++) {
-      if (kanaKit.isKanji(kanjiReading[i])) {
-        literals.add(kanjiReading[i]);
-      }
-    }
-
+  Widget _kanjiDialogContent(List<String> literals) {
     return SizedBox(
       width: double.maxFinite,
       child: FutureBuilder<List<Kanji>>(
@@ -167,7 +173,7 @@ class _ResultsWidgetState extends State<ResultsWidget> {
                     return KanjiListTile(
                         onTap: null,
                         onTapLeading: () =>
-                            Clipboard.setData(ClipboardData(text: kanjiReading[index])),
+                            Clipboard.setData(ClipboardData(text: sortedCharacters[index])),
                         selected: false,
                         kanji: sortedCharacters[index]);
                   });
