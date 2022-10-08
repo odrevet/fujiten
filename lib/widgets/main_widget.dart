@@ -173,26 +173,12 @@ class _MainWidgetState extends State<MainWidget> {
             body: Column(
               children: <Widget>[
                 SearchInput(widget._textEditingController, onSearch, onFocusChanged, focusNode),
-                if (databaseInterfaceKanji.status != DatabaseStatus.ok ||
-                    databaseInterfaceExpression.status != DatabaseStatus.ok)
-                  Expanded(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        Text(
-                          "Kanji DB: ${databaseInterfaceKanji.status.toString()}\n Expression DB: ${databaseInterfaceExpression.status.toString()}",
-                          style: const TextStyle(color: Colors.red, fontSize: 18),
-                        ),
-                      ],
-                    ),
-                  )
-                else
-                  ResultsWidget(
-                      databaseInterfaceKanji,
-                      onEndReached,
-                      context.read<SearchCubit>().state.isLoading,
-                      context.read<SearchCubit>().state.isLoadingNextPage)
+                ResultsWidget(
+                    databaseInterfaceKanji,
+                    databaseInterfaceExpression,
+                    onEndReached,
+                    context.read<SearchCubit>().state.isLoading,
+                    context.read<SearchCubit>().state.isLoadingNextPage)
               ],
             )));
   }

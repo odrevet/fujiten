@@ -8,17 +8,19 @@ import '../models/entry.dart';
 import '../models/kanji.dart';
 import '../models/search.dart';
 import '../models/sense.dart';
+import '../services/database_interface_expression.dart';
 import '../string_utils.dart' show kanaKit;
 import 'kanji_list_tile.dart';
 
 class ResultsWidget extends StatefulWidget {
   final DatabaseInterfaceKanji databaseInterfaceKanji;
+  final DatabaseInterfaceExpression databaseInterfaceExpression;
   final Function onEndReached;
   final bool isLoading;
   final bool isLoadingNextPage;
 
-  const ResultsWidget(
-      this.databaseInterfaceKanji, this.onEndReached, this.isLoading, this.isLoadingNextPage,
+  const ResultsWidget(this.databaseInterfaceKanji, this.databaseInterfaceExpression,
+      this.onEndReached, this.isLoading, this.isLoadingNextPage,
       {Key? key})
       : super(key: key);
 
@@ -190,7 +192,10 @@ class _ResultsWidgetState extends State<ResultsWidget> {
               "No results for '${search.inputs[context.read<SearchCubit>().state.searchIndex]}'");
         } else {
           if (search.inputs[context.read<SearchCubit>().state.searchIndex].isEmpty) {
-            child = const Text("Welcome to fujiten");
+            child = Text(
+              "Kanji DB: ${widget.databaseInterfaceKanji.status.toString()}\n Expression DB: ${widget.databaseInterfaceExpression.status.toString()}",
+              style: const TextStyle(fontSize: 18),
+            );
           } else {
             child = ListView.separated(
                 separatorBuilder: (context, index) {
