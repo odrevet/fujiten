@@ -137,33 +137,34 @@ class _ResultsWidgetState extends State<ResultsWidget> {
 
   Widget _kanjiDialogContent(String kanjiReading) {
     /// filter reading to keep only kanji characters
-    List<String> kanjis = [];
+    List<String> literals = [];
     for (int i = 0; i < kanjiReading.length; i++) {
       if (kanaKit.isKanji(kanjiReading[i])) {
-        kanjis.add(kanjiReading[i]);
+        literals.add(kanjiReading[i]);
       }
     }
-
+    
     return SizedBox(
       width: double.maxFinite,
       child: FutureBuilder<List<Kanji>>(
-          future: widget.databaseInterfaceKanji.getCharactersFromLiterals(kanjis),
+          future: widget.databaseInterfaceKanji.getCharactersFromLiterals(literals),
           builder: (context, snapshot) {
             if (snapshot.hasData) {
+              final sortedCharacters = List.from(snapshot.data!)
+                ..sort((a, b) => literals.indexOf(a.literal) - literals.indexOf(b.literal));
               return ListView.separated(
                   shrinkWrap: true,
                   separatorBuilder: (context, index) {
                     return const Divider();
                   },
-                  itemCount: snapshot.data!.length,
+                  itemCount: sortedCharacters.length,
                   itemBuilder: (BuildContext context, int index) {
-                    Kanji kanji = snapshot.data![index];
                     return KanjiListTile(
                         onTap: null,
                         onTapLeading: () =>
                             Clipboard.setData(ClipboardData(text: kanjiReading[index])),
                         selected: false,
-                        kanji: kanji);
+                        kanji: sortedCharacters[index]);
                   });
             } else if (snapshot.hasError) {
               return ListTile(title: Text("${snapshot.error}"));
