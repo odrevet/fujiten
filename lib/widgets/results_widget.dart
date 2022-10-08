@@ -17,8 +17,8 @@ class ResultsWidget extends StatefulWidget {
   final DatabaseInterfaceExpression databaseInterfaceExpression;
   final Function onEndReached;
 
-  const ResultsWidget(this.databaseInterfaceKanji, this.databaseInterfaceExpression,
-      this.onEndReached,
+  const ResultsWidget(
+      this.databaseInterfaceKanji, this.databaseInterfaceExpression, this.onEndReached,
       {Key? key})
       : super(key: key);
 

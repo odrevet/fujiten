@@ -5,7 +5,6 @@ import 'package:fujiten/models/search.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../cubits/theme_cubit.dart';
-import '../services/database_interface.dart';
 import '../services/database_interface_expression.dart';
 import '../services/database_interface_kanji.dart';
 import '../string_utils.dart';
@@ -55,7 +54,7 @@ class _MainWidgetState extends State<MainWidget> {
       String? path = prefs.getString("expression_path");
       if (path != null) {
         await setExpressionDb(path);
-        await checkDb();
+        databaseInterfaceExpression.setStatus();
       }
     });
 
@@ -63,44 +62,8 @@ class _MainWidgetState extends State<MainWidget> {
       String? path = prefs.getString("kanji_path");
       if (path != null) {
         await setKanjiDb(path);
-        await checkDb();
+        databaseInterfaceKanji.setStatus();
       }
-    });
-  }
-
-  checkDb() async {
-    _prefs.then((SharedPreferences prefs) async {
-      String? path = prefs.getString("kanji_path");
-      setState(() {
-        if (path != null) {
-          databaseInterfaceKanji.count().then((count) async {
-            if (count == 0) {
-              databaseInterfaceKanji.status = DatabaseStatus.noResults;
-            } else {
-              databaseInterfaceKanji.status = DatabaseStatus.ok;
-            }
-          });
-        } else {
-          databaseInterfaceKanji.status = DatabaseStatus.pathNotSet;
-        }
-      });
-    });
-
-    _prefs.then((SharedPreferences prefs) async {
-      String? path = prefs.getString("expression_path");
-      setState(() {
-        if (path != null) {
-          databaseInterfaceExpression.count().then((count) async {
-            if (count == 0) {
-              databaseInterfaceExpression.status = DatabaseStatus.noResults;
-            } else {
-              databaseInterfaceExpression.status = DatabaseStatus.ok;
-            }
-          });
-        } else {
-          databaseInterfaceExpression.status = DatabaseStatus.pathNotSet;
-        }
-      });
     });
   }
 
@@ -161,10 +124,10 @@ class _MainWidgetState extends State<MainWidget> {
               preferredSize: const Size.fromHeight(56),
               child: Builder(
                 builder: (context) => MenuBar(
-                    checkDb: checkDb,
                     setExpressionDb: setExpressionDb,
                     setKanjiDb: setKanjiDb,
                     databaseInterfaceKanji: databaseInterfaceKanji,
+                    databaseInterfaceExpression: databaseInterfaceExpression,
                     search: search,
                     textEditingController: widget._textEditingController,
                     onSearch: onSearch,
@@ -175,10 +138,7 @@ class _MainWidgetState extends State<MainWidget> {
             body: Column(
               children: <Widget>[
                 SearchInput(widget._textEditingController, onSearch, onFocusChanged, focusNode),
-                ResultsWidget(
-                    databaseInterfaceKanji,
-                    databaseInterfaceExpression,
-                    onEndReached)
+                ResultsWidget(databaseInterfaceKanji, databaseInterfaceExpression, onEndReached)
               ],
             )));
   }

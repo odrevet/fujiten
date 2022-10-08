@@ -102,6 +102,7 @@ class DatabaseInterfaceExpression extends DatabaseInterface {
     return entries;
   }
 
+  @override
   Future<int?> count() async {
     try {
       var x = await database!.rawQuery("SELECT count(entry.id) from entry;");

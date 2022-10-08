@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:fujiten/cubits/search_cubit.dart';
+import 'package:fujiten/services/database_interface_expression.dart';
 import 'package:fujiten/services/database_interface_kanji.dart';
 import 'package:fujiten/widgets/toggle_search_type_button.dart';
 
@@ -11,17 +12,18 @@ import 'settings/settings.dart';
 
 class MenuBar extends StatefulWidget {
   final DatabaseInterfaceKanji databaseInterfaceKanji;
+  final DatabaseInterfaceExpression databaseInterfaceExpression;
   final Search? search;
   final TextEditingController? textEditingController;
   final VoidCallback onSearch;
   final Future<void> Function(String) setExpressionDb;
   final Future<void> Function(String) setKanjiDb;
-  final VoidCallback checkDb;
   final int insertPosition;
   final FocusNode focusNode;
 
   const MenuBar(
       {required this.databaseInterfaceKanji,
+      required this.databaseInterfaceExpression,
       required this.search,
       required this.textEditingController,
       required this.onSearch,
@@ -29,7 +31,6 @@ class MenuBar extends StatefulWidget {
       required this.insertPosition,
       required this.setExpressionDb,
       required this.setKanjiDb,
-      required this.checkDb,
       Key? key})
       : super(key: key);
 
@@ -149,26 +150,15 @@ class _MenuBarState extends State<MenuBar> {
                         builder: (context) => SettingsPage(
                             setExpressionDb: widget.setExpressionDb,
                             setKanjiDb: widget.setKanjiDb))).then((_) {
-                  widget.checkDb();
+                  widget.databaseInterfaceExpression.setStatus();
+                  widget.databaseInterfaceKanji.setStatus();
                 })),
         Row(
           children: <Widget>[
             popupMenuButtonInsert,
             IconButton(icon: const Icon(Icons.translate), onPressed: convert),
             const ToggleSearchTypeButton(),
-            /*IconButton(
-                icon: const Icon(Icons.clear),
-                onPressed: () {
-                  widget.textEditingController!.clear();
-                  widget.search!.searchResults.clear();
-                  //widget.search!.input = '';
-                  widget.focusNode.requestFocus();
-                }),*/
             popupMenuButtonInputs,
-            /*IconButton(
-              icon: const Icon(Icons.search),
-              onPressed: () => widget.onSearch(),
-            )*/
           ],
         ),
       ]),

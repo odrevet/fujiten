@@ -63,6 +63,7 @@ class DatabaseInterfaceKanji extends DatabaseInterface {
     });
   }
 
+  @override
   Future<int?> count() async {
     try {
       var x = await database!.rawQuery("SELECT count(character.id) from character;");
