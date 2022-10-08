@@ -199,10 +199,26 @@ class _ResultsWidgetState extends State<ResultsWidget> {
               .state
               .inputs[context.read<InputCubit>().state.searchIndex]
               .isEmpty) {
-            child = const Text(
-              "Welcome to Fujiten",
-              //"Kanji DB: ${widget.databaseInterfaceKanji.status.toString()}\n Expression DB: ${widget.databaseInterfaceExpression.status.toString()}",
-              style: TextStyle(fontSize: 18),
+            child = Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                const Text(
+                  "Welcome to Fujiten",
+                  style: TextStyle(fontSize: 18),
+                ),
+                ElevatedButton(
+                    onPressed: () {
+                      showDialog(
+                          context: context,
+                          builder: (_) => AlertDialog(
+                                title: const Center(child: Text('DB Status')),
+                                content: Text(
+                                    "Kanji DB: ${widget.databaseInterfaceKanji.status.toString()}\n Expression DB: ${widget.databaseInterfaceExpression.status.toString()}"),
+                              ));
+                    },
+                    child: const Text("Check DB status"))
+              ],
             );
           } else {
             child = ListView.separated(
