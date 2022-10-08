@@ -108,7 +108,8 @@ class _MenuBarState extends State<MenuBar> {
           widget.textEditingController!.text =
               context.read<SearchCubit>().state.inputs[searchIndex];
         } else if (result == "clear") {
-          widget.textEditingController!.text = "";
+          widget.textEditingController!.clear();
+          widget.focusNode.requestFocus();
         } else {
           context.read<SearchCubit>().setSearchIndex(result);
           widget.textEditingController!.text = context.read<SearchCubit>().state.inputs[result];
