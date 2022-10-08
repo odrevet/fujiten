@@ -178,9 +178,7 @@ class _MainWidgetState extends State<MainWidget> {
                 ResultsWidget(
                     databaseInterfaceKanji,
                     databaseInterfaceExpression,
-                    onEndReached,
-                    context.read<SearchCubit>().state.isLoading,
-                    context.read<SearchCubit>().state.isLoadingNextPage)
+                    onEndReached)
               ],
             )));
   }

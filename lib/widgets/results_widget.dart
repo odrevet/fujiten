@@ -16,11 +16,9 @@ class ResultsWidget extends StatefulWidget {
   final DatabaseInterfaceKanji databaseInterfaceKanji;
   final DatabaseInterfaceExpression databaseInterfaceExpression;
   final Function onEndReached;
-  final bool isLoading;
-  final bool isLoadingNextPage;
 
   const ResultsWidget(this.databaseInterfaceKanji, this.databaseInterfaceExpression,
-      this.onEndReached, this.isLoading, this.isLoadingNextPage,
+      this.onEndReached,
       {Key? key})
       : super(key: key);
 
@@ -52,8 +50,8 @@ class _ResultsWidgetState extends State<ResultsWidget> {
   scrollListener() {
     if (_scrollController!.offset >= _scrollController!.position.maxScrollExtent &&
         !_scrollController!.position.outOfRange &&
-        !widget.isLoading &&
-        !widget.isLoadingNextPage) {
+        !context.read<SearchCubit>().state.isLoading &&
+        !context.read<SearchCubit>().state.isLoadingNextPage) {
       widget.onEndReached();
     }
   }
