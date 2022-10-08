@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:fujiten/cubits/search_cubit.dart';
 import 'package:fujiten/services/database_interface_expression.dart';
 import 'package:fujiten/services/database_interface_kanji.dart';
 import 'package:fujiten/widgets/toggle_search_type_button.dart';
 
+import '../cubits/input_cubit.dart';
 import '../models/search.dart';
 import '../string_utils.dart';
 import 'radical_page.dart';
@@ -83,7 +83,7 @@ class _MenuBarState extends State<MenuBar> {
             addStringInController('.*');
             break;
         }
-        context.read<SearchCubit>().setInput(widget.textEditingController!.text);
+        context.read<InputCubit>().setInput(widget.textEditingController!.text);
       },
       itemBuilder: (context) => [
         const PopupMenuItem(value: 0, child: Text('<> Radicals')),
@@ -97,27 +97,25 @@ class _MenuBarState extends State<MenuBar> {
       icon: const Icon(Icons.list),
       onSelected: (dynamic result) {
         if (result == "add") {
-          context.read<SearchCubit>().addInput();
-          int searchIndex = context.read<SearchCubit>().state.inputs.length - 1;
-          context.read<SearchCubit>().setSearchIndex(searchIndex);
-          widget.textEditingController!.text =
-              context.read<SearchCubit>().state.inputs[searchIndex];
+          context.read<InputCubit>().addInput();
+          int searchIndex = context.read<InputCubit>().state.inputs.length - 1;
+          context.read<InputCubit>().setSearchIndex(searchIndex);
+          widget.textEditingController!.text = context.read<InputCubit>().state.inputs[searchIndex];
         } else if (result == "remove") {
-          context.read<SearchCubit>().removeInput(context.read<SearchCubit>().state.searchIndex);
-          int searchIndex = context.read<SearchCubit>().state.searchIndex--;
-          context.read<SearchCubit>().setSearchIndex(searchIndex);
-          widget.textEditingController!.text =
-              context.read<SearchCubit>().state.inputs[searchIndex];
+          context.read<InputCubit>().removeInput(context.read<InputCubit>().state.searchIndex);
+          int searchIndex = context.read<InputCubit>().state.searchIndex--;
+          context.read<InputCubit>().setSearchIndex(searchIndex);
+          widget.textEditingController!.text = context.read<InputCubit>().state.inputs[searchIndex];
         } else if (result == "clear") {
           widget.textEditingController!.clear();
           widget.focusNode.requestFocus();
         } else {
-          context.read<SearchCubit>().setSearchIndex(result);
-          widget.textEditingController!.text = context.read<SearchCubit>().state.inputs[result];
+          context.read<InputCubit>().setSearchIndex(result);
+          widget.textEditingController!.text = context.read<InputCubit>().state.inputs[result];
         }
       },
       itemBuilder: (itemBuilderContext) => context
-          .read<SearchCubit>()
+          .read<InputCubit>()
           .state
           .inputs
           .asMap()
@@ -125,14 +123,14 @@ class _MenuBarState extends State<MenuBar> {
           .map<PopupMenuEntry<dynamic>>((entry) => PopupMenuItem(
               value: entry.key,
               child: Text("${entry.key}   ${entry.value}",
-                  style: entry.key == context.read<SearchCubit>().state.searchIndex
+                  style: entry.key == context.read<InputCubit>().state.searchIndex
                       ? const TextStyle(color: Colors.blue)
                       : null)))
           .toList()
         ..add(const PopupMenuItem(value: "add", child: Text("+ New input")))
         ..add(PopupMenuItem(
             value: "remove",
-            enabled: context.read<SearchCubit>().state.inputs.length > 1,
+            enabled: context.read<InputCubit>().state.inputs.length > 1,
             child: const Text("- Remove input")))
         ..add(PopupMenuItem(
             value: "clear",
@@ -216,7 +214,7 @@ class _MenuBarState extends State<MenuBar> {
         }
       }
 
-      context.read<SearchCubit>().setInput(widget.textEditingController!.text);
+      context.read<InputCubit>().setInput(widget.textEditingController!.text);
     });
   }
 }

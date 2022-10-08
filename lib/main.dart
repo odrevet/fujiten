@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:fujiten/cubits/search_cubit.dart';
 
+import 'cubits/input_cubit.dart';
 import 'cubits/theme_cubit.dart';
 import 'widgets/main_widget.dart';
 
@@ -19,9 +20,11 @@ class App extends StatelessWidget {
         create: (_) => ThemeCubit(),
         child: BlocBuilder<ThemeCubit, ThemeData>(
           builder: (context, themeData) => MaterialApp(
-            title: "fujiten",
+            title: "Fujiten",
             theme: themeData,
-            home: BlocProvider(create: (_) => SearchCubit(), child: MainWidget()),
+            home: BlocProvider(
+                create: (_) => InputCubit(),
+                child: BlocProvider(create: (_) => SearchCubit(), child: MainWidget())),
           ),
         ));
   }

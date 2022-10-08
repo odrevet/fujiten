@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../cubits/search_cubit.dart';
+import '../cubits/input_cubit.dart';
 
 class SearchInput extends StatefulWidget {
   final VoidCallback onSubmitted;
@@ -38,7 +38,7 @@ class _SearchInputState extends State<SearchInput> {
     return Padding(
       padding: const EdgeInsets.only(left: 12, right: 12),
       child: TextField(
-        onChanged: (text) => context.read<SearchCubit>().setInput(text),
+        onChanged: (text) => context.read<InputCubit>().setInput(text),
         onSubmitted: (_) => widget.onSubmitted(),
         textInputAction: TextInputAction.search,
         style: const TextStyle(fontSize: 32.0),

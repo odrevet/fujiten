@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:fujiten/cubits/search_cubit.dart';
 import 'package:fujiten/services/database_interface_kanji.dart';
 
+import '../cubits/input_cubit.dart';
 import '../models/entry.dart';
 import '../models/kanji.dart';
 import '../models/search.dart';
@@ -185,11 +186,19 @@ class _ResultsWidgetState extends State<ResultsWidget> {
         child = const CircularProgressIndicator();
       } else {
         if (search.searchResults.isEmpty &&
-            search.inputs[context.read<SearchCubit>().state.searchIndex].isNotEmpty) {
+            context
+                .read<InputCubit>()
+                .state
+                .inputs[context.read<InputCubit>().state.searchIndex]
+                .isNotEmpty) {
           child = Text(
-              "No results for '${search.inputs[context.read<SearchCubit>().state.searchIndex]}'");
+              "No results for '${context.read<InputCubit>().state.inputs[context.read<InputCubit>().state.searchIndex]}'");
         } else {
-          if (search.inputs[context.read<SearchCubit>().state.searchIndex].isEmpty) {
+          if (context
+              .read<InputCubit>()
+              .state
+              .inputs[context.read<InputCubit>().state.searchIndex]
+              .isEmpty) {
             child = Text(
               "Kanji DB: ${widget.databaseInterfaceKanji.status.toString()}\n Expression DB: ${widget.databaseInterfaceExpression.status.toString()}",
               style: const TextStyle(fontSize: 18),

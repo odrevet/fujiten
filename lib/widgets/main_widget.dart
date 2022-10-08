@@ -4,6 +4,7 @@ import 'package:fujiten/cubits/search_cubit.dart';
 import 'package:fujiten/models/search.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../cubits/input_cubit.dart';
 import '../cubits/theme_cubit.dart';
 import '../services/database_interface_expression.dart';
 import '../services/database_interface_kanji.dart';
@@ -35,7 +36,7 @@ class _MainWidgetState extends State<MainWidget> {
   initState() {
     super.initState();
 
-    context.read<SearchCubit>().addInput();
+    context.read<InputCubit>().addInput();
 
     databaseInterfaceExpression = DatabaseInterfaceExpression();
     databaseInterfaceKanji = DatabaseInterfaceKanji();
@@ -80,12 +81,13 @@ class _MainWidgetState extends State<MainWidget> {
     if (widget._textEditingController.text != "") {
       formatInput(widget._textEditingController.text, databaseInterfaceKanji)
           .then((formattedInput) {
+        context.read<InputCubit>().setFormattedInput(formattedInput);
         context.read<SearchCubit>().reset();
-        context.read<SearchCubit>().setFormattedInput(formattedInput);
         context.read<SearchCubit>().runSearch(
             context.read<SearchCubit>().state.searchType == SearchType.kanji
                 ? databaseInterfaceKanji
-                : databaseInterfaceExpression);
+                : databaseInterfaceExpression,
+            formattedInput);
       });
     }
 
@@ -102,7 +104,8 @@ class _MainWidgetState extends State<MainWidget> {
     var searchType = context.read<SearchCubit>().state.searchType;
     context.read<SearchCubit>().nextPage();
     context.read<SearchCubit>().runSearch(
-        searchType == SearchType.kanji ? databaseInterfaceKanji : databaseInterfaceExpression);
+        searchType == SearchType.kanji ? databaseInterfaceKanji : databaseInterfaceExpression,
+        context.read<InputCubit>().state.formattedInput);
   }
 
   @override
