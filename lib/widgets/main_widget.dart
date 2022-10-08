@@ -54,7 +54,6 @@ class _MainWidgetState extends State<MainWidget> {
       String? path = prefs.getString("expression_path");
       if (path != null) {
         await setExpressionDb(path);
-        databaseInterfaceExpression.setStatus();
       }
     });
 
@@ -62,7 +61,6 @@ class _MainWidgetState extends State<MainWidget> {
       String? path = prefs.getString("kanji_path");
       if (path != null) {
         await setKanjiDb(path);
-        databaseInterfaceKanji.setStatus();
       }
     });
   }
@@ -109,6 +107,8 @@ class _MainWidgetState extends State<MainWidget> {
 
   @override
   Widget build(BuildContext context) {
+    databaseInterfaceKanji.setStatus();
+    databaseInterfaceExpression.setStatus();
     return BlocBuilder<SearchCubit, Search>(
         builder: (context, search) => Scaffold(
             key: _scaffoldKey,
