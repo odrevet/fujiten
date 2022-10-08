@@ -127,6 +127,8 @@ class _MainWidgetState extends State<MainWidget> {
                 : databaseInterfaceExpression);
       });
     }
+
+    focusNode.unfocus();
   }
 
   void onFocusChanged(bool hasFocus) async {
