@@ -102,7 +102,7 @@ class _MenuBarState extends State<MenuBar> {
           context.read<InputCubit>().setSearchIndex(searchIndex);
           widget.textEditingController!.text = context.read<InputCubit>().state.inputs[searchIndex];
         } else if (result == "remove") {
-          context.read<InputCubit>().removeInput(context.read<InputCubit>().state.searchIndex);
+          context.read<InputCubit>().removeInput();
           int searchIndex = context.read<InputCubit>().state.searchIndex--;
           context.read<InputCubit>().setSearchIndex(searchIndex);
           widget.textEditingController!.text = context.read<InputCubit>().state.inputs[searchIndex];

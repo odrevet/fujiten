@@ -199,9 +199,10 @@ class _ResultsWidgetState extends State<ResultsWidget> {
               .state
               .inputs[context.read<InputCubit>().state.searchIndex]
               .isEmpty) {
-            child = Text(
-              "Kanji DB: ${widget.databaseInterfaceKanji.status.toString()}\n Expression DB: ${widget.databaseInterfaceExpression.status.toString()}",
-              style: const TextStyle(fontSize: 18),
+            child = const Text(
+              "Welcome to Fujiten",
+              //"Kanji DB: ${widget.databaseInterfaceKanji.status.toString()}\n Expression DB: ${widget.databaseInterfaceExpression.status.toString()}",
+              style: TextStyle(fontSize: 18),
             );
           } else {
             child = ListView.separated(
