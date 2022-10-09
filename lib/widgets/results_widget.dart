@@ -100,24 +100,26 @@ class _ResultsWidgetState extends State<ResultsWidget> {
           ),
         ),
         // Other japanese reading forms
-        Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: searchResult.reading.skip(1).map<Widget>((reading) {
-              List<String> literals = [];
-              for (int i = 0; i < reading.length; i++) {
-                if (kanaKit.isKanji(reading[i])) {
-                  literals.add(reading[i]);
+        Wrap(
+          children: [Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: searchResult.reading.skip(1).map<Widget>((reading) {
+                List<String> literals = [];
+                for (int i = 0; i < reading.length; i++) {
+                  if (kanaKit.isKanji(reading[i])) {
+                    literals.add(reading[i]);
+                  }
                 }
-              }
-              return InkWell(
-                  onTap: () => literals.isNotEmpty ? showDialog(
-                      context: context,
-                      builder: (_) => AlertDialog(
-                            title: const Center(child: Text('Kanji')),
-                            content: _kanjiDialogContent(literals),
-                          )) : null,
-                  child: Text(reading, style: const TextStyle(fontSize: 16.0)));
-            }).toList()),
+                return InkWell(
+                    onTap: () => literals.isNotEmpty ? showDialog(
+                        context: context,
+                        builder: (_) => AlertDialog(
+                              title: const Center(child: Text('Kanji')),
+                              content: _kanjiDialogContent(literals),
+                            )) : null,
+                    child: Text(" $reading ", style: const TextStyle(fontSize: 16.0)));
+              }).toList())],
+        ),
         Align(
           alignment: Alignment.centerLeft,
           child: Column(
