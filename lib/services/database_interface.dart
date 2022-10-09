@@ -26,7 +26,7 @@ abstract class DatabaseInterface {
 
   Future<int> count();
 
-  Future<void> setStatus() async{
+  Future<void> setStatus() async {
     int nbEntries = await count();
     if (nbEntries == 0) {
       status = DatabaseStatus.noResults;

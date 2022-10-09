@@ -63,7 +63,6 @@ class DatabaseInterfaceExpression extends DatabaseInterface {
       sql += " LIMIT $resultsPerPage OFFSET ${currentPage * resultsPerPage}";
     }
 
-
     log(sql);
 
     List<Map<String, dynamic>> queryResults;

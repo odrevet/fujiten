@@ -51,17 +51,21 @@ class _MenuBarState extends State<MenuBar> {
   }
 
   convert() {
-    String? input = widget.textEditingController?.text;
+    String? input = widget.textEditingController?.text!;
+    String convertedInput;
     if (kanaKit.isRomaji(input!)) {
-      widget.textEditingController?.text = kanaKit.toKana(input);
+      convertedInput = kanaKit.toKana(input);
     } else if (kanaKit.isHiragana(input)) {
-      widget.textEditingController?.text = kanaKit.toKatakana(input);
+      convertedInput = kanaKit.toKatakana(input);
     } else if (kanaKit.isKatakana(input)) {
-      widget.textEditingController?.text = kanaKit.toRomaji(input);
+      convertedInput = kanaKit.toRomaji(input);
     } else {
-      // mixed string
-      widget.textEditingController?.text = kanaKit.toKana(input);
+      convertedInput = kanaKit.toKana(input);
     }
+
+    widget.textEditingController?.text = convertedInput;
+    context.read<InputCubit>().state.inputs[context.read<InputCubit>().state.searchIndex] =
+        convertedInput;
   }
 
   @override
