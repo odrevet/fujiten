@@ -103,12 +103,12 @@ class _MenuBarState extends State<MenuBar> {
           widget.textEditingController!.text = context.read<InputCubit>().state.inputs[searchIndex];
         } else if (result == "remove") {
           context.read<InputCubit>().removeInput();
-          int searchIndex = context.read<InputCubit>().state.searchIndex--;
-          context.read<InputCubit>().setSearchIndex(searchIndex);
-          widget.textEditingController!.text = context.read<InputCubit>().state.inputs[searchIndex];
+          widget.textEditingController!.text =
+              context.read<InputCubit>().state.inputs[context.read<InputCubit>().state.searchIndex];
         } else if (result == "clear") {
           widget.textEditingController!.clear();
-          context.read<InputCubit>().state.inputs[context.read<InputCubit>().state.searchIndex] = "";
+          context.read<InputCubit>().state.inputs[context.read<InputCubit>().state.searchIndex] =
+              "";
           widget.focusNode.requestFocus();
         } else {
           context.read<InputCubit>().setSearchIndex(result);
@@ -123,20 +123,34 @@ class _MenuBarState extends State<MenuBar> {
           .entries
           .map<PopupMenuEntry<dynamic>>((entry) => PopupMenuItem(
               value: entry.key,
-              child: Text("${entry.key}   ${entry.value}",
-                  style: entry.key == context.read<InputCubit>().state.searchIndex
-                      ? const TextStyle(color: Colors.blue)
-                      : null)))
+              child: ListTile(
+                leading: Text(entry.key.toString()),
+                title: Text(entry.value),
+                selected: entry.key == context.read<InputCubit>().state.searchIndex,
+              )))
           .toList()
-        ..add(const PopupMenuItem(value: "add", child: Text("+ New")))
+        ..add(const PopupMenuItem(
+            value: "add",
+            child: ListTile(
+              leading: Icon(Icons.add),
+              title: Text('Add'),
+            )))
         ..add(PopupMenuItem(
             value: "remove",
             enabled: context.read<InputCubit>().state.inputs.length > 1,
-            child: const Text("- Remove")))
+            child: ListTile(
+              enabled: context.read<InputCubit>().state.inputs.length > 1,
+              leading: const Icon(Icons.remove),
+              title: const Text('Remove'),
+            )))
         ..add(PopupMenuItem(
             value: "clear",
             enabled: widget.textEditingController!.text != "",
-            child: const Text("x Clear"))),
+            child: ListTile(
+              enabled: widget.textEditingController!.text != "",
+              leading: const Icon(Icons.clear),
+              title: const Text('Clear'),
+            ))),
     );
 
     return AppBar(
