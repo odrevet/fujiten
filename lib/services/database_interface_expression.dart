@@ -1,5 +1,3 @@
-import 'dart:developer';
-
 import 'package:sqflite/sqflite.dart';
 
 import '../models/entry.dart';
@@ -60,8 +58,6 @@ class DatabaseInterfaceExpression extends DatabaseInterface {
                   LEFT JOIN misc on sense_misc.id_misc = misc.id
                   $where
                   GROUP BY sense.id''';
-
-    log(sql);
 
     List<Map<String, dynamic>> queryResults;
     try {
