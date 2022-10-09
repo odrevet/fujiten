@@ -136,11 +136,11 @@ class _ResultsWidgetState extends State<ResultsWidget> {
                   padding: const EdgeInsets.all(4.0),
                   child: RichText(
                     text: TextSpan(
-                        text: '• $pos\n',
+                        text: '$pos\n',
                         style: _styleFieldInformation,
                         children: List.generate(glossesGroupedByPos.value.length, (i) {
                           return TextSpan(
-                              text: senses[i].glosses.join(","),
+                              text: '• ${senses[i].glosses.join(",")}',
                               style: Theme.of(context).textTheme.bodyText2,
                               children: [
                                 TextSpan(
