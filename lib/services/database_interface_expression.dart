@@ -108,10 +108,10 @@ class DatabaseInterfaceExpression extends DatabaseInterface {
   }
 
   @override
-  Future<int?> count() async {
+  Future<int> count() async {
     try {
       var x = await database!.rawQuery("SELECT count(entry.id) from entry;");
-      return Sqflite.firstIntValue(x);
+      return Sqflite.firstIntValue(x) ?? 0;
     } catch (_) {
       return 0;
     }

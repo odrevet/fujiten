@@ -64,10 +64,10 @@ class DatabaseInterfaceKanji extends DatabaseInterface {
   }
 
   @override
-  Future<int?> count() async {
+  Future<int> count() async {
     try {
       var x = await database!.rawQuery("SELECT count(character.id) from character;");
-      return Sqflite.firstIntValue(x);
+      return Sqflite.firstIntValue(x) ?? 0;
     } catch (_) {
       return 0;
     }

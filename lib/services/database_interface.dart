@@ -24,15 +24,14 @@ abstract class DatabaseInterface {
 
   Future<List<Entry>> search(String input, [resultsPerPage = 10, currentPage = 0]);
 
-  Future<int?> count();
+  Future<int> count();
 
-  void setStatus() {
-    count().then((count) async {
-      if (count == 0) {
-        status = DatabaseStatus.noResults;
-      } else {
-        status = DatabaseStatus.ok;
-      }
-    });
+  Future<void> setStatus() async{
+    int nbEntries = await count();
+    if (nbEntries == 0) {
+      status = DatabaseStatus.noResults;
+    } else {
+      status = DatabaseStatus.ok;
+    }
   }
 }

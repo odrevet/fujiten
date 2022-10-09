@@ -230,9 +230,10 @@ class _ResultsWidgetState extends State<ResultsWidget> {
                 ),
                 ElevatedButton(
                     onPressed: () {
-                      widget.databaseInterfaceKanji.setStatus();
-                      widget.databaseInterfaceExpression.setStatus();
-                      showDialog(
+                      Future.wait([
+                        widget.databaseInterfaceKanji.setStatus(),
+                        widget.databaseInterfaceExpression.setStatus()
+                      ]).then((List responses) => showDialog(
                           context: context,
                           builder: (_) => AlertDialog(
                                 title: const Center(child: Text('Databases Status')),
@@ -240,7 +241,7 @@ class _ResultsWidgetState extends State<ResultsWidget> {
                                   databaseInterfaceExpression: widget.databaseInterfaceExpression,
                                   databaseInterfaceKanji: widget.databaseInterfaceKanji,
                                 ),
-                              ));
+                              )));
                     },
                     child: const Text("Check DB status"))
               ],
