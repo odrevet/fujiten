@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:fujiten/cubits/search_cubit.dart';
 import 'package:fujiten/services/database_interface_kanji.dart';
+import 'package:fujiten/widgets/database_status_display.dart';
 
 import '../cubits/input_cubit.dart';
 import '../models/entry.dart';
@@ -87,12 +88,14 @@ class _ResultsWidgetState extends State<ResultsWidget> {
         title: Column(
       children: <Widget>[
         InkWell(
-          onTap: () => literals.isNotEmpty ? showDialog(
-              context: context,
-              builder: (_) => AlertDialog(
-                    title: const Center(child: Text('Kanji')),
-                    content: _kanjiDialogContent(literals),
-                  )) : null,
+          onTap: () => literals.isNotEmpty
+              ? showDialog(
+                  context: context,
+                  builder: (_) => AlertDialog(
+                        title: const Center(child: Text('Kanji')),
+                        content: _kanjiDialogContent(literals),
+                      ))
+              : null,
           onDoubleTap: () => Clipboard.setData(ClipboardData(text: searchResult.reading)),
           child: Text(
             '${searchResult.reading.isNotEmpty ? searchResult.reading[0] : ''}',
@@ -101,24 +104,28 @@ class _ResultsWidgetState extends State<ResultsWidget> {
         ),
         // Other japanese reading forms
         Wrap(
-          children: [Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: searchResult.reading.skip(1).map<Widget>((reading) {
-                List<String> literals = [];
-                for (int i = 0; i < reading.length; i++) {
-                  if (kanaKit.isKanji(reading[i])) {
-                    literals.add(reading[i]);
+          children: [
+            Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: searchResult.reading.skip(1).map<Widget>((reading) {
+                  List<String> literals = [];
+                  for (int i = 0; i < reading.length; i++) {
+                    if (kanaKit.isKanji(reading[i])) {
+                      literals.add(reading[i]);
+                    }
                   }
-                }
-                return InkWell(
-                    onTap: () => literals.isNotEmpty ? showDialog(
-                        context: context,
-                        builder: (_) => AlertDialog(
-                              title: const Center(child: Text('Kanji')),
-                              content: _kanjiDialogContent(literals),
-                            )) : null,
-                    child: Text(" $reading ", style: const TextStyle(fontSize: 16.0)));
-              }).toList())],
+                  return InkWell(
+                      onTap: () => literals.isNotEmpty
+                          ? showDialog(
+                              context: context,
+                              builder: (_) => AlertDialog(
+                                    title: const Center(child: Text('Kanji')),
+                                    content: _kanjiDialogContent(literals),
+                                  ))
+                          : null,
+                      child: Text(" $reading ", style: const TextStyle(fontSize: 16.0)));
+                }).toList())
+          ],
         ),
         Align(
           alignment: Alignment.centerLeft,
@@ -163,7 +170,7 @@ class _ResultsWidgetState extends State<ResultsWidget> {
           future: widget.databaseInterfaceKanji.getCharactersFromLiterals(literals),
           builder: (context, snapshot) {
             if (snapshot.hasData) {
-              final List<Kanji>sortedCharacters = List.from(snapshot.data!)
+              final List<Kanji> sortedCharacters = List.from(snapshot.data!)
                 ..sort((a, b) => literals.indexOf(a.literal) - literals.indexOf(b.literal));
               return ListView.separated(
                   shrinkWrap: true,
@@ -226,9 +233,11 @@ class _ResultsWidgetState extends State<ResultsWidget> {
                       showDialog(
                           context: context,
                           builder: (_) => AlertDialog(
-                                title: const Center(child: Text('DB Status')),
-                                content: Text(
-                                    "Kanji DB: ${widget.databaseInterfaceKanji.status.toString()}\n Expression DB: ${widget.databaseInterfaceExpression.status.toString()}"),
+                                title: const Center(child: Text('Databases Status')),
+                                content: DatabaseStatusDisplay(
+                                  databaseInterfaceExpression: widget.databaseInterfaceExpression,
+                                  databaseInterfaceKanji: widget.databaseInterfaceKanji,
+                                ),
                               ));
                     },
                     child: const Text("Check DB status"))
