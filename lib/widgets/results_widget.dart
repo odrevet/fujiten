@@ -115,15 +115,14 @@ class _ResultsWidgetState extends State<ResultsWidget> {
               return InkWell(
                   onTap: () => literals.isNotEmpty
                       ? showDialog(
-                      context: context,
-                      builder: (_) => AlertDialog(
-                        title: const Center(child: Text('Kanji')),
-                        content: _kanjiDialogContent(literals),
-                      ))
+                          context: context,
+                          builder: (_) => AlertDialog(
+                                title: const Center(child: Text('Kanji')),
+                                content: _kanjiDialogContent(literals),
+                              ))
                       : null,
                   child: Text(" $reading ", style: const TextStyle(fontSize: 16.0)));
-            }).toList())
-        ,
+            }).toList()),
         Align(
           alignment: Alignment.centerLeft,
           child: Column(

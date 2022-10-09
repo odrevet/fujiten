@@ -51,7 +51,7 @@ class _MenuBarState extends State<MenuBar> {
   }
 
   convert() {
-    String? input = widget.textEditingController?.text!;
+    String? input = widget.textEditingController?.text;
     String convertedInput;
     if (kanaKit.isRomaji(input!)) {
       convertedInput = kanaKit.toKana(input);

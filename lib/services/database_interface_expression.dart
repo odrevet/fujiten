@@ -12,30 +12,23 @@ class DatabaseInterfaceExpression extends DatabaseInterface {
 
   @override
   Future<List<ExpressionEntry>> search(String input, [resultsPerPage, currentPage = 0]) async {
-    String joins = '''JOIN sense ON sense.id_entry = entry.id
-                    JOIN gloss ON gloss.id_sense = sense.id
-                    LEFT JOIN sense_pos on sense.id = sense_pos.id_sense 
-                    LEFT JOIN pos on sense_pos.id_pos = pos.id
-                    LEFT JOIN sense_dial on sense.id = sense_dial.id_sense 
-                    LEFT JOIN dial on sense_dial.id_dial = dial.id
-                    LEFT JOIN sense_field on sense.id = sense_field.id_sense 
-                    LEFT JOIN field on sense_field.id_field = field.id
-                    LEFT JOIN sense_misc on sense.id = sense_misc.id_sense 
-                    LEFT JOIN misc on sense_misc.id_misc = misc.id''';
-
     String where;
     if (kanaKit.isRomaji(input)) {
       where =
-          "WHERE entry.id IN (SELECT sense.id_entry FROM sense JOIN gloss ON gloss.id_sense = sense.id WHERE gloss.content REGEXP '$input')";
+          "WHERE entry.id IN (SELECT DISTINCT sense.id_entry FROM sense JOIN gloss ON gloss.id_sense = sense.id WHERE gloss.content REGEXP '$input'";
     } else {
-      // optimize the search: if the input does not contains a kanji it's useless to search in the reb
+      // if the input does not contains a kanji do not search in the reb
       var regExp = RegExp(regexKanji);
       var hasKanji = regExp.hasMatch(input);
-
-      where = "WHERE (keb REGEXP '$input' ${hasKanji ? "" : "OR reb REGEXP '$input'"})";
-      joins += '''\nJOIN r_ele on entry.id = r_ele.id_entry
-                LEFT JOIN k_ele on entry.id = k_ele.id_entry''';
+      where = '''WHERE entry.id IN 
+        (SELECT DISTINCT  entry_sub.id FROM entry entry_sub JOIN sense sense_sub ON entry_sub.id = sense_sub.id_entry JOIN r_ele on entry_sub.id = r_ele.id_entry
+         LEFT JOIN k_ele ON entry_sub.id = k_ele.id_entry WHERE (keb REGEXP '$input' ${hasKanji ? "" : "OR reb REGEXP '$input'"})''';
     }
+
+    if (resultsPerPage != null) {
+      where += " LIMIT $resultsPerPage OFFSET ${currentPage * resultsPerPage}";
+    }
+    where += ')';
 
     String sql = '''SELECT entry.id as entry_id,
                   sense.id as sense_id, 
@@ -55,13 +48,18 @@ class DatabaseInterfaceExpression extends DatabaseInterface {
                   GROUP_CONCAT(DISTINCT field.name) field_group,
                   GROUP_CONCAT(DISTINCT misc.name) misc_group
                   FROM entry
-                  $joins
+                  JOIN sense ON sense.id_entry = entry.id
+                  JOIN gloss ON gloss.id_sense = sense.id
+                  LEFT JOIN sense_pos on sense.id = sense_pos.id_sense 
+                  LEFT JOIN pos on sense_pos.id_pos = pos.id
+                  LEFT JOIN sense_dial on sense.id = sense_dial.id_sense 
+                  LEFT JOIN dial on sense_dial.id_dial = dial.id
+                  LEFT JOIN sense_field on sense.id = sense_field.id_sense 
+                  LEFT JOIN field on sense_field.id_field = field.id
+                  LEFT JOIN sense_misc on sense.id = sense_misc.id_sense 
+                  LEFT JOIN misc on sense_misc.id_misc = misc.id
                   $where
                   GROUP BY sense.id''';
-
-    if (resultsPerPage != null) {
-      sql += " LIMIT $resultsPerPage OFFSET ${currentPage * resultsPerPage}";
-    }
 
     log(sql);
 
