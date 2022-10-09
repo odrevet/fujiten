@@ -110,8 +110,6 @@ class _MainWidgetState extends State<MainWidget> {
 
   @override
   Widget build(BuildContext context) {
-    databaseInterfaceKanji.setStatus();
-    databaseInterfaceExpression.setStatus();
     return BlocBuilder<SearchCubit, Search>(
         builder: (context, search) => Scaffold(
             key: _scaffoldKey,

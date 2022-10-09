@@ -230,6 +230,8 @@ class _ResultsWidgetState extends State<ResultsWidget> {
                 ),
                 ElevatedButton(
                     onPressed: () {
+                      widget.databaseInterfaceKanji.setStatus();
+                      widget.databaseInterfaceExpression.setStatus();
                       showDialog(
                           context: context,
                           builder: (_) => AlertDialog(
