@@ -108,6 +108,7 @@ class _MenuBarState extends State<MenuBar> {
           widget.textEditingController!.text = context.read<InputCubit>().state.inputs[searchIndex];
         } else if (result == "clear") {
           widget.textEditingController!.clear();
+          context.read<InputCubit>().state.inputs[context.read<InputCubit>().state.searchIndex] = "";
           widget.focusNode.requestFocus();
         } else {
           context.read<InputCubit>().setSearchIndex(result);
@@ -127,15 +128,15 @@ class _MenuBarState extends State<MenuBar> {
                       ? const TextStyle(color: Colors.blue)
                       : null)))
           .toList()
-        ..add(const PopupMenuItem(value: "add", child: Text("+ New input")))
+        ..add(const PopupMenuItem(value: "add", child: Text("+ New")))
         ..add(PopupMenuItem(
             value: "remove",
             enabled: context.read<InputCubit>().state.inputs.length > 1,
-            child: const Text("- Remove input")))
+            child: const Text("- Remove")))
         ..add(PopupMenuItem(
             value: "clear",
             enabled: widget.textEditingController!.text != "",
-            child: const Text("x Clear input"))),
+            child: const Text("x Clear"))),
     );
 
     return AppBar(
