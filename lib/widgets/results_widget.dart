@@ -161,7 +161,7 @@ class _ResultsWidgetState extends State<ResultsWidget> {
           future: widget.databaseInterfaceKanji.getCharactersFromLiterals(literals),
           builder: (context, snapshot) {
             if (snapshot.hasData) {
-              final sortedCharacters = List.from(snapshot.data!)
+              final List<Kanji>sortedCharacters = List.from(snapshot.data!)
                 ..sort((a, b) => literals.indexOf(a.literal) - literals.indexOf(b.literal));
               return ListView.separated(
                   shrinkWrap: true,
@@ -173,7 +173,7 @@ class _ResultsWidgetState extends State<ResultsWidget> {
                     return KanjiListTile(
                         onTap: null,
                         onTapLeading: () =>
-                            Clipboard.setData(ClipboardData(text: sortedCharacters[index])),
+                            Clipboard.setData(ClipboardData(text: sortedCharacters[index].literal)),
                         selected: false,
                         kanji: sortedCharacters[index]);
                   });
