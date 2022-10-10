@@ -48,7 +48,7 @@ class DatabaseStatusDisplay extends StatelessWidget {
                   TextSpan(
                     children: [
                       WidgetSpan(child: Icon(Icons.error)),
-                      TextSpan(text: 'Set database in the setting menu'),
+                      TextSpan(text: 'Database must be set from the setting menu'),
                     ],
                   ),
                 )
@@ -56,7 +56,7 @@ class DatabaseStatusDisplay extends StatelessWidget {
                   TextSpan(
                     children: [
                       WidgetSpan(child: Icon(Icons.check)),
-                      TextSpan(text: 'No error'),
+                      TextSpan(text: 'All DB OK'),
                     ],
                   ),
                 )
