@@ -58,7 +58,7 @@ class DatabaseInterfaceExpression extends DatabaseInterface {
                   LEFT JOIN field on sense_field.id_field = field.id
                   LEFT JOIN sense_misc on sense.id = sense_misc.id_sense 
                   LEFT JOIN misc on sense_misc.id_misc = misc.id
-                  WHERE entry.id IN ($subQuery())
+                  WHERE entry.id IN (${subQuery(input, resultsPerPage, currentPage)})
                   GROUP BY sense.id''';
 
     List<Map<String, dynamic>> queryResults;
