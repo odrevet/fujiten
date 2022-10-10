@@ -8,26 +8,28 @@ import 'database_interface.dart';
 class DatabaseInterfaceExpression extends DatabaseInterface {
   DatabaseInterfaceExpression({super.database});
 
-  @override
-  Future<List<ExpressionEntry>> search(String input, [resultsPerPage, currentPage = 0]) async {
-    String where;
+  String subQuery(String input, int? resultsPerPage, int currentPage){
+    String sql;
     if (kanaKit.isRomaji(input)) {
-      where =
-          "WHERE entry.id IN (SELECT DISTINCT sense.id_entry FROM sense JOIN gloss ON gloss.id_sense = sense.id WHERE gloss.content REGEXP '$input'";
+      sql =
+      "SELECT DISTINCT sense.id_entry FROM sense JOIN gloss ON gloss.id_sense = sense.id WHERE gloss.content REGEXP '$input'";
     } else {
       // if the input does not contains a kanji do not search in the reb
       var regExp = RegExp(regexKanji);
       var hasKanji = regExp.hasMatch(input);
-      where = '''WHERE entry.id IN 
+      sql = '''WHERE entry.id IN 
         (SELECT DISTINCT  entry_sub.id FROM entry entry_sub JOIN sense sense_sub ON entry_sub.id = sense_sub.id_entry JOIN r_ele on entry_sub.id = r_ele.id_entry
          LEFT JOIN k_ele ON entry_sub.id = k_ele.id_entry WHERE (keb REGEXP '$input' ${hasKanji ? "" : "OR reb REGEXP '$input'"})''';
     }
 
     if (resultsPerPage != null) {
-      where += " LIMIT $resultsPerPage OFFSET ${currentPage * resultsPerPage}";
+      sql += " LIMIT $resultsPerPage OFFSET ${currentPage * resultsPerPage}";
     }
-    where += ')';
+    return sql;
+  }
 
+  @override
+  Future<List<ExpressionEntry>> search(String input, [int? resultsPerPage, int currentPage = 0]) async {
     String sql = '''SELECT entry.id as entry_id,
                   sense.id as sense_id, 
                   (
@@ -56,7 +58,7 @@ class DatabaseInterfaceExpression extends DatabaseInterface {
                   LEFT JOIN field on sense_field.id_field = field.id
                   LEFT JOIN sense_misc on sense.id = sense_misc.id_sense 
                   LEFT JOIN misc on sense_misc.id_misc = misc.id
-                  $where
+                  WHERE entry.id IN ($subQuery())
                   GROUP BY sense.id''';
 
     List<Map<String, dynamic>> queryResults;

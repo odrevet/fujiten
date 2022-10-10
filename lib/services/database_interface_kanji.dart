@@ -9,7 +9,7 @@ class DatabaseInterfaceKanji extends DatabaseInterface {
   DatabaseInterfaceKanji({super.database});
 
   @override
-  Future<List<KanjiEntry>> search(String input, [resultsPerPage, currentPage = 0]) async {
+  Future<List<KanjiEntry>> search(String input, [int? resultsPerPage, int currentPage = 0]) async {
     String where;
 
     Iterable<RegExpMatch> matchesKanji = RegExp(regexKanji).allMatches(input);
