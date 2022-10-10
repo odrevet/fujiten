@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:sqflite/sqflite.dart';
 
 import '../models/entry.dart';
@@ -8,17 +10,17 @@ import 'database_interface.dart';
 class DatabaseInterfaceExpression extends DatabaseInterface {
   DatabaseInterfaceExpression({super.database});
 
-  String subQuery(String input, int? resultsPerPage, int currentPage){
+  String subQuery(String input, int? resultsPerPage, int currentPage) {
     String sql;
     if (kanaKit.isRomaji(input)) {
       sql =
-      "SELECT DISTINCT sense.id_entry FROM sense JOIN gloss ON gloss.id_sense = sense.id WHERE gloss.content REGEXP '$input'";
+          "SELECT DISTINCT sense.id_entry FROM sense JOIN gloss ON gloss.id_sense = sense.id WHERE gloss.content REGEXP '$input'";
     } else {
       // if the input does not contains a kanji do not search in the reb
       var regExp = RegExp(regexKanji);
       var hasKanji = regExp.hasMatch(input);
-      sql = '''WHERE entry.id IN 
-        (SELECT DISTINCT  entry_sub.id FROM entry entry_sub JOIN sense sense_sub ON entry_sub.id = sense_sub.id_entry JOIN r_ele on entry_sub.id = r_ele.id_entry
+      sql =
+          '''SELECT DISTINCT  entry_sub.id FROM entry entry_sub JOIN sense sense_sub ON entry_sub.id = sense_sub.id_entry JOIN r_ele on entry_sub.id = r_ele.id_entry
          LEFT JOIN k_ele ON entry_sub.id = k_ele.id_entry WHERE (keb REGEXP '$input' ${hasKanji ? "" : "OR reb REGEXP '$input'"})''';
     }
 
@@ -29,7 +31,8 @@ class DatabaseInterfaceExpression extends DatabaseInterface {
   }
 
   @override
-  Future<List<ExpressionEntry>> search(String input, [int? resultsPerPage, int currentPage = 0]) async {
+  Future<List<ExpressionEntry>> search(String input,
+      [int? resultsPerPage, int currentPage = 0]) async {
     String sql = '''SELECT entry.id as entry_id,
                   sense.id as sense_id, 
                   (
@@ -61,6 +64,7 @@ class DatabaseInterfaceExpression extends DatabaseInterface {
                   WHERE entry.id IN (${subQuery(input, resultsPerPage, currentPage)})
                   GROUP BY sense.id''';
 
+    log(sql);
     List<Map<String, dynamic>> queryResults;
     try {
       queryResults = await database!.rawQuery(sql);
