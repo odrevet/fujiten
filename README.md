@@ -2,6 +2,14 @@ Fujiten is a Japanese dictionary application made with the flutter framework.
 
 Definition and kanji comes from the EDICT dictionary, compiled as a database from the edict_database project.
 
+[<img src="https://fdroid.gitlab.io/artwork/badge/get-it-on.png"
+     alt="Get it on F-Droid"
+     height="80">](https://f-droid.org/packages/fr.odrevet.fujiten/)
+[<img src="https://play.google.com/intl/en_us/badges/images/generic/en-play-badge.png"
+     alt="Get it on Google Play"
+     height="80">](https://play.google.com/store/apps/details?id=fr.odrevet.fujiten)
+
+or get the APK from the [Releases Section](https://github.com/odrevet/fujiten/releases/latest)
 
 # Setup
 
