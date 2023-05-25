@@ -140,7 +140,7 @@ class _ResultsWidgetState extends State<ResultsWidget> {
                         children: List.generate(glossesGroupedByPos.value.length, (i) {
                           return TextSpan(
                               text: '• ${senses[i].glosses.join(",")}',
-                              style: Theme.of(context).textTheme.bodyText2,
+                              style: Theme.of(context).textTheme.bodyMedium,
                               children: [
                                 TextSpan(
                                     text: " ${senses[i].dial.join(",")}",

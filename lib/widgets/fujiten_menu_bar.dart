@@ -10,7 +10,7 @@ import '../string_utils.dart';
 import 'radical_page.dart';
 import 'settings/settings.dart';
 
-class MenuBar extends StatefulWidget {
+class FujitenMenuBar extends StatefulWidget {
   final DatabaseInterfaceKanji databaseInterfaceKanji;
   final DatabaseInterfaceExpression databaseInterfaceExpression;
   final Search? search;
@@ -21,7 +21,7 @@ class MenuBar extends StatefulWidget {
   final int insertPosition;
   final FocusNode focusNode;
 
-  const MenuBar(
+  const FujitenMenuBar(
       {required this.databaseInterfaceKanji,
       required this.databaseInterfaceExpression,
       required this.search,
@@ -35,10 +35,10 @@ class MenuBar extends StatefulWidget {
       : super(key: key);
 
   @override
-  State<MenuBar> createState() => _MenuBarState();
+  State<FujitenMenuBar> createState() => _FujitenMenuBarState();
 }
 
-class _MenuBarState extends State<MenuBar> {
+class _FujitenMenuBarState extends State<FujitenMenuBar> {
   addStringInController(String input) {
     if (widget.insertPosition >= 0) {
       widget.textEditingController!.text =

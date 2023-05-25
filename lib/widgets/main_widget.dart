@@ -9,7 +9,7 @@ import '../cubits/theme_cubit.dart';
 import '../services/database_interface_expression.dart';
 import '../services/database_interface_kanji.dart';
 import '../string_utils.dart';
-import 'menu_bar.dart';
+import 'fujiten_menu_bar.dart';
 import 'results_widget.dart';
 import 'search_input.dart';
 
@@ -124,7 +124,7 @@ class _MainWidgetState extends State<MainWidget> {
             appBar: PreferredSize(
               preferredSize: const Size.fromHeight(56),
               child: Builder(
-                builder: (context) => MenuBar(
+                builder: (context) => FujitenMenuBar(
                     setExpressionDb: setExpressionDb,
                     setKanjiDb: setKanjiDb,
                     databaseInterfaceKanji: databaseInterfaceKanji,
