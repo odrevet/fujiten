@@ -44,7 +44,7 @@ class SettingsPage extends StatelessWidget {
                           context: context,
                           applicationName: appName,
                           applicationVersion: version,
-                          applicationLegalese: '''2022 Olivier Drevet All right reserved
+                          applicationLegalese: '''2022-2024 Olivier Drevet All right reserved
 This software uses data from JMDict, Kanjidic2, Radkfile by the Electronic Dictionary Research and Development Group
 under the Creative Commons Attribution-ShareAlike Licence (V3.0)''');
                     })
