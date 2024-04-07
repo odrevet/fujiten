@@ -7,7 +7,11 @@ class SearchCubit extends Cubit<Search> {
   SearchCubit() : super(Search());
 
   void reset() => emit(state.copyWith(
-      searchResults: [], isLoading: false, isLoadingNextPage: false, totalResult: 0, page: 0));
+      searchResults: [],
+      isLoading: false,
+      isLoadingNextPage: false,
+      totalResult: 0,
+      page: 0));
 
   void nextPage() {
     emit(state.copyWith(page: ++state.page, isLoadingNextPage: true));
@@ -35,5 +39,7 @@ class SearchCubit extends Cubit<Search> {
   }
 
   void toggleSearchType() => emit(state.copyWith(
-      searchType: state.searchType == SearchType.kanji ? SearchType.expression : SearchType.kanji));
+      searchType: state.searchType == SearchType.kanji
+          ? SearchType.expression
+          : SearchType.kanji));
 }

@@ -45,7 +45,9 @@ class _MainWidgetState extends State<MainWidget> {
     _prefs.then((SharedPreferences prefs) async {
       bool? isLight = prefs.getBool("darkTheme");
       if (isLight == true) {
-        context.read<ThemeCubit>().updateTheme(ThemeData(brightness: Brightness.dark));
+        context
+            .read<ThemeCubit>()
+            .updateTheme(ThemeData(brightness: Brightness.dark));
       }
     });
   }
@@ -66,9 +68,11 @@ class _MainWidgetState extends State<MainWidget> {
     });
   }
 
-  Future<void> setExpressionDb(String path) async => await databaseInterfaceExpression.open(path);
+  Future<void> setExpressionDb(String path) async =>
+      await databaseInterfaceExpression.open(path);
 
-  Future<void> setKanjiDb(String path) async => databaseInterfaceKanji.open(path);
+  Future<void> setKanjiDb(String path) async =>
+      databaseInterfaceKanji.open(path);
 
   @override
   void dispose() {
@@ -104,7 +108,9 @@ class _MainWidgetState extends State<MainWidget> {
     var searchType = context.read<SearchCubit>().state.searchType;
     context.read<SearchCubit>().nextPage();
     context.read<SearchCubit>().runSearch(
-        searchType == SearchType.kanji ? databaseInterfaceKanji : databaseInterfaceExpression,
+        searchType == SearchType.kanji
+            ? databaseInterfaceKanji
+            : databaseInterfaceExpression,
         context.read<InputCubit>().state.formattedInput);
   }
 
@@ -113,14 +119,18 @@ class _MainWidgetState extends State<MainWidget> {
     return BlocBuilder<SearchCubit, Search>(
         builder: (context, search) => Scaffold(
             key: _scaffoldKey,
-            floatingActionButton: context.read<SearchCubit>().state.isLoadingNextPage
-                ? const FloatingActionButton(
-                    onPressed: null,
-                    backgroundColor: Colors.white,
-                    mini: true,
-                    child: SizedBox(height: 10, width: 10, child: CircularProgressIndicator()),
-                  )
-                : null,
+            floatingActionButton:
+                context.read<SearchCubit>().state.isLoadingNextPage
+                    ? const FloatingActionButton(
+                        onPressed: null,
+                        backgroundColor: Colors.white,
+                        mini: true,
+                        child: SizedBox(
+                            height: 10,
+                            width: 10,
+                            child: CircularProgressIndicator()),
+                      )
+                    : null,
             appBar: PreferredSize(
               preferredSize: const Size.fromHeight(56),
               child: Builder(
@@ -138,8 +148,10 @@ class _MainWidgetState extends State<MainWidget> {
             ),
             body: Column(
               children: <Widget>[
-                SearchInput(widget._textEditingController, onSearch, onFocusChanged, focusNode),
-                ResultsWidget(databaseInterfaceKanji, databaseInterfaceExpression, onEndReached)
+                SearchInput(widget._textEditingController, onSearch,
+                    onFocusChanged, focusNode),
+                ResultsWidget(databaseInterfaceKanji,
+                    databaseInterfaceExpression, onEndReached)
               ],
             )));
   }

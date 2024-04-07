@@ -9,18 +9,22 @@ class KanjiDialog extends StatelessWidget {
   final List<String> literals;
   final DatabaseInterfaceKanji databaseInterfaceKanji;
 
-  const KanjiDialog({required this.databaseInterfaceKanji, required this. literals, super.key});
+  const KanjiDialog(
+      {required this.databaseInterfaceKanji,
+      required this.literals,
+      super.key});
 
   @override
   Widget build(BuildContext context) {
-    return   SizedBox(
+    return SizedBox(
       width: double.maxFinite,
       child: FutureBuilder<List<Kanji>>(
           future: databaseInterfaceKanji.getCharactersFromLiterals(literals),
           builder: (context, snapshot) {
             if (snapshot.hasData) {
               final List<Kanji> sortedCharacters = List.from(snapshot.data!)
-                ..sort((a, b) => literals.indexOf(a.literal) - literals.indexOf(b.literal));
+                ..sort((a, b) =>
+                    literals.indexOf(a.literal) - literals.indexOf(b.literal));
               return ListView.separated(
                   shrinkWrap: true,
                   separatorBuilder: (context, index) {
@@ -30,8 +34,8 @@ class KanjiDialog extends StatelessWidget {
                   itemBuilder: (BuildContext context, int index) {
                     return KanjiListTile(
                         onTap: null,
-                        onTapLeading: () =>
-                            Clipboard.setData(ClipboardData(text: sortedCharacters[index].literal)),
+                        onTapLeading: () => Clipboard.setData(ClipboardData(
+                            text: sortedCharacters[index].literal)),
                         selected: false,
                         kanji: sortedCharacters[index]);
                   });
@@ -41,7 +45,9 @@ class KanjiDialog extends StatelessWidget {
 
             return ListView(
               shrinkWrap: true,
-              children: const [ListTile(title: Center(child: CircularProgressIndicator()))],
+              children: const [
+                ListTile(title: Center(child: CircularProgressIndicator()))
+              ],
             );
           }),
     );

@@ -21,5 +21,6 @@ class InputCubit extends Cubit<Input> {
       inputs: [...state.inputs]..removeAt(at ?? state.searchIndex),
       searchIndex: --state.searchIndex));
 
-  void setSearchIndex(int searchIndex) => emit(state.copyWith(searchIndex: searchIndex));
+  void setSearchIndex(int searchIndex) =>
+      emit(state.copyWith(searchIndex: searchIndex));
 }

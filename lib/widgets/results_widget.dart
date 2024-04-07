@@ -17,8 +17,8 @@ class ResultsWidget extends StatefulWidget {
   final DatabaseInterfaceExpression databaseInterfaceExpression;
   final Function onEndReached;
 
-  const ResultsWidget(
-      this.databaseInterfaceKanji, this.databaseInterfaceExpression, this.onEndReached,
+  const ResultsWidget(this.databaseInterfaceKanji,
+      this.databaseInterfaceExpression, this.onEndReached,
       {Key? key})
       : super(key: key);
 
@@ -44,7 +44,8 @@ class _ResultsWidgetState extends State<ResultsWidget> {
   }
 
   scrollListener() {
-    if (_scrollController!.offset >= _scrollController!.position.maxScrollExtent &&
+    if (_scrollController!.offset >=
+            _scrollController!.position.maxScrollExtent &&
         !_scrollController!.position.outOfRange &&
         !context.read<SearchCubit>().state.isLoading &&
         !context.read<SearchCubit>().state.isLoadingNextPage) {
@@ -90,10 +91,13 @@ class _ResultsWidgetState extends State<ResultsWidget> {
                       ]).then((List responses) => showDialog(
                           context: context,
                           builder: (_) => AlertDialog(
-                                title: const Center(child: Text('Databases Status')),
+                                title: const Center(
+                                    child: Text('Databases Status')),
                                 content: DatabaseStatusDisplay(
-                                  databaseInterfaceExpression: widget.databaseInterfaceExpression,
-                                  databaseInterfaceKanji: widget.databaseInterfaceKanji,
+                                  databaseInterfaceExpression:
+                                      widget.databaseInterfaceExpression,
+                                  databaseInterfaceKanji:
+                                      widget.databaseInterfaceKanji,
                                 ),
                               )));
                     },
@@ -109,13 +113,17 @@ class _ResultsWidgetState extends State<ResultsWidget> {
                 itemCount: search.searchResults.length,
                 itemBuilder: (BuildContext context, int index) {
                   if (search.searchResults[index] is KanjiEntry) {
-                    KanjiEntry searchResult = search.searchResults[index] as KanjiEntry;
+                    KanjiEntry searchResult =
+                        search.searchResults[index] as KanjiEntry;
                     return KanjiListTile(
                         kanji: searchResult.kanji,
                         selected: false,
-                        onTap: () => Clipboard.setData(ClipboardData(text: searchResult.kanji.literal)));
+                        onTap: () => Clipboard.setData(
+                            ClipboardData(text: searchResult.kanji.literal)));
                   } else {
-                    return ResultExpressionList(searchResult: search.searchResults[index], databaseInterfaceKanji: widget.databaseInterfaceKanji);
+                    return ResultExpressionList(
+                        searchResult: search.searchResults[index],
+                        databaseInterfaceKanji: widget.databaseInterfaceKanji);
                   }
                 });
           }

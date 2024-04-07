@@ -41,10 +41,10 @@ class FujitenMenuBar extends StatefulWidget {
 class _FujitenMenuBarState extends State<FujitenMenuBar> {
   addStringInController(String input) {
     if (widget.insertPosition >= 0) {
-      widget.textEditingController!.text =
-          addCharAtPosition(widget.textEditingController!.text, input, widget.insertPosition);
-      widget.textEditingController!.selection =
-          TextSelection.fromPosition(TextPosition(offset: widget.insertPosition + 1));
+      widget.textEditingController!.text = addCharAtPosition(
+          widget.textEditingController!.text, input, widget.insertPosition);
+      widget.textEditingController!.selection = TextSelection.fromPosition(
+          TextPosition(offset: widget.insertPosition + 1));
     } else {
       widget.textEditingController!.text += input;
     }
@@ -64,8 +64,10 @@ class _FujitenMenuBarState extends State<FujitenMenuBar> {
     }
 
     widget.textEditingController?.text = convertedInput;
-    context.read<InputCubit>().state.inputs[context.read<InputCubit>().state.searchIndex] =
-        convertedInput;
+    context
+        .read<InputCubit>()
+        .state
+        .inputs[context.read<InputCubit>().state.searchIndex] = convertedInput;
   }
 
   @override
@@ -104,19 +106,25 @@ class _FujitenMenuBarState extends State<FujitenMenuBar> {
           context.read<InputCubit>().addInput();
           int searchIndex = context.read<InputCubit>().state.inputs.length - 1;
           context.read<InputCubit>().setSearchIndex(searchIndex);
-          widget.textEditingController!.text = context.read<InputCubit>().state.inputs[searchIndex];
+          widget.textEditingController!.text =
+              context.read<InputCubit>().state.inputs[searchIndex];
         } else if (result == "remove") {
           context.read<InputCubit>().removeInput();
-          widget.textEditingController!.text =
-              context.read<InputCubit>().state.inputs[context.read<InputCubit>().state.searchIndex];
+          widget.textEditingController!.text = context
+              .read<InputCubit>()
+              .state
+              .inputs[context.read<InputCubit>().state.searchIndex];
         } else if (result == "clear") {
           widget.textEditingController!.clear();
-          context.read<InputCubit>().state.inputs[context.read<InputCubit>().state.searchIndex] =
-              "";
+          context
+              .read<InputCubit>()
+              .state
+              .inputs[context.read<InputCubit>().state.searchIndex] = "";
           widget.focusNode.requestFocus();
         } else {
           context.read<InputCubit>().setSearchIndex(result);
-          widget.textEditingController!.text = context.read<InputCubit>().state.inputs[result];
+          widget.textEditingController!.text =
+              context.read<InputCubit>().state.inputs[result];
         }
       },
       itemBuilder: (itemBuilderContext) => context
@@ -130,7 +138,8 @@ class _FujitenMenuBarState extends State<FujitenMenuBar> {
               child: ListTile(
                 leading: Text(entry.key.toString()),
                 title: Text(entry.value),
-                selected: entry.key == context.read<InputCubit>().state.searchIndex,
+                selected:
+                    entry.key == context.read<InputCubit>().state.searchIndex,
               )))
           .toList()
         ..add(const PopupMenuItem(
@@ -185,7 +194,8 @@ class _FujitenMenuBarState extends State<FujitenMenuBar> {
   displayRadicalWidget(BuildContext context) async {
     //send the radicals inside < > to the radical page
     var exp = RegExp(r'<(.*?)>');
-    Iterable<RegExpMatch> matches = exp.allMatches(widget.textEditingController!.text);
+    Iterable<RegExpMatch> matches =
+        exp.allMatches(widget.textEditingController!.text);
     Match? matchAtCursor;
     for (Match m in matches) {
       if (widget.insertPosition > m.start && widget.insertPosition < m.end) {
@@ -193,21 +203,25 @@ class _FujitenMenuBarState extends State<FujitenMenuBar> {
         break;
       }
     }
-    List<String> radicals =
-        matchAtCursor == null ? [] : List.from(matchAtCursor.group(1)!.split(''));
+    List<String> radicals = matchAtCursor == null
+        ? []
+        : List.from(matchAtCursor.group(1)!.split(''));
 
     //remove every non-radical characters
     //call to getRadicalsCharacter somehow move the cursor to the end of textinput, retain de current position now
     int insertPosition = 0;
     if (widget.insertPosition > 0) insertPosition = widget.insertPosition;
 
-    List<String?> radicalsFromDb = await widget.databaseInterfaceKanji.getRadicalsCharacter();
+    List<String?> radicalsFromDb =
+        await widget.databaseInterfaceKanji.getRadicalsCharacter();
     radicals.removeWhere((String radical) => !radicalsFromDb.contains(radical));
 
     if (!mounted) return;
     Navigator.push(
       context,
-      MaterialPageRoute(builder: (context) => RadicalPage(widget.databaseInterfaceKanji, radicals)),
+      MaterialPageRoute(
+          builder: (context) =>
+              RadicalPage(widget.databaseInterfaceKanji, radicals)),
     ).then((results) {
       var isRadicalList = results[0];
       var selectedRadicalsOrKanji = results[1];
@@ -219,17 +233,25 @@ class _FujitenMenuBarState extends State<FujitenMenuBar> {
                 '<${selectedRadicalsOrKanji.join()}>',
                 insertPosition);
           } else {
-            widget.textEditingController!.text = widget.textEditingController!.text.replaceRange(
-                matchAtCursor.start, matchAtCursor.end, '<${selectedRadicalsOrKanji.join()}>');
+            widget.textEditingController!.text =
+                widget.textEditingController!.text.replaceRange(
+                    matchAtCursor.start,
+                    matchAtCursor.end,
+                    '<${selectedRadicalsOrKanji.join()}>');
           }
         }
       } else {
         if (matchAtCursor == null) {
           widget.textEditingController!.text = addCharAtPosition(
-              widget.textEditingController!.text, selectedRadicalsOrKanji, insertPosition);
+              widget.textEditingController!.text,
+              selectedRadicalsOrKanji,
+              insertPosition);
         } else {
-          widget.textEditingController!.text = widget.textEditingController!.text
-              .replaceRange(matchAtCursor.start, matchAtCursor.end, selectedRadicalsOrKanji);
+          widget.textEditingController!.text =
+              widget.textEditingController!.text.replaceRange(
+                  matchAtCursor.start,
+                  matchAtCursor.end,
+                  selectedRadicalsOrKanji);
         }
       }
 

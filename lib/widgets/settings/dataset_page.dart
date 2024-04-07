@@ -5,7 +5,8 @@ class DatasetPage extends StatelessWidget {
   final Future<void> Function(String) setExpressionDb;
   final Future<void> Function(String) setKanjiDb;
 
-  const DatasetPage({required this.setExpressionDb, required this.setKanjiDb, Key? key})
+  const DatasetPage(
+      {required this.setExpressionDb, required this.setKanjiDb, Key? key})
       : super(key: key);
 
   @override

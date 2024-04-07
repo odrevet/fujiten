@@ -9,7 +9,9 @@ class DatabaseStatusDisplay extends StatelessWidget {
   final DatabaseInterfaceExpression databaseInterfaceExpression;
 
   const DatabaseStatusDisplay(
-      {required this.databaseInterfaceExpression, required this.databaseInterfaceKanji, Key? key})
+      {required this.databaseInterfaceExpression,
+      required this.databaseInterfaceKanji,
+      Key? key})
       : super(key: key);
 
   String databaseStatusFormat(DatabaseStatus? databaseStatus) {
@@ -32,8 +34,9 @@ class DatabaseStatusDisplay extends StatelessWidget {
           Text(
             "Kanji DB: ${databaseStatusFormat(databaseInterfaceKanji.status)}",
             style: TextStyle(
-                color:
-                    databaseInterfaceKanji.status != DatabaseStatus.ok ? Colors.red : Colors.green),
+                color: databaseInterfaceKanji.status != DatabaseStatus.ok
+                    ? Colors.red
+                    : Colors.green),
           ),
           Text(
             "Expression DB: ${databaseStatusFormat(databaseInterfaceExpression.status)}",
@@ -48,7 +51,8 @@ class DatabaseStatusDisplay extends StatelessWidget {
                   TextSpan(
                     children: [
                       WidgetSpan(child: Icon(Icons.error)),
-                      TextSpan(text: 'Database must be set from the setting menu'),
+                      TextSpan(
+                          text: 'Database must be set from the setting menu'),
                     ],
                   ),
                 )

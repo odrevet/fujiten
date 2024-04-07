@@ -24,7 +24,8 @@ class App extends StatelessWidget {
             theme: themeData,
             home: BlocProvider(
                 create: (_) => InputCubit(),
-                child: BlocProvider(create: (_) => SearchCubit(), child: MainWidget())),
+                child: BlocProvider(
+                    create: (_) => SearchCubit(), child: MainWidget())),
           ),
         ));
   }

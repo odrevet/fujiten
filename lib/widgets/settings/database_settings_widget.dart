@@ -13,7 +13,8 @@ class DatabaseSettingsWidget extends StatefulWidget {
   final String type;
   final Function setDb;
 
-  const DatabaseSettingsWidget({required this.type, required this.setDb, Key? key})
+  const DatabaseSettingsWidget(
+      {required this.type, required this.setDb, Key? key})
       : super(key: key);
 
   @override
@@ -37,7 +38,8 @@ class _DatabaseSettingsWidgetState extends State<DatabaseSettingsWidget> {
   Future<void> setPath(String path) async {
     final SharedPreferences prefs = await _prefs;
     setState(() {
-      pathDb = prefs.setString('${widget.type}_path', path).then((bool success) {
+      pathDb =
+          prefs.setString('${widget.type}_path', path).then((bool success) {
         return path;
       });
     });
@@ -93,29 +95,36 @@ class _DatabaseSettingsWidgetState extends State<DatabaseSettingsWidget> {
                                       Directory appDocDir =
                                           await getApplicationDocumentsDirectory();
                                       String appDocPath = appDocDir.path;
-                                      String downloadTo = "$appDocPath/${widget.type}.db";
+                                      String downloadTo =
+                                          "$appDocPath/${widget.type}.db";
                                       Dio().download(
                                           "https://github.com/odrevet/edict_database/releases/latest/download/${widget.type}.zip",
-                                          downloadTo, onReceiveProgress: (received, total) {
+                                          downloadTo,
+                                          onReceiveProgress: (received, total) {
                                         if (total != -1) {
                                           setState(() => downloadLog =
                                               ("Downloading... ${(received / total * 100).toStringAsFixed(0)}%"));
                                         }
                                       }).then((_) async {
-                                        String path = "$appDocPath/${widget.type}.db";
+                                        String path =
+                                            "$appDocPath/${widget.type}.db";
 
                                         // Extract zip
                                         try {
                                           // Read the Zip file from disk.
-                                          final bytes = File(downloadTo).readAsBytesSync();
+                                          final bytes = File(downloadTo)
+                                              .readAsBytesSync();
 
                                           // Decode the Zip file
-                                          final archive = ZipDecoder().decodeBytes(bytes);
+                                          final archive =
+                                              ZipDecoder().decodeBytes(bytes);
 
                                           // Extract the contents of the Zip archive to disk.
                                           for (final file in archive) {
-                                            final data = file.content as List<int>;
-                                            File('$appDocPath/${widget.type}.db')
+                                            final data =
+                                                file.content as List<int>;
+                                            File(
+                                                '$appDocPath/${widget.type}.db')
                                               ..createSync(recursive: true)
                                               ..writeAsBytesSync(data);
                                           }
@@ -127,7 +136,8 @@ class _DatabaseSettingsWidgetState extends State<DatabaseSettingsWidget> {
                                           });
                                           await widget.setDb(path);
                                         } catch (e) {
-                                          setState(() => downloadLog = "Error ${e.toString()}");
+                                          setState(() => downloadLog =
+                                              "Error ${e.toString()}");
                                         }
                                       });
                                     },
@@ -162,7 +172,9 @@ class _DatabaseSettingsWidgetState extends State<DatabaseSettingsWidget> {
 
   Future<List<PlatformFile>?> _pickFiles() async {
     try {
-      return (await FilePicker.platform.pickFiles(type: FileType.any, allowMultiple: false))?.files;
+      return (await FilePicker.platform
+              .pickFiles(type: FileType.any, allowMultiple: false))
+          ?.files;
     } on PlatformException catch (e) {
       if (kDebugMode) {
         print('Unsupported operation $e');

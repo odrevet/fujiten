@@ -8,7 +8,11 @@ class KanjiListTile extends ListTile {
   final Function()? onTapLeading;
 
   const KanjiListTile(
-      {required this.kanji, required onTap, required selected, this.onTapLeading, Key? key})
+      {required this.kanji,
+      required onTap,
+      required selected,
+      this.onTapLeading,
+      Key? key})
       : super(key: key, onTap: onTap, selected: selected);
 
   @override
@@ -24,7 +28,8 @@ class KanjiListTile extends ListTile {
         leading: KanjiCharacterWidget(
             kanji: kanji,
             onTap: onTapLeading,
-            style: TextStyle(fontSize: 40.0, color: selected == true ? Colors.red : null)),
+            style: TextStyle(
+                fontSize: 40.0, color: selected == true ? Colors.red : null)),
         onTap: onTap,
         title: Table(children: <TableRow>[
           TableRow(children: <Widget>[SelectableText(stroke)]),

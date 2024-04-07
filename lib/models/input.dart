@@ -3,7 +3,8 @@ class Input {
   List<String> inputs;
   String formattedInput;
 
-  Input({this.searchIndex = 0, this.inputs = const [], this.formattedInput = ""});
+  Input(
+      {this.searchIndex = 0, this.inputs = const [], this.formattedInput = ""});
 
   Input copyWith({
     int? searchIndex,

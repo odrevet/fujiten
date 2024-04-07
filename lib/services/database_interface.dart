@@ -22,7 +22,8 @@ abstract class DatabaseInterface {
     database?.close();
   }
 
-  Future<List<Entry>> search(String input, [int? resultsPerPage = 10, int currentPage = 0]);
+  Future<List<Entry>> search(String input,
+      [int? resultsPerPage = 10, int currentPage = 0]);
 
   Future<int> count();
 

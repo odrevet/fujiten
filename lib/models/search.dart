@@ -37,7 +37,8 @@ class Search {
         totalResult: totalResult ?? this.totalResult,
         page: page ?? this.page,
         resultsPerPageKanji: resultsPerPageKanji ?? this.resultsPerPageKanji,
-        resultsPerPageExpression: resultsPerPageExpression ?? this.resultsPerPageExpression,
+        resultsPerPageExpression:
+            resultsPerPageExpression ?? this.resultsPerPageExpression,
         searchType: searchType ?? this.searchType,
         searchResults: searchResults ?? this.searchResults);
   }

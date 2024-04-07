@@ -83,8 +83,9 @@ class DatabaseInterfaceExpression extends DatabaseInterface {
       if (queryResult['entry_id'] != entryId) {
         senses = [];
         entries.add(ExpressionEntry(
-            reading:
-                queryResult['keb_reb_group'] != null ? queryResult['keb_reb_group'].split(',') : [],
+            reading: queryResult['keb_reb_group'] != null
+                ? queryResult['keb_reb_group'].split(',')
+                : [],
             senses: senses));
         entryId = queryResult['entry_id'];
       }
@@ -95,8 +96,12 @@ class DatabaseInterfaceExpression extends DatabaseInterface {
         senses.add(Sense(
             glosses: glosses,
             posses: queryResult['pos_group'].split(','),
-            dial: queryResult['dial_group'] != null ? queryResult['dial_group'].split(',') : [],
-            misc: queryResult['misc_group'] != null ? queryResult['misc_group'].split(',') : [],
+            dial: queryResult['dial_group'] != null
+                ? queryResult['dial_group'].split(',')
+                : [],
+            misc: queryResult['misc_group'] != null
+                ? queryResult['misc_group'].split(',')
+                : [],
             lang: "eng"));
       }
 

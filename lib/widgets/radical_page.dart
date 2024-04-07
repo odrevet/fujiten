@@ -9,7 +9,8 @@ class RadicalPage extends StatefulWidget {
   final DatabaseInterfaceKanji databaseInterfaceKanji;
   final List<String> selectedRadicals;
 
-  const RadicalPage(this.databaseInterfaceKanji, this.selectedRadicals, {Key? key})
+  const RadicalPage(this.databaseInterfaceKanji, this.selectedRadicals,
+      {Key? key})
       : super(key: key);
 
   @override
@@ -30,7 +31,8 @@ class RadicalPageState extends State<RadicalPage> {
     if (widget.selectedRadicals.isNotEmpty) {
       widget.databaseInterfaceKanji
           .getRadicalsForSelection(widget.selectedRadicals)
-          .then((validRadicals) => setState(() => _validRadicals = validRadicals));
+          .then((validRadicals) =>
+              setState(() => _validRadicals = validRadicals));
     }
     super.initState();
   }
@@ -69,17 +71,20 @@ class RadicalPageState extends State<RadicalPage> {
               radicals = radicals
                   .where((radical) => radical.meanings == null
                       ? false
-                      : radical.meanings!.any((meaning) => meaning.contains(filter)))
+                      : radical.meanings!
+                          .any((meaning) => meaning.contains(filter)))
                   .toList();
             } else if (kanaKit.isHiragana(filter)) {
               radicals = radicals
-                  .where((radical) =>
-                      radical.kun == null ? false : radical.kun!.any((kun) => kun.contains(filter)))
+                  .where((radical) => radical.kun == null
+                      ? false
+                      : radical.kun!.any((kun) => kun.contains(filter)))
                   .toList();
             } else if (kanaKit.isKatakana(filter)) {
               radicals = radicals
-                  .where((radical) =>
-                      radical.on == null ? false : radical.on!.any((on) => on.contains(filter)))
+                  .where((radical) => radical.on == null
+                      ? false
+                      : radical.on!.any((on) => on.contains(filter)))
                   .toList();
             }
           }
@@ -91,13 +96,18 @@ class RadicalPageState extends State<RadicalPage> {
                 child: FutureBuilder<List<String>>(
                     future: widget.databaseInterfaceKanji
                         .getCharactersFromRadicals(widget.selectedRadicals),
-                    builder: (BuildContext context, AsyncSnapshot<List<String>> snapshot) {
+                    builder: (BuildContext context,
+                        AsyncSnapshot<List<String>> snapshot) {
                       if (snapshot.hasData) {
-                        var buttonList =
-                            snapshot.data!.map<Widget>((kanji) => kanjiButton(kanji)).toList();
-                        return ListView(scrollDirection: Axis.horizontal, children: buttonList);
+                        var buttonList = snapshot.data!
+                            .map<Widget>((kanji) => kanjiButton(kanji))
+                            .toList();
+                        return ListView(
+                            scrollDirection: Axis.horizontal,
+                            children: buttonList);
                       } else {
-                        return const Center(child: Text("Matched Kanji will appears here"));
+                        return const Center(
+                            child: Text("Matched Kanji will appears here"));
                       }
                     }),
               ),
@@ -151,7 +161,8 @@ class RadicalPageState extends State<RadicalPage> {
                 title: Text(widget.selectedRadicals.toString()),
                 leading: IconButton(
                     icon: const Icon(Icons.arrow_back),
-                    onPressed: () => Navigator.pop(context, [true, widget.selectedRadicals])),
+                    onPressed: () => Navigator.pop(
+                        context, [true, widget.selectedRadicals])),
                 actions: <Widget>[
                   IconButton(
                       icon: const Icon(Icons.clear),
@@ -165,7 +176,8 @@ class RadicalPageState extends State<RadicalPage> {
                           ? const Icon(Icons.list_rounded)
                           : const Icon(Icons.grid_4x4_sharp),
                       tooltip: 'Toggle view',
-                      onPressed: () => setState(() => listViewDisplay = !listViewDisplay)),
+                      onPressed: () =>
+                          setState(() => listViewDisplay = !listViewDisplay)),
                 ]),
             body: body);
       },
@@ -175,7 +187,8 @@ class RadicalPageState extends State<RadicalPage> {
   Widget radicalListView(List<Kanji> radicals) {
     // remove not selectable radicals
     radicals = radicals
-        .where((radical) => _validRadicals.isEmpty || _validRadicals.contains(radical.literal))
+        .where((radical) =>
+            _validRadicals.isEmpty || _validRadicals.contains(radical.literal))
         .toList();
 
     return ListView.separated(
@@ -197,10 +210,12 @@ class RadicalPageState extends State<RadicalPage> {
   }
 
   Widget radicalGridView(List<Kanji> radicals) => GridView.builder(
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 5),
+      gridDelegate:
+          const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 5),
       itemCount: radicals.length,
       itemBuilder: (BuildContext context, int index) {
-        if (index == 0 || radicals[index].strokeCount != radicals[index - 1].strokeCount) {
+        if (index == 0 ||
+            radicals[index].strokeCount != radicals[index - 1].strokeCount) {
           return Stack(
             children: <Widget>[
               Positioned.fill(
@@ -211,7 +226,10 @@ class RadicalPageState extends State<RadicalPage> {
                     color: Theme.of(context).brightness == Brightness.light
                         ? Colors.white
                         : Colors.black),
-                Positioned(top: 3, left: 5, child: Text(radicals[index].strokeCount.toString()))
+                Positioned(
+                    top: 3,
+                    left: 5,
+                    child: Text(radicals[index].strokeCount.toString()))
               ]),
             ],
           );
@@ -236,16 +254,20 @@ class RadicalPageState extends State<RadicalPage> {
 
   Widget radicalButton(Kanji radical) => TextButton(
       style: ButtonStyle(
-        backgroundColor: MaterialStateProperty.resolveWith<Color?>((Set<MaterialState> states) =>
-            states.contains(MaterialState.disabled) ? Colors.grey : null),
+        backgroundColor: MaterialStateProperty.resolveWith<Color?>(
+            (Set<MaterialState> states) =>
+                states.contains(MaterialState.disabled) ? Colors.grey : null),
       ),
-      onPressed: _validRadicals.isEmpty || _validRadicals.contains(radical.literal)
-          ? () => onRadicalButtonPress(radical.literal)
-          : null,
+      onPressed:
+          _validRadicals.isEmpty || _validRadicals.contains(radical.literal)
+              ? () => onRadicalButtonPress(radical.literal)
+              : null,
       child: Text(radical.literal,
           style: TextStyle(
             fontSize: 35,
-            color: widget.selectedRadicals.contains(radical.literal) ? Colors.red : null,
+            color: widget.selectedRadicals.contains(radical.literal)
+                ? Colors.red
+                : null,
           )));
 
   Widget kanjiButton(String kanji) => TextButton(

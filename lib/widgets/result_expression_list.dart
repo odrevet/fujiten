@@ -5,12 +5,14 @@ import '../models/sense.dart';
 import '../string_utils.dart' show kanaKit;
 import 'kanji_dialog.dart';
 
-
 class ResultExpressionList extends StatefulWidget {
   final searchResult;
   final databaseInterfaceKanji;
 
-  const ResultExpressionList({required this.searchResult, required this.databaseInterfaceKanji, super.key});
+  const ResultExpressionList(
+      {required this.searchResult,
+      required this.databaseInterfaceKanji,
+      super.key});
 
   @override
   State<ResultExpressionList> createState() => _ResultExpressionListState();
@@ -55,12 +57,13 @@ class _ResultExpressionListState extends State<ResultExpressionList> {
               ? showDialog(
                   context: context,
                   builder: (_) => AlertDialog(
-                        title: const Center(child: Text('Kanji')),
-                        content: KanjiDialog(databaseInterfaceKanji: widget.databaseInterfaceKanji, literals: literals)
-                      ))
+                      title: const Center(child: Text('Kanji')),
+                      content: KanjiDialog(
+                          databaseInterfaceKanji: widget.databaseInterfaceKanji,
+                          literals: literals)))
               : null,
-          onDoubleTap: () =>
-              Clipboard.setData(ClipboardData(text: widget.searchResult.reading)),
+          onDoubleTap: () => Clipboard.setData(
+              ClipboardData(text: widget.searchResult.reading)),
           child: Text(
             '${widget.searchResult.reading.isNotEmpty ? widget.searchResult.reading[0] : ''}',
             style: const TextStyle(fontSize: 20.0),
@@ -69,7 +72,8 @@ class _ResultExpressionListState extends State<ResultExpressionList> {
         // Other japanese reading forms
         Wrap(
             alignment: WrapAlignment.center,
-            children: widget.searchResult.reading.skip(1).map<Widget>((reading) {
+            children:
+                widget.searchResult.reading.skip(1).map<Widget>((reading) {
               List<String> literals = [];
               for (int i = 0; i < reading.length; i++) {
                 if (kanaKit.isKanji(reading[i])) {
@@ -81,9 +85,11 @@ class _ResultExpressionListState extends State<ResultExpressionList> {
                       ? showDialog(
                           context: context,
                           builder: (_) => AlertDialog(
-                                title: const Center(child: Text('Kanji')),
-                                content: KanjiDialog(databaseInterfaceKanji: widget.databaseInterfaceKanji, literals: literals)
-                              ))
+                              title: const Center(child: Text('Kanji')),
+                              content: KanjiDialog(
+                                  databaseInterfaceKanji:
+                                      widget.databaseInterfaceKanji,
+                                  literals: literals)))
                       : null,
                   child: Text(" $reading ",
                       style: const TextStyle(fontSize: 16.0)));

@@ -8,7 +8,8 @@ class SettingsPage extends StatelessWidget {
   final Future<void> Function(String) setExpressionDb;
   final Future<void> Function(String) setKanjiDb;
 
-  const SettingsPage({Key? key, required this.setExpressionDb, required this.setKanjiDb})
+  const SettingsPage(
+      {Key? key, required this.setExpressionDb, required this.setKanjiDb})
       : super(key: key);
 
   @override
@@ -22,15 +23,17 @@ class SettingsPage extends StatelessWidget {
               onTap: () => Navigator.push(
                     context,
                     MaterialPageRoute(
-                        builder: (context) =>
-                            DatasetPage(setExpressionDb: setExpressionDb, setKanjiDb: setKanjiDb)),
+                        builder: (context) => DatasetPage(
+                            setExpressionDb: setExpressionDb,
+                            setKanjiDb: setKanjiDb)),
                   )),
           ListTile(
               leading: const Icon(Icons.palette),
               title: const Text("Brightness"),
               onTap: () => Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (context) => const ThemeSettings()),
+                    MaterialPageRoute(
+                        builder: (context) => const ThemeSettings()),
                   )),
           ListTile(
               leading: const Icon(Icons.info),
@@ -44,7 +47,8 @@ class SettingsPage extends StatelessWidget {
                           context: context,
                           applicationName: appName,
                           applicationVersion: version,
-                          applicationLegalese: '''2022-2024 Olivier Drevet All right reserved
+                          applicationLegalese:
+                              '''2022-2024 Olivier Drevet All right reserved
 This software uses data from JMDict, Kanjidic2, Radkfile by the Electronic Dictionary Research and Development Group
 under the Creative Commons Attribution-ShareAlike Licence (V3.0)''');
                     })

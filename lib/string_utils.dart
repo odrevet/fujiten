@@ -17,7 +17,8 @@ String addCharAtPosition(String s, String char, int position) {
   return s.substring(0, position) + char + s.substring(position, s.length);
 }
 
-Future<String> formatInput(String input, DatabaseInterfaceKanji databaseInterfaceKanji) async {
+Future<String> formatInput(
+    String input, DatabaseInterfaceKanji databaseInterfaceKanji) async {
   input.trim().replaceAll(RegExp(r'\s+'), ' ');
 
   //replace every radicals into < > with matching kanji in [ ] for regexp
@@ -26,14 +27,16 @@ Future<String> formatInput(String input, DatabaseInterfaceKanji databaseInterfac
   Iterable<RegExpMatch> matches = exp.allMatches(input);
 
   if (matches.isNotEmpty) {
-    List<String?> radicalList = await databaseInterfaceKanji.getRadicalsCharacter();
+    List<String?> radicalList =
+        await databaseInterfaceKanji.getRadicalsCharacter();
     String radicalsString = radicalList.join();
 
     await Future.forEach(matches, (dynamic match) async {
       String radicals = match[1];
       //remove all characters that are not a radical
       radicals = radicals.replaceAll(RegExp('[^$radicalsString]'), '');
-      var characters = await databaseInterfaceKanji.getCharactersFromRadicals(radicals.split(""));
+      var characters = await databaseInterfaceKanji
+          .getCharactersFromRadicals(radicals.split(""));
       kanjis.add(characters);
     });
 
