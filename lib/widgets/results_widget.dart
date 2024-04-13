@@ -53,6 +53,22 @@ class _ResultsWidgetState extends State<ResultsWidget> {
     }
   }
 
+  Widget itemBuilderExpression(BuildContext context, int index, Search search) {
+    if (search.searchResults[index] is KanjiEntry) {
+      KanjiEntry searchResult =
+      search.searchResults[index] as KanjiEntry;
+      return KanjiListTile(
+          kanji: searchResult.kanji,
+          selected: false,
+          onTap: () => Clipboard.setData(
+              ClipboardData(text: searchResult.kanji.literal)));
+    } else {
+      return ResultExpressionList(
+          searchResult: search.searchResults[index],
+          databaseInterfaceKanji: widget.databaseInterfaceKanji);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<SearchCubit, Search>(builder: (context, search) {
@@ -112,19 +128,7 @@ class _ResultsWidgetState extends State<ResultsWidget> {
                 controller: _scrollController,
                 itemCount: search.searchResults.length,
                 itemBuilder: (BuildContext context, int index) {
-                  if (search.searchResults[index] is KanjiEntry) {
-                    KanjiEntry searchResult =
-                        search.searchResults[index] as KanjiEntry;
-                    return KanjiListTile(
-                        kanji: searchResult.kanji,
-                        selected: false,
-                        onTap: () => Clipboard.setData(
-                            ClipboardData(text: searchResult.kanji.literal)));
-                  } else {
-                    return ResultExpressionList(
-                        searchResult: search.searchResults[index],
-                        databaseInterfaceKanji: widget.databaseInterfaceKanji);
-                  }
+                  return itemBuilderExpression(context, index, search);
                 });
           }
         }
