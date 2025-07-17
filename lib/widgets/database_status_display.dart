@@ -11,8 +11,7 @@ class DatabaseStatusDisplay extends StatelessWidget {
   const DatabaseStatusDisplay(
       {required this.databaseInterfaceExpression,
       required this.databaseInterfaceKanji,
-      Key? key})
-      : super(key: key);
+      super.key});
 
   String databaseStatusFormat(DatabaseStatus? databaseStatus) {
     switch (databaseStatus) {
