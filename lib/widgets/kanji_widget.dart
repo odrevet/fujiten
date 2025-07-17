@@ -10,27 +10,28 @@ class KanjiCharacterWidget extends StatelessWidget {
   final TextStyle? style;
   final TextStyle? styleFurigana;
 
-  const KanjiCharacterWidget(
-      {required this.kanji,
-      this.onTap,
-      this.displayFurigana = true,
-      this.furigana,
-      required this.style,
-      this.styleFurigana,
-      Key? key})
-      : super(key: key);
+  const KanjiCharacterWidget({
+    required this.kanji,
+    this.onTap,
+    this.displayFurigana = true,
+    this.furigana,
+    required this.style,
+    this.styleFurigana,
+    super.key,
+  });
 
   @override
   Widget build(BuildContext context) {
     return InkWell(
-        onTap: onTap,
-        child: furigana != null && displayFurigana
-            ? Column(
-                children: <Widget>[
-                  Text(furigana!, style: styleFurigana),
-                  Expanded(child: Text(kanji!.literal, style: style))
-                ],
-              )
-            : Text(kanji!.literal, style: style));
+      onTap: onTap,
+      child: furigana != null && displayFurigana
+          ? Column(
+              children: <Widget>[
+                Text(furigana!, style: styleFurigana),
+                Expanded(child: Text(kanji!.literal, style: style)),
+              ],
+            )
+          : Text(kanji!.literal, style: style),
+    );
   }
 }

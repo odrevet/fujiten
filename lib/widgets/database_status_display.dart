@@ -8,10 +8,11 @@ class DatabaseStatusDisplay extends StatelessWidget {
   final DatabaseInterfaceKanji databaseInterfaceKanji;
   final DatabaseInterfaceExpression databaseInterfaceExpression;
 
-  const DatabaseStatusDisplay(
-      {required this.databaseInterfaceExpression,
-      required this.databaseInterfaceKanji,
-      super.key});
+  const DatabaseStatusDisplay({
+    required this.databaseInterfaceExpression,
+    required this.databaseInterfaceKanji,
+    super.key,
+  });
 
   String databaseStatusFormat(DatabaseStatus? databaseStatus) {
     switch (databaseStatus) {
@@ -28,41 +29,42 @@ class DatabaseStatusDisplay extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Text(
-            "Kanji DB: ${databaseStatusFormat(databaseInterfaceKanji.status)}",
-            style: TextStyle(
-                color: databaseInterfaceKanji.status != DatabaseStatus.ok
-                    ? Colors.red
-                    : Colors.green),
-          ),
-          Text(
-            "Expression DB: ${databaseStatusFormat(databaseInterfaceExpression.status)}",
-            style: TextStyle(
-                color: databaseInterfaceExpression.status != DatabaseStatus.ok
-                    ? Colors.red
-                    : Colors.green),
-          ),
-          databaseInterfaceKanji.status != DatabaseStatus.ok ||
-                  databaseInterfaceExpression.status != DatabaseStatus.ok
-              ? const Text.rich(
-                  TextSpan(
-                    children: [
-                      WidgetSpan(child: Icon(Icons.error)),
-                      TextSpan(
-                          text: 'Database must be set from the setting menu'),
-                    ],
-                  ),
-                )
-              : const Text.rich(
-                  TextSpan(
-                    children: [
-                      WidgetSpan(child: Icon(Icons.check)),
-                      TextSpan(text: 'All DB OK'),
-                    ],
-                  ),
-                )
-        ],
-      );
+    mainAxisSize: MainAxisSize.min,
+    children: [
+      Text(
+        "Kanji DB: ${databaseStatusFormat(databaseInterfaceKanji.status)}",
+        style: TextStyle(
+          color: databaseInterfaceKanji.status != DatabaseStatus.ok
+              ? Colors.red
+              : Colors.green,
+        ),
+      ),
+      Text(
+        "Expression DB: ${databaseStatusFormat(databaseInterfaceExpression.status)}",
+        style: TextStyle(
+          color: databaseInterfaceExpression.status != DatabaseStatus.ok
+              ? Colors.red
+              : Colors.green,
+        ),
+      ),
+      databaseInterfaceKanji.status != DatabaseStatus.ok ||
+              databaseInterfaceExpression.status != DatabaseStatus.ok
+          ? const Text.rich(
+              TextSpan(
+                children: [
+                  WidgetSpan(child: Icon(Icons.error)),
+                  TextSpan(text: 'Database must be set from the setting menu'),
+                ],
+              ),
+            )
+          : const Text.rich(
+              TextSpan(
+                children: [
+                  WidgetSpan(child: Icon(Icons.check)),
+                  TextSpan(text: 'All DB OK'),
+                ],
+              ),
+            ),
+    ],
+  );
 }

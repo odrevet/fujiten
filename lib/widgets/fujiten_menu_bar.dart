@@ -21,18 +21,18 @@ class FujitenMenuBar extends StatefulWidget {
   final int insertPosition;
   final FocusNode focusNode;
 
-  const FujitenMenuBar(
-      {required this.databaseInterfaceKanji,
-      required this.databaseInterfaceExpression,
-      required this.search,
-      required this.textEditingController,
-      required this.onSearch,
-      required this.focusNode,
-      required this.insertPosition,
-      required this.setExpressionDb,
-      required this.setKanjiDb,
-      Key? key})
-      : super(key: key);
+  const FujitenMenuBar({
+    required this.databaseInterfaceKanji,
+    required this.databaseInterfaceExpression,
+    required this.search,
+    required this.textEditingController,
+    required this.onSearch,
+    required this.focusNode,
+    required this.insertPosition,
+    required this.setExpressionDb,
+    required this.setKanjiDb,
+    super.key,
+  });
 
   @override
   State<FujitenMenuBar> createState() => _FujitenMenuBarState();
@@ -42,9 +42,13 @@ class _FujitenMenuBarState extends State<FujitenMenuBar> {
   addStringInController(String input) {
     if (widget.insertPosition >= 0) {
       widget.textEditingController!.text = addCharAtPosition(
-          widget.textEditingController!.text, input, widget.insertPosition);
+        widget.textEditingController!.text,
+        input,
+        widget.insertPosition,
+      );
       widget.textEditingController!.selection = TextSelection.fromPosition(
-          TextPosition(offset: widget.insertPosition + 1));
+        TextPosition(offset: widget.insertPosition + 1),
+      );
     } else {
       widget.textEditingController!.text += input;
     }
@@ -64,10 +68,11 @@ class _FujitenMenuBarState extends State<FujitenMenuBar> {
     }
 
     widget.textEditingController?.text = convertedInput;
-    context
-        .read<InputCubit>()
-        .state
-        .inputs[context.read<InputCubit>().state.searchIndex] = convertedInput;
+    context.read<InputCubit>().state.inputs[context
+            .read<InputCubit>()
+            .state
+            .searchIndex] =
+        convertedInput;
   }
 
   @override
@@ -106,8 +111,10 @@ class _FujitenMenuBarState extends State<FujitenMenuBar> {
           context.read<InputCubit>().addInput();
           int searchIndex = context.read<InputCubit>().state.inputs.length - 1;
           context.read<InputCubit>().setSearchIndex(searchIndex);
-          widget.textEditingController!.text =
-              context.read<InputCubit>().state.inputs[searchIndex];
+          widget.textEditingController!.text = context
+              .read<InputCubit>()
+              .state
+              .inputs[searchIndex];
         } else if (result == "remove") {
           context.read<InputCubit>().removeInput();
           widget.textEditingController!.text = context
@@ -116,86 +123,109 @@ class _FujitenMenuBarState extends State<FujitenMenuBar> {
               .inputs[context.read<InputCubit>().state.searchIndex];
         } else if (result == "clear") {
           widget.textEditingController!.clear();
-          context
-              .read<InputCubit>()
-              .state
-              .inputs[context.read<InputCubit>().state.searchIndex] = "";
+          context.read<InputCubit>().state.inputs[context
+                  .read<InputCubit>()
+                  .state
+                  .searchIndex] =
+              "";
           widget.focusNode.requestFocus();
         } else {
           context.read<InputCubit>().setSearchIndex(result);
-          widget.textEditingController!.text =
-              context.read<InputCubit>().state.inputs[result];
+          widget.textEditingController!.text = context
+              .read<InputCubit>()
+              .state
+              .inputs[result];
         }
       },
-      itemBuilder: (itemBuilderContext) => context
-          .read<InputCubit>()
-          .state
-          .inputs
-          .asMap()
-          .entries
-          .map<PopupMenuEntry<dynamic>>((entry) => PopupMenuItem(
-              value: entry.key,
-              child: ListTile(
-                leading: Text(entry.key.toString()),
-                title: Text(entry.value),
-                selected:
-                    entry.key == context.read<InputCubit>().state.searchIndex,
-              )))
-          .toList()
-        ..add(const PopupMenuItem(
-            value: "add",
-            child: ListTile(
-              leading: Icon(Icons.add),
-              title: Text('Add'),
-            )))
-        ..add(PopupMenuItem(
-            value: "remove",
-            enabled: context.read<InputCubit>().state.inputs.length > 1,
-            child: ListTile(
-              enabled: context.read<InputCubit>().state.inputs.length > 1,
-              leading: const Icon(Icons.remove),
-              title: const Text('Remove'),
-            )))
-        ..add(PopupMenuItem(
-            value: "clear",
-            enabled: widget.textEditingController!.text != "",
-            child: ListTile(
-              enabled: widget.textEditingController!.text != "",
-              leading: const Icon(Icons.clear),
-              title: const Text('Clear'),
-            ))),
+      itemBuilder: (itemBuilderContext) =>
+          context
+              .read<InputCubit>()
+              .state
+              .inputs
+              .asMap()
+              .entries
+              .map<PopupMenuEntry<dynamic>>(
+                (entry) => PopupMenuItem(
+                  value: entry.key,
+                  child: ListTile(
+                    leading: Text(entry.key.toString()),
+                    title: Text(entry.value),
+                    selected:
+                        entry.key ==
+                        context.read<InputCubit>().state.searchIndex,
+                  ),
+                ),
+              )
+              .toList()
+            ..add(
+              const PopupMenuItem(
+                value: "add",
+                child: ListTile(leading: Icon(Icons.add), title: Text('Add')),
+              ),
+            )
+            ..add(
+              PopupMenuItem(
+                value: "remove",
+                enabled: context.read<InputCubit>().state.inputs.length > 1,
+                child: ListTile(
+                  enabled: context.read<InputCubit>().state.inputs.length > 1,
+                  leading: const Icon(Icons.remove),
+                  title: const Text('Remove'),
+                ),
+              ),
+            )
+            ..add(
+              PopupMenuItem(
+                value: "clear",
+                enabled: widget.textEditingController!.text != "",
+                child: ListTile(
+                  enabled: widget.textEditingController!.text != "",
+                  leading: const Icon(Icons.clear),
+                  title: const Text('Clear'),
+                ),
+              ),
+            ),
     );
 
     return AppBar(
-      title: Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-        IconButton(
+      title: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          IconButton(
             icon: const Icon(Icons.menu),
-            onPressed: () => Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) => SettingsPage(
-                            setExpressionDb: widget.setExpressionDb,
-                            setKanjiDb: widget.setKanjiDb))).then((_) {
+            onPressed: () =>
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => SettingsPage(
+                      setExpressionDb: widget.setExpressionDb,
+                      setKanjiDb: widget.setKanjiDb,
+                    ),
+                  ),
+                ).then((_) {
                   widget.databaseInterfaceExpression.setStatus();
                   widget.databaseInterfaceKanji.setStatus();
-                })),
-        Row(
-          children: <Widget>[
-            popupMenuButtonInsert,
-            IconButton(icon: const Icon(Icons.translate), onPressed: convert),
-            const ToggleSearchTypeButton(),
-            popupMenuButtonInputs,
-          ],
-        ),
-      ]),
+                }),
+          ),
+          Row(
+            children: <Widget>[
+              popupMenuButtonInsert,
+              IconButton(icon: const Icon(Icons.translate), onPressed: convert),
+              const ToggleSearchTypeButton(),
+              popupMenuButtonInputs,
+            ],
+          ),
+        ],
+      ),
     );
   }
 
   displayRadicalWidget(BuildContext context) async {
     //send the radicals inside < > to the radical page
     var exp = RegExp(r'<(.*?)>');
-    Iterable<RegExpMatch> matches =
-        exp.allMatches(widget.textEditingController!.text);
+    Iterable<RegExpMatch> matches = exp.allMatches(
+      widget.textEditingController!.text,
+    );
     Match? matchAtCursor;
     for (Match m in matches) {
       if (widget.insertPosition > m.start && widget.insertPosition < m.end) {
@@ -212,16 +242,17 @@ class _FujitenMenuBarState extends State<FujitenMenuBar> {
     int insertPosition = 0;
     if (widget.insertPosition > 0) insertPosition = widget.insertPosition;
 
-    List<String?> radicalsFromDb =
-        await widget.databaseInterfaceKanji.getRadicalsCharacter();
+    List<String?> radicalsFromDb = await widget.databaseInterfaceKanji
+        .getRadicalsCharacter();
     radicals.removeWhere((String radical) => !radicalsFromDb.contains(radical));
 
     if (!mounted) return;
     Navigator.push(
       context,
       MaterialPageRoute(
-          builder: (context) =>
-              RadicalPage(widget.databaseInterfaceKanji, radicals)),
+        builder: (context) =>
+            RadicalPage(widget.databaseInterfaceKanji, radicals),
+      ),
     ).then((results) {
       var isRadicalList = results[0];
       var selectedRadicalsOrKanji = results[1];
@@ -229,29 +260,37 @@ class _FujitenMenuBarState extends State<FujitenMenuBar> {
         if (selectedRadicalsOrKanji.isNotEmpty) {
           if (matchAtCursor == null) {
             widget.textEditingController!.text = addCharAtPosition(
-                widget.textEditingController!.text,
-                '<${selectedRadicalsOrKanji.join()}>',
-                insertPosition);
+              widget.textEditingController!.text,
+              '<${selectedRadicalsOrKanji.join()}>',
+              insertPosition,
+            );
           } else {
-            widget.textEditingController!.text =
-                widget.textEditingController!.text.replaceRange(
-                    matchAtCursor.start,
-                    matchAtCursor.end,
-                    '<${selectedRadicalsOrKanji.join()}>');
+            widget.textEditingController!.text = widget
+                .textEditingController!
+                .text
+                .replaceRange(
+                  matchAtCursor.start,
+                  matchAtCursor.end,
+                  '<${selectedRadicalsOrKanji.join()}>',
+                );
           }
         }
       } else {
         if (matchAtCursor == null) {
           widget.textEditingController!.text = addCharAtPosition(
-              widget.textEditingController!.text,
-              selectedRadicalsOrKanji,
-              insertPosition);
+            widget.textEditingController!.text,
+            selectedRadicalsOrKanji,
+            insertPosition,
+          );
         } else {
-          widget.textEditingController!.text =
-              widget.textEditingController!.text.replaceRange(
-                  matchAtCursor.start,
-                  matchAtCursor.end,
-                  selectedRadicalsOrKanji);
+          widget.textEditingController!.text = widget
+              .textEditingController!
+              .text
+              .replaceRange(
+                matchAtCursor.start,
+                matchAtCursor.end,
+                selectedRadicalsOrKanji,
+              );
         }
       }
 

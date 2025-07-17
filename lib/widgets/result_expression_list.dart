@@ -9,10 +9,11 @@ class ResultExpressionList extends StatefulWidget {
   final searchResult;
   final databaseInterfaceKanji;
 
-  const ResultExpressionList(
-      {required this.searchResult,
-      required this.databaseInterfaceKanji,
-      super.key});
+  const ResultExpressionList({
+    required this.searchResult,
+    required this.databaseInterfaceKanji,
+    super.key,
+  });
 
   @override
   State<ResultExpressionList> createState() => _ResultExpressionListState();
@@ -24,7 +25,10 @@ class _ResultExpressionListState extends State<ResultExpressionList> {
   @override
   initState() {
     _styleFieldInformation = const TextStyle(
-        fontSize: 12, fontStyle: FontStyle.italic, color: Colors.blue);
+      fontSize: 12,
+      fontStyle: FontStyle.italic,
+      color: Colors.blue,
+    );
 
     super.initState();
   }
@@ -50,30 +54,35 @@ class _ResultExpressionListState extends State<ResultExpressionList> {
     }
 
     return ListTile(
-        title: Column(
-      children: <Widget>[
-        InkWell(
-          onTap: () => literals.isNotEmpty
-              ? showDialog(
-                  context: context,
-                  builder: (_) => AlertDialog(
+      title: Column(
+        children: <Widget>[
+          InkWell(
+            onTap: () => literals.isNotEmpty
+                ? showDialog(
+                    context: context,
+                    builder: (_) => AlertDialog(
                       title: const Center(child: Text('Kanji')),
                       content: KanjiDialog(
-                          databaseInterfaceKanji: widget.databaseInterfaceKanji,
-                          literals: literals)))
-              : null,
-          onDoubleTap: () => Clipboard.setData(
-              ClipboardData(text: widget.searchResult.reading)),
-          child: Text(
-            '${widget.searchResult.reading.isNotEmpty ? widget.searchResult.reading[0] : ''}',
-            style: const TextStyle(fontSize: 20.0),
+                        databaseInterfaceKanji: widget.databaseInterfaceKanji,
+                        literals: literals,
+                      ),
+                    ),
+                  )
+                : null,
+            onDoubleTap: () => Clipboard.setData(
+              ClipboardData(text: widget.searchResult.reading),
+            ),
+            child: Text(
+              '${widget.searchResult.reading.isNotEmpty ? widget.searchResult.reading[0] : ''}',
+              style: const TextStyle(fontSize: 20.0),
+            ),
           ),
-        ),
-        // Other japanese reading forms
-        Wrap(
+          // Other japanese reading forms
+          Wrap(
             alignment: WrapAlignment.center,
-            children:
-                widget.searchResult.reading.skip(1).map<Widget>((reading) {
+            children: widget.searchResult.reading.skip(1).map<Widget>((
+              reading,
+            ) {
               List<String> literals = [];
               for (int i = 0; i < reading.length; i++) {
                 if (kanaKit.isKanji(reading[i])) {
@@ -81,53 +90,70 @@ class _ResultExpressionListState extends State<ResultExpressionList> {
                 }
               }
               return InkWell(
-                  onTap: () => literals.isNotEmpty
-                      ? showDialog(
-                          context: context,
-                          builder: (_) => AlertDialog(
-                              title: const Center(child: Text('Kanji')),
-                              content: KanjiDialog(
-                                  databaseInterfaceKanji:
-                                      widget.databaseInterfaceKanji,
-                                  literals: literals)))
-                      : null,
-                  child: Text(" $reading ",
-                      style: const TextStyle(fontSize: 16.0)));
-            }).toList()),
-        Align(
-          alignment: Alignment.centerLeft,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: sensesGroupedByPosses.entries.map((glossesGroupedByPos) {
-              String? pos = glossesGroupedByPos.key;
-              List<Sense> senses = glossesGroupedByPos.value;
+                onTap: () => literals.isNotEmpty
+                    ? showDialog(
+                        context: context,
+                        builder: (_) => AlertDialog(
+                          title: const Center(child: Text('Kanji')),
+                          content: KanjiDialog(
+                            databaseInterfaceKanji:
+                                widget.databaseInterfaceKanji,
+                            literals: literals,
+                          ),
+                        ),
+                      )
+                    : null,
+                child: Text(
+                  " $reading ",
+                  style: const TextStyle(fontSize: 16.0),
+                ),
+              );
+            }).toList(),
+          ),
+          Align(
+            alignment: Alignment.centerLeft,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: sensesGroupedByPosses.entries.map((
+                glossesGroupedByPos,
+              ) {
+                String? pos = glossesGroupedByPos.key;
+                List<Sense> senses = glossesGroupedByPos.value;
 
-              return Padding(
+                return Padding(
                   padding: const EdgeInsets.all(4.0),
                   child: RichText(
                     text: TextSpan(
-                        text: '$pos\n',
-                        style: _styleFieldInformation,
-                        children: List.generate(
-                            glossesGroupedByPos.value.length, (i) {
+                      text: '$pos\n',
+                      style: _styleFieldInformation,
+                      children: List.generate(
+                        glossesGroupedByPos.value.length,
+                        (i) {
                           return TextSpan(
-                              text: '• ${senses[i].glosses.join(",")}',
-                              style: Theme.of(context).textTheme.bodyMedium,
-                              children: [
-                                TextSpan(
-                                    text: " ${senses[i].dial.join(",")}",
-                                    style: _styleFieldInformation),
-                                TextSpan(
-                                    text: " ${senses[i].misc.join(",")}",
-                                    style: _styleFieldInformation),
-                                const TextSpan(text: "\n")
-                              ]);
-                        })),
-                  ));
-            }).toList(),
+                            text: '• ${senses[i].glosses.join(",")}',
+                            style: Theme.of(context).textTheme.bodyMedium,
+                            children: [
+                              TextSpan(
+                                text: " ${senses[i].dial.join(",")}",
+                                style: _styleFieldInformation,
+                              ),
+                              TextSpan(
+                                text: " ${senses[i].misc.join(",")}",
+                                style: _styleFieldInformation,
+                              ),
+                              const TextSpan(text: "\n"),
+                            ],
+                          );
+                        },
+                      ),
+                    ),
+                  ),
+                );
+              }).toList(),
+            ),
           ),
-        ),
-      ],
-    ));
+        ],
+      ),
+    );
   }
 }

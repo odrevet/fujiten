@@ -9,10 +9,13 @@ class SearchInput extends StatefulWidget {
   final FocusNode focusNode;
   final TextEditingController textEditingController;
 
-  const SearchInput(this.textEditingController, this.onSubmitted,
-      this.onFocusChanged, this.focusNode,
-      {Key? key})
-      : super(key: key);
+  const SearchInput(
+    this.textEditingController,
+    this.onSubmitted,
+    this.onFocusChanged,
+    this.focusNode, {
+    super.key,
+  });
 
   @override
   State<SearchInput> createState() => _SearchInputState();
@@ -45,15 +48,16 @@ class _SearchInputState extends State<SearchInput> {
         controller: widget.textEditingController,
         focusNode: widget.focusNode,
         decoration: InputDecoration(
-            hintText: 'Enter a search term',
-            suffixIcon: Align(
-              widthFactor: 1.0,
-              heightFactor: 1.0,
-              child: IconButton(
-                icon: const Icon(Icons.search),
-                onPressed: () => widget.onSubmitted(),
-              ),
-            )),
+          hintText: 'Enter a search term',
+          suffixIcon: Align(
+            widthFactor: 1.0,
+            heightFactor: 1.0,
+            child: IconButton(
+              icon: const Icon(Icons.search),
+              onPressed: () => widget.onSubmitted(),
+            ),
+          ),
+        ),
       ),
     );
   }

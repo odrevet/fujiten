@@ -17,7 +17,7 @@ class MainWidget extends StatefulWidget {
   final String? title;
   final TextEditingController _textEditingController = TextEditingController();
 
-  MainWidget({Key? key, this.title}) : super(key: key);
+  MainWidget({super.key, this.title});
 
   @override
   State<MainWidget> createState() => _MainWidgetState();
@@ -45,14 +45,14 @@ class _MainWidgetState extends State<MainWidget> {
     _prefs.then((SharedPreferences prefs) async {
       bool? isLight = prefs.getBool("darkTheme");
       if (isLight == true) {
-        context
-            .read<ThemeCubit>()
-            .updateTheme(ThemeData(brightness: Brightness.dark));
+        context.read<ThemeCubit>().updateTheme(
+          ThemeData(brightness: Brightness.dark),
+        );
       }
     });
   }
 
-  initDb() async {
+  Future<void> initDb() async {
     _prefs.then((SharedPreferences prefs) async {
       String? path = prefs.getString("expression_path");
       if (path != null) {
@@ -83,15 +83,18 @@ class _MainWidgetState extends State<MainWidget> {
 
   onSearch() {
     if (widget._textEditingController.text != "") {
-      formatInput(widget._textEditingController.text, databaseInterfaceKanji)
-          .then((formattedInput) {
+      formatInput(
+        widget._textEditingController.text,
+        databaseInterfaceKanji,
+      ).then((formattedInput) {
         context.read<InputCubit>().setFormattedInput(formattedInput);
         context.read<SearchCubit>().reset();
         context.read<SearchCubit>().runSearch(
-            context.read<SearchCubit>().state.searchType == SearchType.kanji
-                ? databaseInterfaceKanji
-                : databaseInterfaceExpression,
-            formattedInput);
+          context.read<SearchCubit>().state.searchType == SearchType.kanji
+              ? databaseInterfaceKanji
+              : databaseInterfaceExpression,
+          formattedInput,
+        );
       });
     }
 
@@ -108,51 +111,63 @@ class _MainWidgetState extends State<MainWidget> {
     var searchType = context.read<SearchCubit>().state.searchType;
     context.read<SearchCubit>().nextPage();
     context.read<SearchCubit>().runSearch(
-        searchType == SearchType.kanji
-            ? databaseInterfaceKanji
-            : databaseInterfaceExpression,
-        context.read<InputCubit>().state.formattedInput);
+      searchType == SearchType.kanji
+          ? databaseInterfaceKanji
+          : databaseInterfaceExpression,
+      context.read<InputCubit>().state.formattedInput,
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<SearchCubit, Search>(
-        builder: (context, search) => Scaffold(
-            key: _scaffoldKey,
-            floatingActionButton:
-                context.read<SearchCubit>().state.isLoadingNextPage
-                    ? const FloatingActionButton(
-                        onPressed: null,
-                        backgroundColor: Colors.white,
-                        mini: true,
-                        child: SizedBox(
-                            height: 10,
-                            width: 10,
-                            child: CircularProgressIndicator()),
-                      )
-                    : null,
-            appBar: PreferredSize(
-              preferredSize: const Size.fromHeight(56),
-              child: Builder(
-                builder: (context) => FujitenMenuBar(
-                    setExpressionDb: setExpressionDb,
-                    setKanjiDb: setKanjiDb,
-                    databaseInterfaceKanji: databaseInterfaceKanji,
-                    databaseInterfaceExpression: databaseInterfaceExpression,
-                    search: search,
-                    textEditingController: widget._textEditingController,
-                    onSearch: onSearch,
-                    focusNode: focusNode,
-                    insertPosition: cursorPosition),
-              ),
+      builder: (context, search) => Scaffold(
+        key: _scaffoldKey,
+        floatingActionButton:
+            context.read<SearchCubit>().state.isLoadingNextPage
+            ? const FloatingActionButton(
+                onPressed: null,
+                backgroundColor: Colors.white,
+                mini: true,
+                child: SizedBox(
+                  height: 10,
+                  width: 10,
+                  child: CircularProgressIndicator(),
+                ),
+              )
+            : null,
+        appBar: PreferredSize(
+          preferredSize: const Size.fromHeight(56),
+          child: Builder(
+            builder: (context) => FujitenMenuBar(
+              setExpressionDb: setExpressionDb,
+              setKanjiDb: setKanjiDb,
+              databaseInterfaceKanji: databaseInterfaceKanji,
+              databaseInterfaceExpression: databaseInterfaceExpression,
+              search: search,
+              textEditingController: widget._textEditingController,
+              onSearch: onSearch,
+              focusNode: focusNode,
+              insertPosition: cursorPosition,
             ),
-            body: Column(
-              children: <Widget>[
-                SearchInput(widget._textEditingController, onSearch,
-                    onFocusChanged, focusNode),
-                ResultsWidget(databaseInterfaceKanji,
-                    databaseInterfaceExpression, onEndReached)
-              ],
-            )));
+          ),
+        ),
+        body: Column(
+          children: <Widget>[
+            SearchInput(
+              widget._textEditingController,
+              onSearch,
+              onFocusChanged,
+              focusNode,
+            ),
+            ResultsWidget(
+              databaseInterfaceKanji,
+              databaseInterfaceExpression,
+              onEndReached,
+            ),
+          ],
+        ),
+      ),
+    );
   }
 }

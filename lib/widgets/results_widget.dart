@@ -17,10 +17,12 @@ class ResultsWidget extends StatefulWidget {
   final DatabaseInterfaceExpression databaseInterfaceExpression;
   final Function onEndReached;
 
-  const ResultsWidget(this.databaseInterfaceKanji,
-      this.databaseInterfaceExpression, this.onEndReached,
-      {Key? key})
-      : super(key: key);
+  const ResultsWidget(
+    this.databaseInterfaceKanji,
+    this.databaseInterfaceExpression,
+    this.onEndReached, {
+    super.key,
+  });
 
   @override
   State<ResultsWidget> createState() => _ResultsWidgetState();
@@ -55,73 +57,81 @@ class _ResultsWidgetState extends State<ResultsWidget> {
 
   Widget itemBuilderExpression(BuildContext context, int index, Search search) {
     if (search.searchResults[index] is KanjiEntry) {
-      KanjiEntry searchResult =
-      search.searchResults[index] as KanjiEntry;
+      KanjiEntry searchResult = search.searchResults[index] as KanjiEntry;
       return KanjiListTile(
-          kanji: searchResult.kanji,
-          selected: false,
-          onTap: () => Clipboard.setData(
-              ClipboardData(text: searchResult.kanji.literal)));
+        kanji: searchResult.kanji,
+        selected: false,
+        onTap: () =>
+            Clipboard.setData(ClipboardData(text: searchResult.kanji.literal)),
+      );
     } else {
       return ResultExpressionList(
-          searchResult: search.searchResults[index],
-          databaseInterfaceKanji: widget.databaseInterfaceKanji);
+        searchResult: search.searchResults[index],
+        databaseInterfaceKanji: widget.databaseInterfaceKanji,
+      );
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<SearchCubit, Search>(builder: (context, search) {
-      late Widget child;
+    return BlocBuilder<SearchCubit, Search>(
+      builder: (context, search) {
+        late Widget child;
 
-      if (search.isLoading && !search.isLoadingNextPage) {
-        child = const CircularProgressIndicator();
-      } else {
-        if (search.searchResults.isEmpty &&
-            context
+        if (search.isLoading && !search.isLoadingNextPage) {
+          child = const CircularProgressIndicator();
+        } else {
+          if (search.searchResults.isEmpty &&
+              context
+                  .read<InputCubit>()
+                  .state
+                  .inputs[context.read<InputCubit>().state.searchIndex]
+                  .isNotEmpty) {
+            child = Text(
+              "No results for '${context.read<InputCubit>().state.inputs[context.read<InputCubit>().state.searchIndex]}'",
+            );
+          } else {
+            if (context
                 .read<InputCubit>()
                 .state
                 .inputs[context.read<InputCubit>().state.searchIndex]
-                .isNotEmpty) {
-          child = Text(
-              "No results for '${context.read<InputCubit>().state.inputs[context.read<InputCubit>().state.searchIndex]}'");
-        } else {
-          if (context
-              .read<InputCubit>()
-              .state
-              .inputs[context.read<InputCubit>().state.searchIndex]
-              .isEmpty) {
-            child = Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                const Text(
-                  "Welcome to Fujiten",
-                  style: TextStyle(fontSize: 18),
-                ),
-                ElevatedButton(
+                .isEmpty) {
+              child = Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  const Text(
+                    "Welcome to Fujiten",
+                    style: TextStyle(fontSize: 18),
+                  ),
+                  ElevatedButton(
                     onPressed: () {
                       Future.wait([
                         widget.databaseInterfaceKanji.setStatus(),
-                        widget.databaseInterfaceExpression.setStatus()
-                      ]).then((List responses) => showDialog(
+                        widget.databaseInterfaceExpression.setStatus(),
+                      ]).then(
+                        (List responses) => showDialog(
                           context: context,
                           builder: (_) => AlertDialog(
-                                title: const Center(
-                                    child: Text('Databases Status')),
-                                content: DatabaseStatusDisplay(
-                                  databaseInterfaceExpression:
-                                      widget.databaseInterfaceExpression,
-                                  databaseInterfaceKanji:
-                                      widget.databaseInterfaceKanji,
-                                ),
-                              )));
+                            title: const Center(
+                              child: Text('Databases Status'),
+                            ),
+                            content: DatabaseStatusDisplay(
+                              databaseInterfaceExpression:
+                                  widget.databaseInterfaceExpression,
+                              databaseInterfaceKanji:
+                                  widget.databaseInterfaceKanji,
+                            ),
+                          ),
+                        ),
+                      );
                     },
-                    child: const Text("Check DB status"))
-              ],
-            );
-          } else {
-            child = ListView.separated(
+                    child: const Text("Check DB status"),
+                  ),
+                ],
+              );
+            } else {
+              child = ListView.separated(
                 separatorBuilder: (context, index) {
                   return const Divider();
                 },
@@ -129,11 +139,13 @@ class _ResultsWidgetState extends State<ResultsWidget> {
                 itemCount: search.searchResults.length,
                 itemBuilder: (BuildContext context, int index) {
                   return itemBuilderExpression(context, index, search);
-                });
+                },
+              );
+            }
           }
         }
-      }
-      return Expanded(child: Center(child: child));
-    });
+        return Expanded(child: Center(child: child));
+      },
+    );
   }
 }

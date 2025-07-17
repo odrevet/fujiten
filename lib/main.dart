@@ -12,21 +12,25 @@ void main() async {
 }
 
 class App extends StatelessWidget {
-  const App({Key? key}) : super(key: key);
+  const App({super.key});
 
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-        create: (_) => ThemeCubit(),
-        child: BlocBuilder<ThemeCubit, ThemeData>(
-          builder: (context, themeData) => MaterialApp(
-            title: "Fujiten",
-            theme: themeData,
-            home: BlocProvider(
-                create: (_) => InputCubit(),
-                child: BlocProvider(
-                    create: (_) => SearchCubit(), child: MainWidget())),
+      create: (_) => ThemeCubit(),
+      child: BlocBuilder<ThemeCubit, ThemeData>(
+        builder: (context, themeData) => MaterialApp(
+          title: "Fujiten",
+          theme: themeData,
+          home: BlocProvider(
+            create: (_) => InputCubit(),
+            child: BlocProvider(
+              create: (_) => SearchCubit(),
+              child: MainWidget(),
+            ),
           ),
-        ));
+        ),
+      ),
+    );
   }
 }

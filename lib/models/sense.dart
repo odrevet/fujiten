@@ -5,10 +5,11 @@ class Sense {
   List<String> misc;
   String lang;
 
-  Sense(
-      {required this.glosses,
-      required this.posses,
-      required this.dial,
-      required this.misc,
-      this.lang = "eng"});
+  Sense({
+    required this.glosses,
+    required this.posses,
+    required this.dial,
+    required this.misc,
+    this.lang = "eng",
+  });
 }

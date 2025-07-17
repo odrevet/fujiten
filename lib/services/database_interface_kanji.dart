@@ -9,8 +9,11 @@ class DatabaseInterfaceKanji extends DatabaseInterface {
   DatabaseInterfaceKanji({super.database});
 
   @override
-  Future<List<KanjiEntry>> search(String input,
-      [int? resultsPerPage, int currentPage = 0]) async {
+  Future<List<KanjiEntry>> search(
+    String input, [
+    int? resultsPerPage,
+    int currentPage = 0,
+  ]) async {
     String where;
 
     Iterable<RegExpMatch> matchesKanji = RegExp(regexKanji).allMatches(input);
@@ -19,19 +22,22 @@ class DatabaseInterfaceKanji extends DatabaseInterface {
       where =
           "WHERE character.id IN (${matchesKanji.map((m) => "'${m.group(0)}'").join(',')})";
     } else if (kanaKit.isHiragana(input)) {
-      where = '''WHERE character.id IN (SELECT character.id
+      where =
+          '''WHERE character.id IN (SELECT character.id
         FROM character 
         INNER JOIN kun_yomi ON kun_yomi.id_character = character.id 
         WHERE REPLACE(REPLACE(kun_yomi.reading,'-',''),'.','') = '$input'
         GROUP BY character.id)''';
     } else if (kanaKit.isKatakana(input)) {
-      where = '''WHERE character.id IN (SELECT character.id
+      where =
+          '''WHERE character.id IN (SELECT character.id
         FROM character 
         INNER JOIN on_yomi ON on_yomi.id_character = character.id 
         WHERE on_yomi.reading = '$input'
         GROUP BY character.id)''';
     } else if (kanaKit.isRomaji(input)) {
-      where = '''WHERE character.id IN (SELECT character.id
+      where =
+          '''WHERE character.id IN (SELECT character.id
         FROM character 
         LEFT JOIN meaning ON meaning.id_character = character.id
         WHERE meaning.content REGEXP '$input'
@@ -40,7 +46,8 @@ class DatabaseInterfaceKanji extends DatabaseInterface {
       where = "WHERE character.id REGEXP '$input'";
     }
 
-    String sql = '''SELECT character.*,
+    String sql =
+        '''SELECT character.*,
         GROUP_CONCAT(DISTINCT character_radical.id_radical) as radicals,
         GROUP_CONCAT(DISTINCT on_yomi.reading) AS on_reading,
         GROUP_CONCAT(DISTINCT kun_yomi.reading) AS kun_reading,
@@ -68,8 +75,9 @@ class DatabaseInterfaceKanji extends DatabaseInterface {
   @override
   Future<int> count() async {
     try {
-      var x = await database!
-          .rawQuery("SELECT count(character.id) from character;");
+      var x = await database!.rawQuery(
+        "SELECT count(character.id) from character;",
+      );
       return Sqflite.firstIntValue(x) ?? 0;
     } catch (_) {
       return 0;
@@ -77,7 +85,8 @@ class DatabaseInterfaceKanji extends DatabaseInterface {
   }
 
   Future<List<Kanji>> getCharactersFromLiterals(List<String> characters) async {
-    String sql = '''SELECT character.*,
+    String sql =
+        '''SELECT character.*,
         GROUP_CONCAT(DISTINCT character_radical.id_radical) as radicals,
         GROUP_CONCAT(DISTINCT on_yomi.reading) AS on_reading,
         GROUP_CONCAT(DISTINCT kun_yomi.reading) AS kun_reading,
@@ -102,8 +111,9 @@ class DatabaseInterfaceKanji extends DatabaseInterface {
     radicals.asMap().forEach((i, radical) {
       sql +=
           "SELECT id_character FROM character_radical WHERE id_radical = '$radical'";
-      sql +=
-          i < radicals.length - 1 ? ' INTERSECT ' : ') ORDER BY stroke_count;';
+      sql += i < radicals.length - 1
+          ? ' INTERSECT '
+          : ') ORDER BY stroke_count;';
     });
 
     final List<Map<String, dynamic>> kanjiMaps = await database!.rawQuery(sql);
@@ -114,8 +124,8 @@ class DatabaseInterfaceKanji extends DatabaseInterface {
   }
 
   Future<List<Kanji>> getRadicals() async {
-    final List<Map<String, dynamic>> radicalMaps =
-        await database!.rawQuery('''SELECT radical.id, 
+    final List<Map<String, dynamic>> radicalMaps = await database!.rawQuery(
+      '''SELECT radical.id, 
                                     radical.stroke_count,
                                     GROUP_CONCAT(DISTINCT on_yomi.reading) AS on_reading,
                                     GROUP_CONCAT(DISTINCT kun_yomi.reading) AS kun_reading,
@@ -125,7 +135,8 @@ class DatabaseInterfaceKanji extends DatabaseInterface {
                                     LEFT JOIN kun_yomi ON kun_yomi.id_character = radical.id
                                     LEFT JOIN meaning ON meaning.id_character = radical.id
                                     GROUP BY radical.id
-                                    ORDER BY stroke_count''');
+                                    ORDER BY stroke_count''',
+    );
 
     return List.generate(radicalMaps.length, (i) {
       return Kanji.fromMap(radicalMaps[i]);
@@ -133,8 +144,9 @@ class DatabaseInterfaceKanji extends DatabaseInterface {
   }
 
   Future<List<String?>> getRadicalsCharacter() async {
-    final List<Map<String, dynamic>> radicalMaps =
-        await database!.rawQuery('SELECT id FROM radical');
+    final List<Map<String, dynamic>> radicalMaps = await database!.rawQuery(
+      'SELECT id FROM radical',
+    );
 
     return List.generate(radicalMaps.length, (i) {
       return radicalMaps[i]['id'];
@@ -151,8 +163,9 @@ class DatabaseInterfaceKanji extends DatabaseInterface {
     });
     sql += ')';
 
-    final List<Map<String, dynamic>> radicalIdMaps =
-        await database!.rawQuery(sql);
+    final List<Map<String, dynamic>> radicalIdMaps = await database!.rawQuery(
+      sql,
+    );
 
     return List.generate(radicalIdMaps.length, (i) {
       return radicalIdMaps[i]['id_radical'];

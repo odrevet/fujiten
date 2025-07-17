@@ -31,9 +31,13 @@ class DatabaseInterfaceExpression extends DatabaseInterface {
   }
 
   @override
-  Future<List<ExpressionEntry>> search(String input,
-      [int? resultsPerPage, int currentPage = 0]) async {
-    String sql = '''SELECT entry.id as entry_id,
+  Future<List<ExpressionEntry>> search(
+    String input, [
+    int? resultsPerPage,
+    int currentPage = 0,
+  ]) async {
+    String sql =
+        '''SELECT entry.id as entry_id,
                   sense.id as sense_id, 
                   (
                     SELECT
@@ -82,18 +86,22 @@ class DatabaseInterfaceExpression extends DatabaseInterface {
     for (var queryResult in queryResults) {
       if (queryResult['entry_id'] != entryId) {
         senses = [];
-        entries.add(ExpressionEntry(
+        entries.add(
+          ExpressionEntry(
             reading: queryResult['keb_reb_group'] != null
                 ? queryResult['keb_reb_group'].split(',')
                 : [],
-            senses: senses));
+            senses: senses,
+          ),
+        );
         entryId = queryResult['entry_id'];
       }
 
       if (queryResult['sense_id'] != senseId) {
         glosses = [];
         senseId = queryResult['sense_id'];
-        senses.add(Sense(
+        senses.add(
+          Sense(
             glosses: glosses,
             posses: queryResult['pos_group'].split(','),
             dial: queryResult['dial_group'] != null
@@ -102,7 +110,9 @@ class DatabaseInterfaceExpression extends DatabaseInterface {
             misc: queryResult['misc_group'] != null
                 ? queryResult['misc_group'].split(',')
                 : [],
-            lang: "eng"));
+            lang: "eng",
+          ),
+        );
       }
 
       glosses.add(queryResult['gloss_group']);

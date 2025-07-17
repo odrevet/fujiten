@@ -12,13 +12,14 @@ class Kanji {
   final List<String>? kun;
   final List<String>? meanings;
 
-  Kanji(
-      {required this.literal,
-      required this.strokeCount,
-      this.radicals = const [],
-      this.on = const [],
-      this.kun = const [],
-      this.meanings = const []});
+  Kanji({
+    required this.literal,
+    required this.strokeCount,
+    this.radicals = const [],
+    this.on = const [],
+    this.kun = const [],
+    this.meanings = const [],
+  });
 
   factory Kanji.fromMap(Map<String, dynamic> map) {
     return Kanji(
