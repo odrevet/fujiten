@@ -21,7 +21,7 @@ class _ToggleSearchTypeButtonState extends State<ToggleSearchTypeButton> {
         child: BlocBuilder<SearchCubit, Search>(
           builder: (context, search) {
             return Text(
-              search.searchType == SearchType.kanji ? '漢字' : '言葉',
+              search.searchType == SearchType.kanji ? '漢' : '言',
               style: const TextStyle(fontSize: 23.0, color: Colors.white),
             );
           },
