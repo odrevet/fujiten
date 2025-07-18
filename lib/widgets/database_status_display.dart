@@ -22,6 +22,8 @@ class DatabaseStatusDisplay extends StatelessWidget {
         return "OK";
       case DatabaseStatus.noResults:
         return "The selected database is invalid (no entry found)";
+      case DatabaseStatus.pathNotSet:
+        return "No database set. Please choose a Database in the setting menu";
       default:
         return "Unknown status $databaseStatus";
     }

@@ -32,6 +32,8 @@ class _MainWidgetState extends State<MainWidget> {
 
   final Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
 
+  bool _isDbInitialized = false;
+
   @override
   initState() {
     super.initState();
@@ -40,7 +42,8 @@ class _MainWidgetState extends State<MainWidget> {
 
     databaseInterfaceExpression = DatabaseInterfaceExpression();
     databaseInterfaceKanji = DatabaseInterfaceKanji();
-    initDb();
+
+    _initDb();
 
     _prefs.then((SharedPreferences prefs) async {
       bool? isLight = prefs.getBool("darkTheme");
@@ -52,21 +55,31 @@ class _MainWidgetState extends State<MainWidget> {
     });
   }
 
-  Future<void> initDb() async {
-    _prefs.then((SharedPreferences prefs) async {
-      String? path = prefs.getString("expression_path");
-      if (path != null) {
-        await setExpressionDb(path);
-      }
-    });
+  void _initDb() async {
+    final prefs = await _prefs;
 
-    _prefs.then((SharedPreferences prefs) async {
-      String? path = prefs.getString("kanji_path");
-      if (path != null) {
-        await setKanjiDb(path);
-      }
-    });
+    // Initialize expression database
+    String? expressionPath = prefs.getString("expression_path");
+    if (expressionPath != null) {
+      await setExpressionDb(expressionPath);
+    }
+    await databaseInterfaceExpression.setStatus();
+
+    // Initialize kanji database
+    String? kanjiPath = prefs.getString("kanji_path");
+    if (kanjiPath != null) {
+      await setKanjiDb(kanjiPath);
+    }
+    await databaseInterfaceKanji.setStatus();
+
+    // Update UI when done
+    if (mounted) {
+      setState(() {
+        _isDbInitialized = true;
+      });
+    }
   }
+
 
   Future<void> setExpressionDb(String path) async =>
       await databaseInterfaceExpression.open(path);
@@ -120,6 +133,14 @@ class _MainWidgetState extends State<MainWidget> {
 
   @override
   Widget build(BuildContext context) {
+    if (!_isDbInitialized) {
+      return Scaffold(
+        body: Center(
+          child: CircularProgressIndicator(),
+        ),
+      );
+    }
+
     return BlocBuilder<SearchCubit, Search>(
       builder: (context, search) => Scaffold(
         key: _scaffoldKey,

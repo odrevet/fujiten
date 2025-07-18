@@ -27,11 +27,15 @@ abstract class DatabaseInterface {
   Future<int> count();
 
   Future<void> setStatus() async {
-    int nbEntries = await count();
-    if (nbEntries == 0) {
-      status = DatabaseStatus.noResults;
+    if (database == null) {
+      status = DatabaseStatus.pathNotSet;
     } else {
-      status = DatabaseStatus.ok;
+      int nbEntries = await count();
+      if (nbEntries == 0) {
+        status = DatabaseStatus.noResults;
+      } else {
+        status = DatabaseStatus.ok;
+      }
     }
   }
 }
