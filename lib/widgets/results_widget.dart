@@ -100,33 +100,10 @@ class _ResultsWidgetState extends State<ResultsWidget> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  const Text(
-                    "Welcome to Fujiten",
-                    style: TextStyle(fontSize: 18),
-                  ),
-                  ElevatedButton(
-                    onPressed: () {
-                      Future.wait([
-                        widget.databaseInterfaceKanji.setStatus(),
-                        widget.databaseInterfaceExpression.setStatus(),
-                      ]).then(
-                        (List responses) => showDialog(
-                          context: context,
-                          builder: (_) => AlertDialog(
-                            title: const Center(
-                              child: Text('Databases Status'),
-                            ),
-                            content: DatabaseStatusDisplay(
-                              databaseInterfaceExpression:
-                                  widget.databaseInterfaceExpression,
-                              databaseInterfaceKanji:
-                                  widget.databaseInterfaceKanji,
-                            ),
-                          ),
-                        ),
-                      );
-                    },
-                    child: const Text("Check DB status"),
+                  DatabaseStatusDisplay(
+                    databaseInterfaceExpression:
+                        widget.databaseInterfaceExpression,
+                    databaseInterfaceKanji: widget.databaseInterfaceKanji,
                   ),
                 ],
               );

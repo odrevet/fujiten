@@ -39,6 +39,7 @@ class DatabaseStatusDisplay extends StatelessWidget {
               : Colors.green,
         ),
       ),
+      const Divider(),
       Text(
         "Expression DB: ${databaseStatusFormat(databaseInterfaceExpression.status)}",
         style: TextStyle(
@@ -52,7 +53,6 @@ class DatabaseStatusDisplay extends StatelessWidget {
           ? const Text.rich(
               TextSpan(
                 children: [
-                  WidgetSpan(child: Icon(Icons.error)),
                   TextSpan(text: 'Database must be set from the setting menu'),
                 ],
               ),
