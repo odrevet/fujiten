@@ -2,10 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:fujiten/cubits/search_cubit.dart';
 import 'package:fujiten/models/search.dart';
+import 'package:fujiten/widgets/settings/dataset_page.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../cubits/input_cubit.dart';
 import '../cubits/theme_cubit.dart';
+import '../services/database_interface.dart';
 import '../services/database_interface_expression.dart';
 import '../services/database_interface_kanji.dart';
 import '../string_utils.dart';
@@ -139,6 +141,11 @@ class _MainWidgetState extends State<MainWidget> {
           child: CircularProgressIndicator(),
         ),
       );
+    }
+
+    if (databaseInterfaceExpression.status != DatabaseStatus.ok ||
+        databaseInterfaceKanji.status != DatabaseStatus.ok) {
+      return DatasetPage(setExpressionDb: setExpressionDb, setKanjiDb: setKanjiDb);
     }
 
     return BlocBuilder<SearchCubit, Search>(
