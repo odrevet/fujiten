@@ -74,13 +74,14 @@ class _DatabaseSettingsWidgetState extends State<DatabaseSettingsWidget> {
     return PopScope<Object?>(
       canPop: false,
       onPopInvokedWithResult: (bool didPop, Object? result) async {
-        if (didPop || downloadLog.isEmpty) {
-          return;
-        }
-
-        final bool shouldPop = await _displayCancelDownloadDialog();
-        if (context.mounted && shouldPop) {
+        if (downloadLog == ''){
           Navigator.pop(context);
+        }
+        else {
+          final bool shouldPop = await _displayCancelDownloadDialog();
+          if (context.mounted && shouldPop) {
+            Navigator.pop(context);
+          }
         }
       },
       child: FutureBuilder<String>(
