@@ -1,16 +1,82 @@
-# fujiten
+Fujiten is an offline Japanese dictionary application made with the flutter framework.
 
-A new Flutter project.
+Definition and kanji comes from the EDICT dictionary, compiled as a database from the edict_database project.
 
-## Getting Started
+[<img src="https://fdroid.gitlab.io/artwork/badge/get-it-on.png"
+     alt="Get it on F-Droid"
+     height="80">](https://f-droid.org/packages/fr.odrevet.fujiten/)
+[<img src="https://play.google.com/intl/en_us/badges/images/generic/en-play-badge.png"
+     alt="Get it on Google Play"
+     height="80">](https://play.google.com/store/apps/details?id=fr.odrevet.fujiten)
 
-This project is a starting point for a Flutter application.
+or get the APK from the [Releases Section](https://github.com/odrevet/fujiten/releases/latest)
 
-A few resources to get you started if this is your first Flutter project:
+# Setup
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+In order to fujiten to work, the Expression Database and the Kanji Database are needed.
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+The databases can be downloaded and installed from fujiten via the "settings/databases menu or by downloading the database manually from https://github.com/odrevet/edict_database
+
+# Top menu
+
+## Bars
+
+Access the settings menu.
+
+The settings menu allow you to download the dictionaries, set brightness and read legal information.
+
+## Insert
+
+### Radicals <>
+
+Will match kanji composed with the selected radicals
+
+### Kanji character Ⓚ
+
+Will match any kanji
+
+### Kana character ㋐
+
+Will match a hiragana/katakana character
+
+### Joker .*
+
+Any match
+
+## Convert
+
+In case your device is not equipped with a Japanese input keyboard, fujiten can convert Latin character (romaji) to hiragana or katakana.
+
+Lowercase romaji will be converted to hiragana, uppercase romaji will be converted to katakana.
+
+
+# Kotoba / Kanji search
+
+When Kotoba is selected, fujiten will search for expression.
+
+When Kanji is selected, fujiten will search for kanji.
+
+## Clear
+
+Clear the input field.
+
+## Search
+
+Run the search.
+
+# Tips
+
+* Search are performed with regular expression, quantifiers "{}" and meta-characters like "." and others can be use
+
+* Use search by radical < > when searching for an expression which you do not know a kanji but recognize some of it's radical example: ＜化＞
+
+* When no results, add ".*" at the beginning or the end of your search
+
+# Platforms
+
+The Android releases are build from the main branch using the sqflite package to access the databases. 
+
+The Linux releases are build from the sqlite3 branch using the sqlite3 package to access the databases. 
+
+Fujiten may be build for Windows, Mac and IOS but I cannot provide release for those OS at this moment. 
+
