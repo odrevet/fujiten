@@ -2,16 +2,22 @@ import 'package:flutter/material.dart';
 import 'package:fujiten/widgets/settings/theme_settings.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 
+import '../../services/database_interface_expression.dart';
+import '../../services/database_interface_kanji.dart';
 import 'dataset_page.dart';
 
 class SettingsPage extends StatelessWidget {
   final Future<void> Function(String) setExpressionDb;
   final Future<void> Function(String) setKanjiDb;
+  final DatabaseInterfaceExpression databaseInterfaceExpression;
+  final DatabaseInterfaceKanji databaseInterfaceKanji;
 
   const SettingsPage({
     super.key,
     required this.setExpressionDb,
     required this.setKanjiDb,
+    required this.databaseInterfaceExpression,
+    required this.databaseInterfaceKanji,
   });
 
   @override
@@ -27,6 +33,8 @@ class SettingsPage extends StatelessWidget {
               context,
               MaterialPageRoute(
                 builder: (context) => DatasetPage(
+                  databaseInterfaceExpression: databaseInterfaceExpression,
+                  databaseInterfaceKanji: databaseInterfaceKanji,
                   setExpressionDb: setExpressionDb,
                   setKanjiDb: setKanjiDb,
                 ),

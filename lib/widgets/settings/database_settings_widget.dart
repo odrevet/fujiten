@@ -95,10 +95,7 @@ class _DatabaseSettingsWidgetState extends State<DatabaseSettingsWidget> {
               } else {
                 return Card(
                   elevation: 4,
-                  margin: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 8,
-                  ),
+                  margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12),
                   ),
@@ -110,12 +107,30 @@ class _DatabaseSettingsWidgetState extends State<DatabaseSettingsWidget> {
                         // Header with database type
                         Row(
                           children: [
+                            Container(
+                              width: 40,
+                              height: 40,
+                              decoration: BoxDecoration(
+                                color: Theme.of(context).primaryColor.withValues(alpha: .1),
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              child: Center(
+                                child: Text(
+                                  widget.type == 'expression' ? '言' : '漢',
+                                  style: TextStyle(
+                                    fontSize: 24,
+                                    fontWeight: FontWeight.bold
+                                  ),
+                                ),
+                              ),
+                            ),
                             const SizedBox(width: 12),
                             Expanded(
                               child: Text(
                                 '${widget.type.substring(0, 1).toUpperCase()}${widget.type.substring(1)} Database',
-                                style: Theme.of(context).textTheme.headlineSmall
-                                    ?.copyWith(fontWeight: FontWeight.bold),
+                                style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                                  fontWeight: FontWeight.bold
+                                ),
                               ),
                             ),
                           ],
@@ -127,9 +142,7 @@ class _DatabaseSettingsWidgetState extends State<DatabaseSettingsWidget> {
                           width: double.infinity,
                           padding: const EdgeInsets.all(12),
                           decoration: BoxDecoration(
-                            color: Theme.of(
-                              context,
-                            ).colorScheme.surfaceVariant.withOpacity(0.3),
+                            color: Theme.of(context).colorScheme.surfaceVariant.withOpacity(0.3),
                             borderRadius: BorderRadius.circular(8),
                           ),
                           child: Column(
@@ -137,25 +150,19 @@ class _DatabaseSettingsWidgetState extends State<DatabaseSettingsWidget> {
                             children: [
                               Text(
                                 'Database Path:',
-                                style: Theme.of(context).textTheme.labelMedium
-                                    ?.copyWith(fontWeight: FontWeight.bold),
+                                style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                                  fontWeight: FontWeight.bold,
+                                ),
                               ),
                               const SizedBox(height: 4),
                               Text(
-                                snapshot.data!.isEmpty
-                                    ? 'No database selected'
-                                    : snapshot.data!,
-                                style: Theme.of(context).textTheme.bodyMedium
-                                    ?.copyWith(
-                                      color: snapshot.data!.isEmpty
-                                          ? Theme.of(context).colorScheme.error
-                                          : Theme.of(
-                                              context,
-                                            ).colorScheme.onSurface,
-                                      fontStyle: snapshot.data!.isEmpty
-                                          ? FontStyle.italic
-                                          : FontStyle.normal,
-                                    ),
+                                snapshot.data!.isEmpty ? 'No database selected' : snapshot.data!,
+                                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                  color: snapshot.data!.isEmpty
+                                      ? Theme.of(context).colorScheme.error
+                                      : Theme.of(context).colorScheme.onSurface,
+                                  fontStyle: snapshot.data!.isEmpty ? FontStyle.italic : FontStyle.normal,
+                                ),
                               ),
                             ],
                           ),
@@ -172,116 +179,95 @@ class _DatabaseSettingsWidgetState extends State<DatabaseSettingsWidget> {
                               onPressed: downloadLog.isNotEmpty
                                   ? null
                                   : () async {
-                                      Directory appDocDir =
-                                          await getApplicationDocumentsDirectory();
-                                      String appDocPath = appDocDir.path;
-                                      String downloadTo =
-                                          "$appDocPath/${widget.type}.db";
-                                      Dio()
-                                          .download(
-                                            "https://github.com/odrevet/edict_database/releases/latest/download/${widget.type}.zip",
-                                            downloadTo,
-                                            onReceiveProgress: (received, total) {
-                                              if (total != -1) {
-                                                setState(
-                                                  () => downloadLog =
-                                                      ("Downloading... ${(received / total * 100).toStringAsFixed(0)}%"),
-                                                );
-                                              }
-                                            },
-                                          )
-                                          .then((_) async {
-                                            String path =
-                                                "$appDocPath/${widget.type}.db";
+                                Directory appDocDir = await getApplicationDocumentsDirectory();
+                                String appDocPath = appDocDir.path;
+                                String downloadTo = "$appDocPath/${widget.type}.db";
+                                Dio()
+                                    .download(
+                                  "https://github.com/odrevet/edict_database/releases/latest/download/${widget.type}.zip",
+                                  downloadTo,
+                                  onReceiveProgress: (received, total) {
+                                    if (total != -1) {
+                                      setState(
+                                            () => downloadLog =
+                                        ("Downloading... ${(received / total * 100).toStringAsFixed(0)}%"),
+                                      );
+                                    }
+                                  },
+                                )
+                                    .then((_) async {
+                                  String path = "$appDocPath/${widget.type}.db";
 
-                                            // Extract zip
-                                            try {
-                                              // Read the Zip file from disk.
-                                              final bytes = File(
-                                                downloadTo,
-                                              ).readAsBytesSync();
+                                  // Extract zip
+                                  try {
+                                    // Read the Zip file from disk.
+                                    final bytes = File(downloadTo).readAsBytesSync();
 
-                                              // Decode the Zip file
-                                              final archive = ZipDecoder()
-                                                  .decodeBytes(bytes);
+                                    // Decode the Zip file
+                                    final archive = ZipDecoder().decodeBytes(bytes);
 
-                                              // Extract the contents of the Zip archive to disk.
-                                              for (final file in archive) {
-                                                final data =
-                                                    file.content as List<int>;
-                                                File(
-                                                    '$appDocPath/${widget.type}.db',
-                                                  )
-                                                  ..createSync(recursive: true)
-                                                  ..writeAsBytesSync(data);
-                                              }
+                                    // Extract the contents of the Zip archive to disk.
+                                    for (final file in archive) {
+                                      final data = file.content as List<int>;
+                                      File('$appDocPath/${widget.type}.db')
+                                        ..createSync(recursive: true)
+                                        ..writeAsBytesSync(data);
+                                    }
 
-                                              // Set DB Path and open the Database
-                                              setPath(path);
-                                              setState(() {
-                                                downloadLog = "";
-                                              });
-                                              await widget.setDb(path);
-                                            } catch (e) {
-                                              setState(
-                                                () => downloadLog =
-                                                    "Error ${e.toString()}",
-                                              );
-                                            }
-                                          });
-                                    },
+                                    // Set DB Path and open the Database
+                                    setPath(path);
+                                    setState(() {
+                                      downloadLog = "";
+                                    });
+                                    await widget.setDb(path);
+                                  } catch (e) {
+                                    setState(
+                                          () => downloadLog = "Error ${e.toString()}",
+                                    );
+                                  }
+                                });
+                              },
                               icon: const Icon(Icons.download),
                               label: const Text('Download'),
                               style: ElevatedButton.styleFrom(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 16,
-                                  vertical: 12,
-                                ),
+                                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                               ),
                             ),
                             OutlinedButton.icon(
                               onPressed: downloadLog.isNotEmpty
                                   ? null
                                   : () => _pickFiles().then((result) async {
-                                      if (result != null) {
-                                        String path = result.first.path!;
-                                        setPath(path);
-                                        await widget.setDb(path);
-                                        setState(() {
-                                          downloadLog = '';
-                                        });
-                                      }
-                                    }),
+                                if (result != null) {
+                                  String path = result.first.path!;
+                                  setPath(path);
+                                  await widget.setDb(path);
+                                  setState(() {
+                                    downloadLog = '';
+                                  });
+                                }
+                              }),
                               icon: const Icon(Icons.folder_open),
                               label: const Text('Pick File'),
                               style: OutlinedButton.styleFrom(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 16,
-                                  vertical: 12,
-                                ),
+                                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                               ),
                             ),
                             TextButton.icon(
                               onPressed: snapshot.data == ''
                                   ? null
                                   : () async {
-                                      String path = '';
-                                      setPath(path);
-                                      await widget.setDb(path);
-                                      setState(() {
-                                        downloadLog = '';
-                                      });
-                                    },
+                                String path = '';
+                                setPath(path);
+                                await widget.setDb(path);
+                                setState(() {
+                                  downloadLog = '';
+                                });
+                              },
                               icon: const Icon(Icons.clear),
                               label: const Text('Clear'),
                               style: TextButton.styleFrom(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 16,
-                                  vertical: 12,
-                                ),
-                                foregroundColor: Theme.of(
-                                  context,
-                                ).colorScheme.error,
+                                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                                foregroundColor: Theme.of(context).colorScheme.error,
                               ),
                             ),
                           ],
@@ -296,9 +282,7 @@ class _DatabaseSettingsWidgetState extends State<DatabaseSettingsWidget> {
                             decoration: BoxDecoration(
                               color: downloadLog.contains('Error')
                                   ? Theme.of(context).colorScheme.errorContainer
-                                  : Theme.of(
-                                      context,
-                                    ).colorScheme.primaryContainer,
+                                  : Theme.of(context).colorScheme.primaryContainer,
                               borderRadius: BorderRadius.circular(8),
                             ),
                             child: Row(
@@ -310,9 +294,7 @@ class _DatabaseSettingsWidgetState extends State<DatabaseSettingsWidget> {
                                     child: CircularProgressIndicator(
                                       strokeWidth: 2,
                                       valueColor: AlwaysStoppedAnimation<Color>(
-                                        Theme.of(
-                                          context,
-                                        ).colorScheme.onPrimaryContainer,
+                                        Theme.of(context).colorScheme.onPrimaryContainer,
                                       ),
                                     ),
                                   ),
@@ -320,27 +302,18 @@ class _DatabaseSettingsWidgetState extends State<DatabaseSettingsWidget> {
                                   Icon(
                                     Icons.error,
                                     size: 16,
-                                    color: Theme.of(
-                                      context,
-                                    ).colorScheme.onErrorContainer,
+                                    color: Theme.of(context).colorScheme.onErrorContainer,
                                   ),
                                 const SizedBox(width: 8),
                                 Expanded(
                                   child: Text(
                                     downloadLog,
-                                    style: Theme.of(context)
-                                        .textTheme
-                                        .bodyMedium
-                                        ?.copyWith(
-                                          color: downloadLog.contains('Error')
-                                              ? Theme.of(
-                                                  context,
-                                                ).colorScheme.onErrorContainer
-                                              : Theme.of(context)
-                                                    .colorScheme
-                                                    .onPrimaryContainer,
-                                          fontWeight: FontWeight.normal,
-                                        ),
+                                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                      color: downloadLog.contains('Error')
+                                          ? Theme.of(context).colorScheme.onErrorContainer
+                                          : Theme.of(context).colorScheme.onPrimaryContainer,
+                                      fontWeight: FontWeight.normal,
+                                    ),
                                   ),
                                 ),
                               ],
@@ -349,8 +322,7 @@ class _DatabaseSettingsWidgetState extends State<DatabaseSettingsWidget> {
                       ],
                     ),
                   ),
-                );
-              }
+                );              }
           }
         },
       ),

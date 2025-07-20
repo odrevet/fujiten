@@ -7,11 +7,20 @@ enum DatabaseStatus { ok, pathNotSet, noResults }
 abstract class DatabaseInterface {
   Database? database;
   DatabaseStatus? status;
+  String? log;
 
   DatabaseInterface({this.database});
 
   Future<void> open(String path) async {
-    database = await openDatabase(path, readOnly: true);
+    try {
+      database = await openDatabase(path, readOnly: true);
+    } catch (e) {
+      database = null;
+      status = DatabaseStatus.noResults;
+      log = e.toString();
+    }
+
+    //await setStatus();
   }
 
   Future<void> dispose() async {
@@ -29,12 +38,15 @@ abstract class DatabaseInterface {
   Future<void> setStatus() async {
     if (database == null) {
       status = DatabaseStatus.pathNotSet;
+      log = 'No database selected';
     } else {
       int nbEntries = await count();
       if (nbEntries == 0) {
         status = DatabaseStatus.noResults;
+        log = 'No entry found in database';
       } else {
         status = DatabaseStatus.ok;
+        log = 'Database loaded';
       }
     }
   }

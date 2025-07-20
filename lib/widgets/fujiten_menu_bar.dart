@@ -200,6 +200,9 @@ class _FujitenMenuBarState extends State<FujitenMenuBar> {
                     builder: (context) => SettingsPage(
                       setExpressionDb: widget.setExpressionDb,
                       setKanjiDb: widget.setKanjiDb,
+                      databaseInterfaceExpression:
+                          widget.databaseInterfaceExpression,
+                      databaseInterfaceKanji: widget.databaseInterfaceKanji,
                     ),
                   ),
                 ).then((_) {

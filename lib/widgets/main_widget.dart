@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:fujiten/cubits/search_cubit.dart';
 import 'package:fujiten/models/search.dart';
@@ -75,13 +76,11 @@ class _MainWidgetState extends State<MainWidget> {
     await databaseInterfaceKanji.setStatus();
 
     // Update UI when done
-    if (mounted) {
-      setState(() {
-        _isDbInitialized = true;
-      });
-    }
-  }
 
+    setState(() {
+      _isDbInitialized = true;
+    });
+  }
 
   Future<void> setExpressionDb(String path) async =>
       await databaseInterfaceExpression.open(path);
@@ -136,16 +135,20 @@ class _MainWidgetState extends State<MainWidget> {
   @override
   Widget build(BuildContext context) {
     if (!_isDbInitialized) {
-      return Scaffold(
-        body: Center(
-          child: CircularProgressIndicator(),
-        ),
-      );
+      return Scaffold(body: Center(child: CircularProgressIndicator()));
     }
 
     if (databaseInterfaceExpression.status != DatabaseStatus.ok ||
         databaseInterfaceKanji.status != DatabaseStatus.ok) {
-      return DatasetPage(setExpressionDb: setExpressionDb, setKanjiDb: setKanjiDb);
+      return DatasetPage(
+        databaseInterfaceExpression: databaseInterfaceExpression,
+        databaseInterfaceKanji: databaseInterfaceKanji,
+        setExpressionDb: setExpressionDb,
+        setKanjiDb: setKanjiDb,
+        onBackPressed: () {
+          SystemNavigator.pop();
+        },
+      );
     }
 
     return BlocBuilder<SearchCubit, Search>(
