@@ -16,15 +16,13 @@ class DatabaseStatusDisplay extends StatelessWidget {
 
   String _getDatabaseStatusMessage(DatabaseStatus? status) {
     switch (status) {
-      case null:
-      case DatabaseStatus.pathNotSet:
-        return "No database configured";
       case DatabaseStatus.ok:
         return "Ready";
       case DatabaseStatus.noResults:
         return "Invalid database (no entries found)";
+      case DatabaseStatus.pathNotSet:
       default:
-        return "Unknown status: $status";
+        return "No database configured";
     }
   }
 
@@ -52,13 +50,14 @@ class DatabaseStatusDisplay extends StatelessWidget {
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: status == DatabaseStatus.ok
-            ? Theme.of(context).colorScheme.primaryContainer.withOpacity(0.3)
-            : Theme.of(context).colorScheme.errorContainer.withOpacity(0.3),
+            ? Theme.of(
+                context,
+              ).colorScheme.primaryContainer.withValues(alpha: 0.3)
+            : Theme.of(
+                context,
+              ).colorScheme.errorContainer.withValues(alpha: 0.3),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: statusColor.withOpacity(0.3),
-          width: 1,
-        ),
+        border: Border.all(color: statusColor.withValues(alpha: 0.3), width: 1),
       ),
       child: Row(
         children: [
@@ -66,7 +65,7 @@ class DatabaseStatusDisplay extends StatelessWidget {
             width: 40,
             height: 40,
             decoration: BoxDecoration(
-              color: statusColor.withOpacity(0.1),
+              color: statusColor.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(8),
             ),
             child: Center(
@@ -95,11 +94,7 @@ class DatabaseStatusDisplay extends StatelessWidget {
                 const SizedBox(height: 4),
                 Row(
                   children: [
-                    Icon(
-                      statusIcon,
-                      size: 16,
-                      color: statusColor,
-                    ),
+                    Icon(statusIcon, size: 16, color: statusColor),
                     const SizedBox(width: 6),
                     Expanded(
                       child: Text(
@@ -121,7 +116,8 @@ class DatabaseStatusDisplay extends StatelessWidget {
   }
 
   Widget _buildOverallStatus(BuildContext context) {
-    final bool allOk = databaseInterfaceKanji.status == DatabaseStatus.ok &&
+    final bool allOk =
+        databaseInterfaceKanji.status == DatabaseStatus.ok &&
         databaseInterfaceExpression.status == DatabaseStatus.ok;
 
     return Container(
@@ -145,9 +141,7 @@ class DatabaseStatusDisplay extends StatelessWidget {
           ),
           const SizedBox(width: 8),
           Text(
-            allOk
-                ? 'All databases ready'
-                : 'Database configuration required',
+            allOk ? 'All databases ready' : 'Database configuration required',
             style: Theme.of(context).textTheme.titleMedium?.copyWith(
               color: allOk
                   ? Theme.of(context).colorScheme.onPrimaryContainer
@@ -165,9 +159,7 @@ class DatabaseStatusDisplay extends StatelessWidget {
     return Card(
       elevation: 2,
       margin: const EdgeInsets.all(16),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       child: Padding(
         padding: const EdgeInsets.all(20),
         child: Column(
@@ -176,15 +168,12 @@ class DatabaseStatusDisplay extends StatelessWidget {
             // Header
             Row(
               children: [
-                Icon(
-                  Icons.storage,
-                  size: 28
-                ),
+                Icon(Icons.storage, size: 28),
                 const SizedBox(width: 12),
                 Text(
                   'Database Status',
                   style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                    fontWeight: FontWeight.bold
+                    fontWeight: FontWeight.bold,
                   ),
                 ),
               ],
@@ -221,7 +210,9 @@ class DatabaseStatusDisplay extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.surfaceVariant.withOpacity(0.5),
+                  color: Theme.of(
+                    context,
+                  ).colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Row(
