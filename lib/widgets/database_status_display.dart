@@ -178,15 +178,13 @@ class DatabaseStatusDisplay extends StatelessWidget {
               children: [
                 Icon(
                   Icons.storage,
-                  size: 28,
-                  color: Theme.of(context).primaryColor,
+                  size: 28
                 ),
                 const SizedBox(width: 12),
                 Text(
                   'Database Status',
                   style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                    fontWeight: FontWeight.bold,
-                    color: Theme.of(context).primaryColor,
+                    fontWeight: FontWeight.bold
                   ),
                 ),
               ],
