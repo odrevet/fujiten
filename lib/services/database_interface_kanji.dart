@@ -153,7 +153,7 @@ class DatabaseInterfaceKanji extends DatabaseInterface {
     });
   }
 
-  Future<List<String?>> getRadicalsForSelection(selectedRadicals) async {
+  Future<List<String?>> getRadicalsForSelection(List<String> selectedRadicals) async {
     String sql =
         'SELECT DISTINCT id_radical FROM character_radical WHERE id_character IN (';
     selectedRadicals.asMap().forEach((i, radical) {

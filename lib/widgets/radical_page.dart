@@ -40,7 +40,7 @@ class RadicalPageState extends State<RadicalPage> {
     super.initState();
   }
 
-  convert() async {
+  Future<void> convert() async {
     String input = filterController.text;
     if (kanaKit.isRomaji(input)) {
       filterController.text = kanaKit.toKana(input);
@@ -269,11 +269,11 @@ class RadicalPageState extends State<RadicalPage> {
     },
   );
 
-  updateSelection() => widget.databaseInterfaceKanji
+  Future<void> updateSelection() => widget.databaseInterfaceKanji
       .getRadicalsForSelection(widget.selectedRadicals)
       .then((validRadicals) => setState(() => _validRadicals = validRadicals));
 
-  onRadicalButtonPress(String character) {
+  void onRadicalButtonPress(String character) {
     setState(() {
       widget.selectedRadicals.contains(character)
           ? widget.selectedRadicals.removeWhere((test) => test == character)

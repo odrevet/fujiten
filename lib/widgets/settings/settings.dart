@@ -52,23 +52,25 @@ class SettingsPage extends StatelessWidget {
           ListTile(
             leading: const Icon(Icons.info),
             title: const Text("About"),
-            onTap: () => {
+            onTap: () {
               PackageInfo.fromPlatform().then((PackageInfo packageInfo) {
                 String appName = packageInfo.appName;
                 String version = packageInfo.version;
+
+                if (!context.mounted) return;
 
                 showAboutDialog(
                   context: context,
                   applicationName: appName,
                   applicationVersion: version,
-                  applicationLegalese:
-                      '''2022-2025 Olivier Drevet All right reserved
+                  applicationLegalese: '''2022-2025 Olivier Drevet All right reserved
 This software uses data from JMDict, Kanjidic2, Radkfile by the Electronic Dictionary Research and Development Group
 under the Creative Commons Attribution-ShareAlike Licence (V3.0)''',
                 );
-              }),
+              });
             },
-          ),
+          )
+,
         ],
       ),
     );

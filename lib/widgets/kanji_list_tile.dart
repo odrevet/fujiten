@@ -9,11 +9,11 @@ class KanjiListTile extends ListTile {
 
   const KanjiListTile({
     required this.kanji,
-    required onTap,
-    required selected,
+    required super.onTap,
+    required super.selected,
     this.onTapLeading,
     super.key,
-  }) : super(onTap: onTap, selected: selected);
+  });
 
   @override
   Widget build(BuildContext context) {

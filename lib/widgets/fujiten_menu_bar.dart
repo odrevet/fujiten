@@ -39,7 +39,7 @@ class FujitenMenuBar extends StatefulWidget {
 }
 
 class _FujitenMenuBarState extends State<FujitenMenuBar> {
-  addStringInController(String input) {
+  void addStringInController(String input) {
     if (widget.insertPosition >= 0) {
       widget.textEditingController!.text = addCharAtPosition(
         widget.textEditingController!.text,
@@ -54,7 +54,7 @@ class _FujitenMenuBarState extends State<FujitenMenuBar> {
     }
   }
 
-  convert() {
+  void convert() {
     String? input = widget.textEditingController?.text;
     String convertedInput;
     if (kanaKit.isRomaji(input!)) {
@@ -223,7 +223,7 @@ class _FujitenMenuBarState extends State<FujitenMenuBar> {
     );
   }
 
-  displayRadicalWidget(BuildContext context) async {
+  Future<void> displayRadicalWidget(BuildContext context) async {
     //send the radicals inside < > to the radical page
     var exp = RegExp(r'<(.*?)>');
     Iterable<RegExpMatch> matches = exp.allMatches(
@@ -249,7 +249,7 @@ class _FujitenMenuBarState extends State<FujitenMenuBar> {
         .getRadicalsCharacter();
     radicals.removeWhere((String radical) => !radicalsFromDb.contains(radical));
 
-    if (!mounted) return;
+    if (!context.mounted) return;
     Navigator.push(
       context,
       MaterialPageRoute(
@@ -297,7 +297,9 @@ class _FujitenMenuBarState extends State<FujitenMenuBar> {
         }
       }
 
-      context.read<InputCubit>().setInput(widget.textEditingController!.text);
+      if(context.mounted) {
+        context.read<InputCubit>().setInput(widget.textEditingController!.text);
+      }
     });
   }
 }

@@ -48,7 +48,8 @@ class _MainWidgetState extends State<MainWidget> {
 
     _initDb();
 
-    _prefs.then((SharedPreferences prefs) async {
+    _prefs.then((SharedPreferences prefs) {
+      if (!mounted) return;
       bool? isLight = prefs.getBool("darkTheme");
       if (isLight == true) {
         context.read<ThemeCubit>().updateTheme(
@@ -95,21 +96,24 @@ class _MainWidgetState extends State<MainWidget> {
     super.dispose();
   }
 
-  onSearch() {
+  void onSearch() async {
     if (widget._textEditingController.text != "") {
-      formatInput(
+      final formattedInput = await formatInput(
         widget._textEditingController.text,
         databaseInterfaceKanji,
-      ).then((formattedInput) {
-        context.read<InputCubit>().setFormattedInput(formattedInput);
-        context.read<SearchCubit>().reset();
-        context.read<SearchCubit>().runSearch(
-          context.read<SearchCubit>().state.searchType == SearchType.kanji
-              ? databaseInterfaceKanji
-              : databaseInterfaceExpression,
-          formattedInput,
-        );
-      });
+      );
+
+      // Check if the widget is still mounted before using context
+      if (!mounted) return;
+
+      context.read<InputCubit>().setFormattedInput(formattedInput);
+      context.read<SearchCubit>().reset();
+      context.read<SearchCubit>().runSearch(
+        context.read<SearchCubit>().state.searchType == SearchType.kanji
+            ? databaseInterfaceKanji
+            : databaseInterfaceExpression,
+        formattedInput,
+      );
     }
 
     focusNode.unfocus();
@@ -121,7 +125,7 @@ class _MainWidgetState extends State<MainWidget> {
     });
   }
 
-  onEndReached() {
+  void onEndReached() {
     var searchType = context.read<SearchCubit>().state.searchType;
     context.read<SearchCubit>().nextPage();
     context.read<SearchCubit>().runSearch(

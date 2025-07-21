@@ -1,13 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import '../models/entry.dart';
 import '../models/sense.dart';
+import '../services/database_interface_kanji.dart';
 import '../string_utils.dart' show kanaKit;
 import 'kanji_dialog.dart';
 
 class ResultExpressionList extends StatefulWidget {
-  final searchResult;
-  final databaseInterfaceKanji;
+  final ExpressionEntry searchResult;
+  final DatabaseInterfaceKanji databaseInterfaceKanji;
 
   const ResultExpressionList({
     required this.searchResult,
@@ -37,13 +39,13 @@ class _ResultExpressionListState extends State<ResultExpressionList> {
   Widget build(BuildContext context) {
     //group glosses by pos
     Map sensesGroupedByPosses = <String?, List<Sense>>{};
-    widget.searchResult.senses.forEach((sense) {
+    for (var sense in widget.searchResult.senses) {
       String? posString = sense.posses.join(', ');
       if (!sensesGroupedByPosses.containsKey(posString)) {
         sensesGroupedByPosses[posString] = <Sense>[];
       }
       sensesGroupedByPosses[posString].add(sense);
-    });
+    }
 
     /// filter reading to keep only kanji characters
     List<String> literals = [];
@@ -70,10 +72,10 @@ class _ResultExpressionListState extends State<ResultExpressionList> {
                   )
                 : null,
             onDoubleTap: () => Clipboard.setData(
-              ClipboardData(text: widget.searchResult.reading),
+              ClipboardData(text: widget.searchResult.reading.toString()),
             ),
             child: Text(
-              '${widget.searchResult.reading.isNotEmpty ? widget.searchResult.reading[0] : ''}',
+              widget.searchResult.reading.isNotEmpty ? widget.searchResult.reading[0] : '',
               style: const TextStyle(fontSize: 20.0),
             ),
           ),

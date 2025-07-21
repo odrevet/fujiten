@@ -45,7 +45,7 @@ class _ResultsWidgetState extends State<ResultsWidget> {
     super.dispose();
   }
 
-  scrollListener() {
+  void scrollListener() {
     if (_scrollController!.offset >=
             _scrollController!.position.maxScrollExtent &&
         !_scrollController!.position.outOfRange &&
@@ -65,8 +65,10 @@ class _ResultsWidgetState extends State<ResultsWidget> {
             Clipboard.setData(ClipboardData(text: searchResult.kanji.literal)),
       );
     } else {
+      final expressionResults = search.searchResults.whereType<ExpressionEntry>().toList();
+
       return ResultExpressionList(
-        searchResult: search.searchResults[index],
+        searchResult: expressionResults[index],
         databaseInterfaceKanji: widget.databaseInterfaceKanji,
       );
     }
