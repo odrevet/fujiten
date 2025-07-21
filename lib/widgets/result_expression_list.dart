@@ -75,7 +75,9 @@ class _ResultExpressionListState extends State<ResultExpressionList> {
               ClipboardData(text: widget.searchResult.reading.toString()),
             ),
             child: Text(
-              widget.searchResult.reading.isNotEmpty ? widget.searchResult.reading[0] : '',
+              widget.searchResult.reading.isNotEmpty
+                  ? widget.searchResult.reading[0]
+                  : '',
               style: const TextStyle(fontSize: 20.0),
             ),
           ),

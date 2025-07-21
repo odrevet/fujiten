@@ -297,7 +297,7 @@ class _FujitenMenuBarState extends State<FujitenMenuBar> {
         }
       }
 
-      if(context.mounted) {
+      if (context.mounted) {
         context.read<InputCubit>().setInput(widget.textEditingController!.text);
       }
     });

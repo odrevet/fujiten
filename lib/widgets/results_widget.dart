@@ -65,7 +65,9 @@ class _ResultsWidgetState extends State<ResultsWidget> {
             Clipboard.setData(ClipboardData(text: searchResult.kanji.literal)),
       );
     } else {
-      final expressionResults = search.searchResults.whereType<ExpressionEntry>().toList();
+      final expressionResults = search.searchResults
+          .whereType<ExpressionEntry>()
+          .toList();
 
       return ResultExpressionList(
         searchResult: expressionResults[index],
