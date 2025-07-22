@@ -6,16 +6,21 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:fujiten/widgets/database_status_display.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
+import '../../services/database_interface.dart';
 
 class DatabaseSettingsWidget extends StatefulWidget {
   final String type;
   final Function setDb;
+  final DatabaseInterface databaseInterface;
 
   const DatabaseSettingsWidget({
     required this.type,
     required this.setDb,
+    required this.databaseInterface,
     super.key,
   });
 
@@ -48,336 +53,291 @@ class _DatabaseSettingsWidgetState extends State<DatabaseSettingsWidget> {
     });
   }
 
-  Future<bool> _displayCancelDownloadDialog() async {
-    return (await showDialog(
-          context: context,
-          builder: (context) => AlertDialog(
-            title: const Text('Are you sure?'),
-            content: const Text('Exit will cancel the download'),
-            actions: <Widget>[
-              TextButton(
-                onPressed: () => Navigator.of(context).pop(false),
-                child: const Text('No'),
-              ),
-              TextButton(
-                onPressed: () => Navigator.of(context).pop(true),
-                child: const Text('Yes'),
-              ),
-            ],
-          ),
-        )) ??
-        false;
-  }
-
   @override
   Widget build(BuildContext context) {
-    return PopScope<Object?>(
-      canPop: false,
-      onPopInvokedWithResult: (bool didPop, Object? result) async {
-        if (downloadLog == '') {
-          Navigator.pop(context);
-        } else {
-          final bool shouldPop = await _displayCancelDownloadDialog();
-          if (context.mounted && shouldPop) {
-            Navigator.pop(context);
-          }
-        }
-      },
-      child: FutureBuilder<String>(
-        future: pathDb,
-        builder: (BuildContext context, AsyncSnapshot<String> snapshot) {
-          switch (snapshot.connectionState) {
-            case ConnectionState.waiting:
-              return const CircularProgressIndicator();
-            default:
-              if (snapshot.hasError) {
-                return Text('Error: ${snapshot.error}');
-              } else {
-                return Card(
-                  elevation: 4,
-                  margin: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 8,
-                  ),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Padding(
-                    padding: const EdgeInsets.all(16),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        // Header with database type
-                        Row(
+    return FutureBuilder<String>(
+      future: pathDb,
+      builder: (BuildContext context, AsyncSnapshot<String> snapshot) {
+        switch (snapshot.connectionState) {
+          case ConnectionState.waiting:
+            return const CircularProgressIndicator();
+          default:
+            if (snapshot.hasError) {
+              return Text('Error: ${snapshot.error}');
+            } else {
+              return Card(
+                elevation: 4,
+                margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // Header with database type
+                      DatabaseStatusItem(
+                        title: widget.type == 'kanji' ? 'Kanji' : 'Expression',
+                        status: widget.databaseInterface.status,
+                        kanjiChar: widget.type == 'kanji' ? '漢' : '言',
+                      ),
+
+                      const SizedBox(height: 16),
+
+                      // Database path/status section
+                      Container(
+                        width: double.infinity,
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: Theme.of(context)
+                              .colorScheme
+                              .surfaceContainerHighest
+                              .withValues(alpha: 0.3),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Container(
-                              width: 40,
-                              height: 40,
-                              decoration: BoxDecoration(
-                                color: Theme.of(
-                                  context,
-                                ).primaryColor.withValues(alpha: .1),
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                              child: Center(
-                                child: Text(
-                                  widget.type == 'expression' ? '言' : '漢',
-                                  style: TextStyle(
-                                    fontSize: 24,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                              ),
+                            Text(
+                              'Database Path:',
+                              style: Theme.of(context).textTheme.labelMedium
+                                  ?.copyWith(fontWeight: FontWeight.bold),
                             ),
-                            const SizedBox(width: 12),
-                            Expanded(
-                              child: Text(
-                                '${widget.type.substring(0, 1).toUpperCase()}${widget.type.substring(1)} Database',
-                                style: Theme.of(context).textTheme.headlineSmall
-                                    ?.copyWith(fontWeight: FontWeight.bold),
-                              ),
+                            const SizedBox(height: 4),
+                            Text(
+                              snapshot.data!.isEmpty
+                                  ? 'No database selected'
+                                  : snapshot.data!,
+                              style: Theme.of(context).textTheme.bodyMedium
+                                  ?.copyWith(
+                                    color: snapshot.data!.isEmpty
+                                        ? Theme.of(context).colorScheme.error
+                                        : Theme.of(
+                                            context,
+                                          ).colorScheme.onSurface,
+                                    fontStyle: snapshot.data!.isEmpty
+                                        ? FontStyle.italic
+                                        : FontStyle.normal,
+                                  ),
                             ),
                           ],
                         ),
-                        const SizedBox(height: 16),
+                      ),
 
-                        // Database path/status section
-                        Container(
-                          width: double.infinity,
-                          padding: const EdgeInsets.all(12),
-                          decoration: BoxDecoration(
-                            color: Theme.of(context)
-                                .colorScheme
-                                .surfaceContainerHighest
-                                .withValues(alpha: 0.3),
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                'Database Path:',
-                                style: Theme.of(context).textTheme.labelMedium
-                                    ?.copyWith(fontWeight: FontWeight.bold),
-                              ),
-                              const SizedBox(height: 4),
-                              Text(
-                                snapshot.data!.isEmpty
-                                    ? 'No database selected'
-                                    : snapshot.data!,
-                                style: Theme.of(context).textTheme.bodyMedium
-                                    ?.copyWith(
-                                      color: snapshot.data!.isEmpty
-                                          ? Theme.of(context).colorScheme.error
-                                          : Theme.of(
-                                              context,
-                                            ).colorScheme.onSurface,
-                                      fontStyle: snapshot.data!.isEmpty
-                                          ? FontStyle.italic
-                                          : FontStyle.normal,
-                                    ),
-                              ),
-                            ],
-                          ),
-                        ),
+                      const SizedBox(height: 16),
 
-                        const SizedBox(height: 16),
-
-                        // Action buttons
-                        Wrap(
-                          spacing: 8,
-                          runSpacing: 8,
-                          children: [
-                            ElevatedButton.icon(
-                              onPressed: downloadLog.isNotEmpty
-                                  ? null
-                                  : () async {
-                                      Directory appDocDir =
-                                          await getApplicationDocumentsDirectory();
-                                      String appDocPath = appDocDir.path;
-                                      String downloadTo =
-                                          "$appDocPath/${widget.type}.db";
-                                      Dio()
-                                          .download(
-                                            "https://github.com/odrevet/edict_database/releases/latest/download/${widget.type}.zip",
-                                            downloadTo,
-                                            onReceiveProgress: (received, total) {
-                                              if (total != -1) {
-                                                setState(
-                                                  () => downloadLog =
-                                                      ("Downloading... ${(received / total * 100).toStringAsFixed(0)}%"),
-                                                );
-                                              }
-                                            },
-                                          )
-                                          .then((_) async {
-                                            String path =
-                                                "$appDocPath/${widget.type}.db";
-
-                                            // Extract zip
-                                            try {
-                                              // Read the Zip file from disk.
-                                              final bytes = File(
-                                                downloadTo,
-                                              ).readAsBytesSync();
-
-                                              // Decode the Zip file
-                                              final archive = ZipDecoder()
-                                                  .decodeBytes(bytes);
-
-                                              // Extract the contents of the Zip archive to disk.
-                                              for (final file in archive) {
-                                                final data =
-                                                    file.content as List<int>;
-                                                File(
-                                                    '$appDocPath/${widget.type}.db',
-                                                  )
-                                                  ..createSync(recursive: true)
-                                                  ..writeAsBytesSync(data);
-                                              }
-
-                                              // Set DB Path and open the Database
-                                              setPath(path);
-                                              setState(() {
-                                                downloadLog = "";
-                                              });
-                                              await widget.setDb(path);
-                                            } catch (e) {
+                      // Action buttons
+                      Wrap(
+                        spacing: 8,
+                        runSpacing: 8,
+                        children: [
+                          ElevatedButton.icon(
+                            onPressed: downloadLog.isNotEmpty
+                                ? null
+                                : () async {
+                                    Directory appDocDir =
+                                        await getApplicationDocumentsDirectory();
+                                    String appDocPath = appDocDir.path;
+                                    String downloadTo =
+                                        "$appDocPath/${widget.type}.db";
+                                    Dio()
+                                        .download(
+                                          "https://github.com/odrevet/edict_database/releases/latest/download/${widget.type}.zip",
+                                          downloadTo,
+                                          onReceiveProgress: (received, total) {
+                                            if (total != -1) {
                                               setState(
                                                 () => downloadLog =
-                                                    "Error ${e.toString()}",
+                                                    ("Downloading... ${(received / total * 100).toStringAsFixed(0)}%"),
                                               );
                                             }
-                                          });
-                                    },
-                              icon: const Icon(Icons.download),
-                              label: const Text('Download'),
-                              style: ElevatedButton.styleFrom(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 16,
-                                  vertical: 12,
-                                ),
-                              ),
-                            ),
-                            OutlinedButton.icon(
-                              onPressed: downloadLog.isNotEmpty
-                                  ? null
-                                  : () => _pickFiles().then((result) async {
-                                      if (result != null) {
-                                        String path = result.first.path!;
-                                        setPath(path);
-                                        await widget.setDb(path);
-                                        setState(() {
-                                          downloadLog = '';
+                                          },
+                                        )
+                                        .then((_) async {
+                                          String path =
+                                              "$appDocPath/${widget.type}.db";
+
+                                          // Extract zip
+                                          try {
+                                            // Read the Zip file from disk.
+                                            final bytes = File(
+                                              downloadTo,
+                                            ).readAsBytesSync();
+
+                                            // Decode the Zip file
+                                            final archive = ZipDecoder()
+                                                .decodeBytes(bytes);
+
+                                            // Extract the contents of the Zip archive to disk.
+                                            for (final file in archive) {
+                                              final data =
+                                                  file.content as List<int>;
+                                              File(
+                                                  '$appDocPath/${widget.type}.db',
+                                                )
+                                                ..createSync(recursive: true)
+                                                ..writeAsBytesSync(data);
+                                            }
+
+                                            // Set DB Path and open the Database
+                                            setPath(path);
+                                            setState(() {
+                                              downloadLog = "";
+                                            });
+
+                                            await widget.setDb(path);
+                                            await widget.databaseInterface
+                                                .setStatus();
+                                          } catch (e) {
+                                            setState(
+                                              () => downloadLog =
+                                                  "Error ${e.toString()}",
+                                            );
+                                          }
                                         });
-                                      }
-                                    }),
-                              icon: const Icon(Icons.folder_open),
-                              label: const Text('Pick File'),
-                              style: OutlinedButton.styleFrom(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 16,
-                                  vertical: 12,
-                                ),
+                                  },
+                            icon: const Icon(Icons.download),
+                            label: const Text('Download'),
+                            style: ElevatedButton.styleFrom(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 16,
+                                vertical: 12,
                               ),
                             ),
-                            TextButton.icon(
-                              onPressed: snapshot.data == ''
-                                  ? null
-                                  : () async {
-                                      String path = '';
+                          ),
+                          OutlinedButton.icon(
+                            onPressed: downloadLog.isNotEmpty
+                                ? null
+                                : () => _pickFile().then((result) async {
+                                    if (result != null) {
+                                      String path = result.first.path!;
                                       setPath(path);
                                       await widget.setDb(path);
                                       setState(() {
                                         downloadLog = '';
                                       });
-                                    },
-                              icon: const Icon(Icons.clear),
-                              label: const Text('Clear'),
-                              style: TextButton.styleFrom(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 16,
-                                  vertical: 12,
-                                ),
-                                foregroundColor: Theme.of(
-                                  context,
-                                ).colorScheme.error,
+                                      await widget.databaseInterface.setStatus();
+                                    }
+                                  }),
+                            icon: const Icon(Icons.folder_open),
+                            label: const Text('Pick File'),
+                            style: OutlinedButton.styleFrom(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 16,
+                                vertical: 12,
                               ),
                             ),
-                          ],
-                        ),
-
-                        // Progress/status message
-                        if (downloadLog.isNotEmpty)
-                          Container(
-                            margin: const EdgeInsets.only(top: 16),
-                            padding: const EdgeInsets.all(12),
-                            width: double.infinity,
-                            decoration: BoxDecoration(
-                              color: downloadLog.contains('Error')
-                                  ? Theme.of(context).colorScheme.errorContainer
-                                  : Theme.of(
-                                      context,
-                                    ).colorScheme.primaryContainer,
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                            child: Row(
-                              children: [
-                                if (downloadLog.contains('Downloading'))
-                                  SizedBox(
-                                    width: 16,
-                                    height: 16,
-                                    child: CircularProgressIndicator(
-                                      strokeWidth: 2,
-                                      valueColor: AlwaysStoppedAnimation<Color>(
-                                        Theme.of(
-                                          context,
-                                        ).colorScheme.onPrimaryContainer,
-                                      ),
-                                    ),
-                                  ),
-                                if (downloadLog.contains('Error'))
-                                  Icon(
-                                    Icons.error,
-                                    size: 16,
-                                    color: Theme.of(
-                                      context,
-                                    ).colorScheme.onErrorContainer,
-                                  ),
-                                const SizedBox(width: 8),
-                                Expanded(
-                                  child: Text(
-                                    downloadLog,
-                                    style: Theme.of(context)
-                                        .textTheme
-                                        .bodyMedium
-                                        ?.copyWith(
-                                          color: downloadLog.contains('Error')
-                                              ? Theme.of(
-                                                  context,
-                                                ).colorScheme.onErrorContainer
-                                              : Theme.of(context)
-                                                    .colorScheme
-                                                    .onPrimaryContainer,
-                                          fontWeight: FontWeight.normal,
-                                        ),
-                                  ),
-                                ),
-                              ],
+                          ),
+                          OutlinedButton.icon(
+                            onPressed: () async {
+                              await widget.databaseInterface.setStatus();
+                            },
+                            icon: const Icon(Icons.question_mark),
+                            label: const Text('Check'),
+                            style: OutlinedButton.styleFrom(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 16,
+                                vertical: 12,
+                              ),
                             ),
                           ),
-                      ],
-                    ),
+                          TextButton.icon(
+                            onPressed: snapshot.data == ''
+                                ? null
+                                : () async {
+                                    String path = '';
+                                    setPath(path);
+                                    await widget.setDb(path);
+                                    setState(() {
+                                      downloadLog = '';
+                                      widget.databaseInterface.status =
+                                          DatabaseStatus.pathNotSet;
+                                    });
+                                  },
+                            icon: const Icon(Icons.clear),
+                            label: const Text('Clear'),
+                            style: TextButton.styleFrom(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 16,
+                                vertical: 12,
+                              ),
+                              foregroundColor: Theme.of(
+                                context,
+                              ).colorScheme.error,
+                            ),
+                          ),
+                        ],
+                      ),
+
+                      // Progress/status message
+                      if (downloadLog.isNotEmpty)
+                        Container(
+                          margin: const EdgeInsets.only(top: 16),
+                          padding: const EdgeInsets.all(12),
+                          width: double.infinity,
+                          decoration: BoxDecoration(
+                            color: downloadLog.contains('Error')
+                                ? Theme.of(context).colorScheme.errorContainer
+                                : Theme.of(
+                                    context,
+                                  ).colorScheme.primaryContainer,
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Row(
+                            children: [
+                              if (downloadLog.contains('Downloading'))
+                                SizedBox(
+                                  width: 16,
+                                  height: 16,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                    valueColor: AlwaysStoppedAnimation<Color>(
+                                      Theme.of(
+                                        context,
+                                      ).colorScheme.onPrimaryContainer,
+                                    ),
+                                  ),
+                                ),
+                              if (downloadLog.contains('Error'))
+                                Icon(
+                                  Icons.error,
+                                  size: 16,
+                                  color: Theme.of(
+                                    context,
+                                  ).colorScheme.onErrorContainer,
+                                ),
+                              const SizedBox(width: 8),
+                              Expanded(
+                                child: Text(
+                                  downloadLog,
+                                  style: Theme.of(context).textTheme.bodyMedium
+                                      ?.copyWith(
+                                        color: downloadLog.contains('Error')
+                                            ? Theme.of(
+                                                context,
+                                              ).colorScheme.onErrorContainer
+                                            : Theme.of(
+                                                context,
+                                              ).colorScheme.onPrimaryContainer,
+                                        fontWeight: FontWeight.normal,
+                                      ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                    ],
                   ),
-                );
-              }
-          }
-        },
-      ),
+                ),
+              );
+            }
+        }
+      },
     );
   }
 
-  Future<List<PlatformFile>?> _pickFiles() async {
+  Future<List<PlatformFile>?> _pickFile() async {
     try {
       return (await FilePicker.platform.pickFiles(
         type: FileType.any,

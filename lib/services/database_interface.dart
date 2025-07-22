@@ -19,8 +19,6 @@ abstract class DatabaseInterface {
       status = DatabaseStatus.noResults;
       log = e.toString();
     }
-
-    //await setStatus();
   }
 
   Future<void> dispose() async {

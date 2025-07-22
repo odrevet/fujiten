@@ -4,13 +4,15 @@ import 'package:fujiten/services/database_interface_expression.dart';
 import '../services/database_interface.dart';
 import '../services/database_interface_kanji.dart';
 
-class DatabaseStatusDisplay extends StatelessWidget {
-  final DatabaseInterfaceKanji databaseInterfaceKanji;
-  final DatabaseInterfaceExpression databaseInterfaceExpression;
+class DatabaseStatusItem extends StatelessWidget {
+  final String title;
+  final DatabaseStatus? status;
+  final String kanjiChar;
 
-  const DatabaseStatusDisplay({
-    required this.databaseInterfaceExpression,
-    required this.databaseInterfaceKanji,
+  const DatabaseStatusItem({
+    required this.title,
+    required this.status,
+    required this.kanjiChar,
     super.key,
   });
 
@@ -36,12 +38,8 @@ class DatabaseStatusDisplay extends StatelessWidget {
     return status == DatabaseStatus.ok ? Icons.check_circle : Icons.error;
   }
 
-  Widget _buildDatabaseStatusItem({
-    required BuildContext context,
-    required String title,
-    required DatabaseStatus? status,
-    required String kanjiChar,
-  }) {
+  @override
+  Widget build(BuildContext context) {
     final statusColor = _getStatusColor(context, status);
     final statusIcon = _getStatusIcon(status);
     final statusMessage = _getDatabaseStatusMessage(status);
@@ -51,35 +49,16 @@ class DatabaseStatusDisplay extends StatelessWidget {
       decoration: BoxDecoration(
         color: status == DatabaseStatus.ok
             ? Theme.of(
-                context,
-              ).colorScheme.primaryContainer.withValues(alpha: 0.3)
+          context,
+        ).colorScheme.primaryContainer.withValues(alpha: 0.3)
             : Theme.of(
-                context,
-              ).colorScheme.errorContainer.withValues(alpha: 0.3),
+          context,
+        ).colorScheme.errorContainer.withValues(alpha: 0.3),
         borderRadius: BorderRadius.circular(12),
         border: Border.all(color: statusColor.withValues(alpha: 0.3), width: 1),
       ),
       child: Row(
         children: [
-          Container(
-            width: 40,
-            height: 40,
-            decoration: BoxDecoration(
-              color: statusColor.withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: Center(
-              child: Text(
-                kanjiChar,
-                style: TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
-                  color: statusColor,
-                ),
-              ),
-            ),
-          ),
-          const SizedBox(width: 12),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -110,15 +89,45 @@ class DatabaseStatusDisplay extends StatelessWidget {
               ],
             ),
           ),
+          Container(
+            width: 40,
+            height: 40,
+            decoration: BoxDecoration(
+              color: statusColor.withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Center(
+              child: Text(
+                kanjiChar,
+                style: TextStyle(
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                  color: statusColor,
+                ),
+              ),
+            ),
+          ),
         ],
       ),
     );
   }
+}
+
+// Updated DatabaseStatusDisplay class
+class DatabaseStatusDisplay extends StatelessWidget {
+  final DatabaseInterfaceKanji databaseInterfaceKanji;
+  final DatabaseInterfaceExpression databaseInterfaceExpression;
+
+  const DatabaseStatusDisplay({
+    required this.databaseInterfaceExpression,
+    required this.databaseInterfaceKanji,
+    super.key,
+  });
 
   Widget _buildOverallStatus(BuildContext context) {
     final bool allOk =
         databaseInterfaceKanji.status == DatabaseStatus.ok &&
-        databaseInterfaceExpression.status == DatabaseStatus.ok;
+            databaseInterfaceExpression.status == DatabaseStatus.ok;
 
     return Container(
       width: double.infinity,
@@ -171,7 +180,7 @@ class DatabaseStatusDisplay extends StatelessWidget {
                 Icon(Icons.storage, size: 28),
                 const SizedBox(width: 12),
                 Text(
-                  'Database Status',
+                  'Databases Status',
                   style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                     fontWeight: FontWeight.bold,
                   ),
@@ -180,22 +189,20 @@ class DatabaseStatusDisplay extends StatelessWidget {
             ),
             const SizedBox(height: 20),
 
-            // Kanji Database Status
-            _buildDatabaseStatusItem(
-              context: context,
-              title: 'Kanji Database',
-              status: databaseInterfaceKanji.status,
-              kanjiChar: '漢',
+            // Expression Database Status
+            DatabaseStatusItem(
+              title: 'Expression Database',
+              status: databaseInterfaceExpression.status,
+              kanjiChar: '言',
             ),
 
             const SizedBox(height: 12),
 
-            // Expression Database Status
-            _buildDatabaseStatusItem(
-              context: context,
-              title: 'Expression Database',
-              status: databaseInterfaceExpression.status,
-              kanjiChar: '言',
+            // Kanji Database Status
+            DatabaseStatusItem(
+              title: 'Kanji Database',
+              status: databaseInterfaceKanji.status,
+              kanjiChar: '漢',
             ),
 
             const SizedBox(height: 20),
