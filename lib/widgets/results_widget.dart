@@ -5,7 +5,6 @@ import 'package:fujiten/cubits/search_cubit.dart';
 import 'package:fujiten/services/database_interface_kanji.dart';
 import 'package:fujiten/widgets/database_status_display.dart';
 import 'package:fujiten/widgets/result_expression_list.dart';
-import 'package:fujiten/widgets/settings/dataset_page.dart';
 
 import '../cubits/input_cubit.dart';
 import '../models/entry.dart';
@@ -23,7 +22,7 @@ class ResultsWidget extends StatefulWidget {
     this.databaseInterfaceKanji,
     this.databaseInterfaceExpression,
     this.onEndReached,
-  this.refreshDb, {
+    this.refreshDb, {
     super.key,
   });
 
@@ -101,13 +100,17 @@ class _ResultsWidgetState extends State<ResultsWidget> {
                 Icon(
                   Icons.search_off,
                   size: 64,
-                  color: Theme.of(context).colorScheme.onSurface.withOpacity(0.3),
+                  color: Theme.of(
+                    context,
+                  ).colorScheme.onSurface.withOpacity(0.3),
                 ),
                 const SizedBox(height: 16),
                 Text(
                   "No results found",
                   style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                    color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
+                    color: Theme.of(
+                      context,
+                    ).colorScheme.onSurface.withOpacity(0.7),
                     fontWeight: FontWeight.w500,
                   ),
                 ),
@@ -115,7 +118,9 @@ class _ResultsWidgetState extends State<ResultsWidget> {
                 Text(
                   "for '${context.read<InputCubit>().state.inputs[context.read<InputCubit>().state.searchIndex]}'",
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: Theme.of(context).colorScheme.onSurface.withOpacity(0.5),
+                    color: Theme.of(
+                      context,
+                    ).colorScheme.onSurface.withOpacity(0.5),
                   ),
                   textAlign: TextAlign.center,
                 ),
@@ -130,7 +135,8 @@ class _ResultsWidgetState extends State<ResultsWidget> {
               // Center the DatabaseStatusDisplay vertically
               child = Center(
                 child: DatabaseStatusDisplay(
-                  databaseInterfaceExpression: widget.databaseInterfaceExpression,
+                  databaseInterfaceExpression:
+                      widget.databaseInterfaceExpression,
                   databaseInterfaceKanji: widget.databaseInterfaceKanji,
                 ),
               );
@@ -151,4 +157,5 @@ class _ResultsWidgetState extends State<ResultsWidget> {
         return Expanded(child: Center(child: child));
       },
     );
-  }}
+  }
+}

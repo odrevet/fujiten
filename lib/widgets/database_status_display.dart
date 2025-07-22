@@ -50,11 +50,11 @@ class DatabaseStatusItem extends StatelessWidget {
       decoration: BoxDecoration(
         color: status == DatabaseStatus.ok
             ? Theme.of(
-          context,
-        ).colorScheme.primaryContainer.withValues(alpha: 0.3)
+                context,
+              ).colorScheme.primaryContainer.withValues(alpha: 0.3)
             : Theme.of(
-          context,
-        ).colorScheme.errorContainer.withValues(alpha: 0.3),
+                context,
+              ).colorScheme.errorContainer.withValues(alpha: 0.3),
         borderRadius: BorderRadius.circular(12),
         border: Border.all(color: statusColor.withValues(alpha: 0.3), width: 1),
       ),
@@ -128,7 +128,7 @@ class DatabaseStatusDisplay extends StatelessWidget {
   Widget _buildOverallStatus(BuildContext context) {
     final bool allOk =
         databaseInterfaceKanji.status == DatabaseStatus.ok &&
-            databaseInterfaceExpression.status == DatabaseStatus.ok;
+        databaseInterfaceExpression.status == DatabaseStatus.ok;
 
     return Container(
       width: double.infinity,

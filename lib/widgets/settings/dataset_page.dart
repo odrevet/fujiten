@@ -27,9 +27,9 @@ class _DatasetPageState extends State<DatasetPage> {
       body: ListView(
         children: [
           DatabaseSettingsWidget(
-              type: "expression",
-              databaseInterface: widget.databaseInterfaceExpression,
-              refreshDbStatus: widget.refreshDbStatus
+            type: "expression",
+            databaseInterface: widget.databaseInterfaceExpression,
+            refreshDbStatus: widget.refreshDbStatus,
           ),
           DatabaseSettingsWidget(
             type: "kanji",

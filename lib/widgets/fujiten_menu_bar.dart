@@ -199,7 +199,7 @@ class _FujitenMenuBarState extends State<FujitenMenuBar> {
                       databaseInterfaceExpression:
                           widget.databaseInterfaceExpression,
                       databaseInterfaceKanji: widget.databaseInterfaceKanji,
-                        refreshDbStatus: widget.refreshDbStatus
+                      refreshDbStatus: widget.refreshDbStatus,
                     ),
                   ),
                 ).then((_) {
