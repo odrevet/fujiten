@@ -22,7 +22,12 @@ class _ToggleSearchTypeButtonState extends State<ToggleSearchTypeButton> {
           builder: (context, search) {
             return Text(
               search.searchType == SearchType.kanji ? '漢' : '言',
-              style: const TextStyle(fontSize: 23.0, color: Colors.white),
+              style: TextStyle(
+                fontSize: 20.0,
+                color: Theme.of(context).brightness == Brightness.light
+                    ? Colors.black
+                    : Colors.white,
+              ),
             );
           },
         ),
