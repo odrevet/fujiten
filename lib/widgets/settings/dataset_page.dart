@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:fujiten/services/database_interface.dart';
 import 'package:fujiten/services/database_interface_expression.dart';
 import 'package:fujiten/services/database_interface_kanji.dart';
 import 'package:fujiten/widgets/settings/database_settings_widget.dart';
@@ -7,12 +6,12 @@ import 'package:fujiten/widgets/settings/database_settings_widget.dart';
 class DatasetPage extends StatefulWidget {
   final DatabaseInterfaceExpression databaseInterfaceExpression;
   final DatabaseInterfaceKanji databaseInterfaceKanji;
-  final VoidCallback? onBackPressed;
+  final Function() refreshDbStatus;
 
   const DatasetPage({
     required this.databaseInterfaceExpression,
     required this.databaseInterfaceKanji,
-    this.onBackPressed,
+    required this.refreshDbStatus,
     super.key,
   });
 
@@ -23,56 +22,21 @@ class DatasetPage extends StatefulWidget {
 class _DatasetPageState extends State<DatasetPage> {
   @override
   Widget build(BuildContext context) {
-    return PopScope(
-      canPop: widget.onBackPressed == null,
-      onPopInvokedWithResult: (didPop, result) {
-        if (!didPop && widget.onBackPressed != null) {
-          widget.onBackPressed!();
-        }
-      },
-      child: Scaffold(
-        appBar: AppBar(title: const Text('Databases')),
-        body: ListView(
-          children: [
-            DatabaseSettingsWidget(
+    return Scaffold(
+      appBar: AppBar(title: const Text('Databases')),
+      body: ListView(
+        children: [
+          DatabaseSettingsWidget(
               type: "expression",
               databaseInterface: widget.databaseInterfaceExpression,
-            ),
-            DatabaseSettingsWidget(
-              type: "kanji",
-              databaseInterface: widget.databaseInterfaceKanji,
-            ),
-            Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
-                  onPressed: () async {
-                    // Check if databases are OK first
-                    bool bothDbsOk =
-                        widget.databaseInterfaceKanji.status ==
-                            DatabaseStatus.ok &&
-                        widget.databaseInterfaceExpression.status ==
-                            DatabaseStatus.ok;
-
-                    if (bothDbsOk) {
-                      Navigator.of(context).pop();
-                    } else {
-                      setState(() {
-                        widget.databaseInterfaceExpression.setStatus();
-                        widget.databaseInterfaceKanji.setStatus();
-                      });
-                    }
-                  },
-                  style: ElevatedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(vertical: 16.0),
-                  ),
-                  child: Text('Continue', style: const TextStyle(fontSize: 16)),
-                ),
-              ),
-            ),
-          ],
-        ),
+              refreshDbStatus: widget.refreshDbStatus
+          ),
+          DatabaseSettingsWidget(
+            type: "kanji",
+            databaseInterface: widget.databaseInterfaceKanji,
+            refreshDbStatus: widget.refreshDbStatus,
+          ),
+        ],
       ),
     );
   }

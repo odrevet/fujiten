@@ -9,11 +9,13 @@ import 'dataset_page.dart';
 class SettingsPage extends StatelessWidget {
   final DatabaseInterfaceExpression databaseInterfaceExpression;
   final DatabaseInterfaceKanji databaseInterfaceKanji;
+  final Function() refreshDbStatus;
 
   const SettingsPage({
     super.key,
     required this.databaseInterfaceExpression,
     required this.databaseInterfaceKanji,
+    required this.refreshDbStatus,
   });
 
   @override
@@ -30,7 +32,8 @@ class SettingsPage extends StatelessWidget {
               MaterialPageRoute(
                 builder: (context) => DatasetPage(
                   databaseInterfaceExpression: databaseInterfaceExpression,
-                  databaseInterfaceKanji: databaseInterfaceKanji
+                  databaseInterfaceKanji: databaseInterfaceKanji,
+                  refreshDbStatus: refreshDbStatus,
                 ),
               ),
             ),

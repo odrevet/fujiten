@@ -16,10 +16,9 @@ class FujitenMenuBar extends StatefulWidget {
   final Search? search;
   final TextEditingController? textEditingController;
   final VoidCallback onSearch;
-  final Future<void> Function(String) setExpressionDb;
-  final Future<void> Function(String) setKanjiDb;
   final int insertPosition;
   final FocusNode focusNode;
+  final Function() refreshDbStatus;
 
   const FujitenMenuBar({
     required this.databaseInterfaceKanji,
@@ -29,8 +28,7 @@ class FujitenMenuBar extends StatefulWidget {
     required this.onSearch,
     required this.focusNode,
     required this.insertPosition,
-    required this.setExpressionDb,
-    required this.setKanjiDb,
+    required this.refreshDbStatus,
     super.key,
   });
 
@@ -201,6 +199,7 @@ class _FujitenMenuBarState extends State<FujitenMenuBar> {
                       databaseInterfaceExpression:
                           widget.databaseInterfaceExpression,
                       databaseInterfaceKanji: widget.databaseInterfaceKanji,
+                        refreshDbStatus: widget.refreshDbStatus
                     ),
                   ),
                 ).then((_) {

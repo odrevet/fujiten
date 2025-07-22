@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:fujiten/cubits/search_cubit.dart';
 import 'package:fujiten/models/search.dart';
@@ -46,7 +45,7 @@ class _MainWidgetState extends State<MainWidget> {
     databaseInterfaceExpression = DatabaseInterfaceExpression();
     databaseInterfaceKanji = DatabaseInterfaceKanji();
 
-    _initDb();
+    initDb();
 
     _prefs.then((SharedPreferences prefs) {
       if (!mounted) return;
@@ -59,7 +58,7 @@ class _MainWidgetState extends State<MainWidget> {
     });
   }
 
-  void _initDb() async {
+  void initDb() async {
     final prefs = await _prefs;
 
     // Initialize expression database
@@ -67,17 +66,19 @@ class _MainWidgetState extends State<MainWidget> {
     if (expressionPath != null) {
       await setExpressionDb(expressionPath);
     }
-    await databaseInterfaceExpression.setStatus();
 
     // Initialize kanji database
     String? kanjiPath = prefs.getString("kanji_path");
     if (kanjiPath != null) {
       await setKanjiDb(kanjiPath);
     }
+
+    await refreshDbStatus();
+  }
+
+  Future<void> refreshDbStatus() async {
+    await databaseInterfaceExpression.setStatus();
     await databaseInterfaceKanji.setStatus();
-
-    // Update UI when done
-
     setState(() {
       _isDbInitialized = true;
     });
@@ -142,69 +143,69 @@ class _MainWidgetState extends State<MainWidget> {
       return Scaffold(body: Center(child: CircularProgressIndicator()));
     }
 
-    if (databaseInterfaceExpression.status != DatabaseStatus.ok ||
-        databaseInterfaceKanji.status != DatabaseStatus.ok) {
+    bool databasesOk =
+        databaseInterfaceExpression.status == DatabaseStatus.ok &&
+        databaseInterfaceKanji.status == DatabaseStatus.ok;
+
+    if (!databasesOk) {
       return DatasetPage(
         databaseInterfaceExpression: databaseInterfaceExpression,
         databaseInterfaceKanji: databaseInterfaceKanji,
-        onBackPressed: () {
-          SystemNavigator.pop();
-          setState(() {
-            databaseInterfaceExpression.setStatus();
-            databaseInterfaceKanji.setStatus();
-          });
-        },
+        refreshDbStatus: refreshDbStatus,
       );
-    }
-
-    return BlocBuilder<SearchCubit, Search>(
-      builder: (context, search) => Scaffold(
-        key: _scaffoldKey,
-        floatingActionButton:
-            context.read<SearchCubit>().state.isLoadingNextPage
-            ? const FloatingActionButton(
-                onPressed: null,
-                backgroundColor: Colors.white,
-                mini: true,
-                child: SizedBox(
-                  height: 10,
-                  width: 10,
-                  child: CircularProgressIndicator(),
+    } else {
+      return BlocBuilder<SearchCubit, Search>(
+        builder: (context, search) => Scaffold(
+          key: _scaffoldKey,
+          floatingActionButton:
+              context.read<SearchCubit>().state.isLoadingNextPage
+              ? const FloatingActionButton(
+                  onPressed: null,
+                  backgroundColor: Colors.white,
+                  mini: true,
+                  child: SizedBox(
+                    height: 10,
+                    width: 10,
+                    child: CircularProgressIndicator(),
+                  ),
+                )
+              : null,
+          appBar: databasesOk
+              ? PreferredSize(
+                  preferredSize: const Size.fromHeight(56),
+                  child: Builder(
+                    builder: (context) => FujitenMenuBar(
+                      databaseInterfaceKanji: databaseInterfaceKanji,
+                      databaseInterfaceExpression: databaseInterfaceExpression,
+                      search: search,
+                      textEditingController: widget._textEditingController,
+                      onSearch: onSearch,
+                      focusNode: focusNode,
+                      insertPosition: cursorPosition,
+                      refreshDbStatus: refreshDbStatus,
+                    ),
+                  ),
+                )
+              : null,
+          body: Column(
+            children: <Widget>[
+              if (databasesOk)
+                SearchInput(
+                  widget._textEditingController,
+                  onSearch,
+                  onFocusChanged,
+                  focusNode,
                 ),
-              )
-            : null,
-        appBar: PreferredSize(
-          preferredSize: const Size.fromHeight(56),
-          child: Builder(
-            builder: (context) => FujitenMenuBar(
-              setExpressionDb: setExpressionDb,
-              setKanjiDb: setKanjiDb,
-              databaseInterfaceKanji: databaseInterfaceKanji,
-              databaseInterfaceExpression: databaseInterfaceExpression,
-              search: search,
-              textEditingController: widget._textEditingController,
-              onSearch: onSearch,
-              focusNode: focusNode,
-              insertPosition: cursorPosition,
-            ),
+              ResultsWidget(
+                databaseInterfaceKanji,
+                databaseInterfaceExpression,
+                onEndReached,
+                refreshDbStatus,
+              ),
+            ],
           ),
         ),
-        body: Column(
-          children: <Widget>[
-            SearchInput(
-              widget._textEditingController,
-              onSearch,
-              onFocusChanged,
-              focusNode,
-            ),
-            ResultsWidget(
-              databaseInterfaceKanji,
-              databaseInterfaceExpression,
-              onEndReached,
-            ),
-          ],
-        ),
-      ),
-    );
+      );
+    }
   }
 }

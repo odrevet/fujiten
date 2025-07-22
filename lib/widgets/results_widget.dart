@@ -5,6 +5,7 @@ import 'package:fujiten/cubits/search_cubit.dart';
 import 'package:fujiten/services/database_interface_kanji.dart';
 import 'package:fujiten/widgets/database_status_display.dart';
 import 'package:fujiten/widgets/result_expression_list.dart';
+import 'package:fujiten/widgets/settings/dataset_page.dart';
 
 import '../cubits/input_cubit.dart';
 import '../models/entry.dart';
@@ -16,11 +17,13 @@ class ResultsWidget extends StatefulWidget {
   final DatabaseInterfaceKanji databaseInterfaceKanji;
   final DatabaseInterfaceExpression databaseInterfaceExpression;
   final Function onEndReached;
+  final Function() refreshDb;
 
   const ResultsWidget(
     this.databaseInterfaceKanji,
     this.databaseInterfaceExpression,
-    this.onEndReached, {
+    this.onEndReached,
+  this.refreshDb, {
     super.key,
   });
 
@@ -91,8 +94,32 @@ class _ResultsWidgetState extends State<ResultsWidget> {
                   .state
                   .inputs[context.read<InputCubit>().state.searchIndex]
                   .isNotEmpty) {
-            child = Text(
-              "No results for '${context.read<InputCubit>().state.inputs[context.read<InputCubit>().state.searchIndex]}'",
+            // Enhanced no results display
+            child = Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(
+                  Icons.search_off,
+                  size: 64,
+                  color: Theme.of(context).colorScheme.onSurface.withOpacity(0.3),
+                ),
+                const SizedBox(height: 16),
+                Text(
+                  "No results found",
+                  style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                    color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  "for '${context.read<InputCubit>().state.inputs[context.read<InputCubit>().state.searchIndex]}'",
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    color: Theme.of(context).colorScheme.onSurface.withOpacity(0.5),
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+              ],
             );
           } else {
             if (context
@@ -100,16 +127,12 @@ class _ResultsWidgetState extends State<ResultsWidget> {
                 .state
                 .inputs[context.read<InputCubit>().state.searchIndex]
                 .isEmpty) {
-              child = Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  DatabaseStatusDisplay(
-                    databaseInterfaceExpression:
-                        widget.databaseInterfaceExpression,
-                    databaseInterfaceKanji: widget.databaseInterfaceKanji,
-                  ),
-                ],
+              // Center the DatabaseStatusDisplay vertically
+              child = Center(
+                child: DatabaseStatusDisplay(
+                  databaseInterfaceExpression: widget.databaseInterfaceExpression,
+                  databaseInterfaceKanji: widget.databaseInterfaceKanji,
+                ),
               );
             } else {
               child = ListView.separated(
@@ -128,5 +151,4 @@ class _ResultsWidgetState extends State<ResultsWidget> {
         return Expanded(child: Center(child: child));
       },
     );
-  }
-}
+  }}

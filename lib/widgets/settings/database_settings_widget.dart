@@ -15,10 +15,12 @@ import '../../services/database_interface.dart';
 class DatabaseSettingsWidget extends StatefulWidget {
   final String type;
   final DatabaseInterface databaseInterface;
+  final Function() refreshDbStatus;
 
   const DatabaseSettingsWidget({
     required this.type,
     required this.databaseInterface,
+    required this.refreshDbStatus,
     super.key,
   });
 
@@ -179,14 +181,17 @@ class _DatabaseSettingsWidgetState extends State<DatabaseSettingsWidget> {
                                             }
 
                                             // Set DB Path and open the Database
-                                            setPath(path);
+                                            await setPath(path);
                                             setState(() {
                                               downloadLog = "";
                                             });
 
-                                            await widget.databaseInterface.open(path);
+                                            await widget.databaseInterface.open(
+                                              path,
+                                            );
                                             await widget.databaseInterface
                                                 .setStatus();
+                                            await widget.refreshDbStatus();
                                           } catch (e) {
                                             setState(
                                               () => downloadLog =
@@ -210,29 +215,18 @@ class _DatabaseSettingsWidgetState extends State<DatabaseSettingsWidget> {
                                 : () => _pickFile().then((result) async {
                                     if (result != null) {
                                       String path = result.first.path!;
-                                      setPath(path);
+                                      await setPath(path);
                                       await widget.databaseInterface.open(path);
                                       setState(() {
                                         downloadLog = '';
                                       });
-                                      await widget.databaseInterface.setStatus();
+                                      await widget.databaseInterface
+                                          .setStatus();
+                                      await widget.refreshDbStatus();
                                     }
                                   }),
                             icon: const Icon(Icons.folder_open),
                             label: const Text('Pick File'),
-                            style: OutlinedButton.styleFrom(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 16,
-                                vertical: 12,
-                              ),
-                            ),
-                          ),
-                          OutlinedButton.icon(
-                            onPressed: () async {
-                              await widget.databaseInterface.setStatus();
-                            },
-                            icon: const Icon(Icons.question_mark),
-                            label: const Text('Check'),
                             style: OutlinedButton.styleFrom(
                               padding: const EdgeInsets.symmetric(
                                 horizontal: 16,
