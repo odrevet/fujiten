@@ -198,8 +198,6 @@ class _FujitenMenuBarState extends State<FujitenMenuBar> {
                   context,
                   MaterialPageRoute(
                     builder: (context) => SettingsPage(
-                      setExpressionDb: widget.setExpressionDb,
-                      setKanjiDb: widget.setKanjiDb,
                       databaseInterfaceExpression:
                           widget.databaseInterfaceExpression,
                       databaseInterfaceKanji: widget.databaseInterfaceKanji,

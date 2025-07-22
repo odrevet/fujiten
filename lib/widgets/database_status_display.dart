@@ -23,6 +23,7 @@ class DatabaseStatusItem extends StatelessWidget {
       case DatabaseStatus.noResults:
         return "Invalid database (no entries found)";
       case DatabaseStatus.pathNotSet:
+        return "No database selected";
       default:
         return "No database configured";
     }

@@ -147,10 +147,12 @@ class _MainWidgetState extends State<MainWidget> {
       return DatasetPage(
         databaseInterfaceExpression: databaseInterfaceExpression,
         databaseInterfaceKanji: databaseInterfaceKanji,
-        setExpressionDb: setExpressionDb,
-        setKanjiDb: setKanjiDb,
         onBackPressed: () {
           SystemNavigator.pop();
+          setState(() {
+            databaseInterfaceExpression.setStatus();
+            databaseInterfaceKanji.setStatus();
+          });
         },
       );
     }

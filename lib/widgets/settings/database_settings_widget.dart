@@ -14,12 +14,10 @@ import '../../services/database_interface.dart';
 
 class DatabaseSettingsWidget extends StatefulWidget {
   final String type;
-  final Function setDb;
   final DatabaseInterface databaseInterface;
 
   const DatabaseSettingsWidget({
     required this.type,
-    required this.setDb,
     required this.databaseInterface,
     super.key,
   });
@@ -107,7 +105,7 @@ class _DatabaseSettingsWidgetState extends State<DatabaseSettingsWidget> {
                             const SizedBox(height: 4),
                             Text(
                               snapshot.data!.isEmpty
-                                  ? 'No database selected'
+                                  ? 'Please download or select a database'
                                   : snapshot.data!,
                               style: Theme.of(context).textTheme.bodyMedium
                                   ?.copyWith(
@@ -186,7 +184,7 @@ class _DatabaseSettingsWidgetState extends State<DatabaseSettingsWidget> {
                                               downloadLog = "";
                                             });
 
-                                            await widget.setDb(path);
+                                            await widget.databaseInterface.open(path);
                                             await widget.databaseInterface
                                                 .setStatus();
                                           } catch (e) {
@@ -213,7 +211,7 @@ class _DatabaseSettingsWidgetState extends State<DatabaseSettingsWidget> {
                                     if (result != null) {
                                       String path = result.first.path!;
                                       setPath(path);
-                                      await widget.setDb(path);
+                                      await widget.databaseInterface.open(path);
                                       setState(() {
                                         downloadLog = '';
                                       });
@@ -248,7 +246,7 @@ class _DatabaseSettingsWidgetState extends State<DatabaseSettingsWidget> {
                                 : () async {
                                     String path = '';
                                     setPath(path);
-                                    await widget.setDb(path);
+                                    await widget.databaseInterface.open(path);
                                     setState(() {
                                       downloadLog = '';
                                       widget.databaseInterface.status =
