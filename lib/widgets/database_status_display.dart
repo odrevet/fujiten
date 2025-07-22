@@ -130,38 +130,34 @@ class DatabaseStatusDisplay extends StatelessWidget {
         databaseInterfaceKanji.status == DatabaseStatus.ok &&
         databaseInterfaceExpression.status == DatabaseStatus.ok;
 
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: allOk
-            ? Theme.of(context).colorScheme.primaryContainer
-            : Theme.of(context).colorScheme.errorContainer,
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(
-            allOk ? Icons.check_circle : Icons.warning,
-            color: allOk
-                ? Theme.of(context).colorScheme.onPrimaryContainer
-                : Theme.of(context).colorScheme.onErrorContainer,
-            size: 20,
-          ),
-          const SizedBox(width: 8),
-          Text(
-            allOk ? 'All databases ready' : 'Database configuration required',
-            style: Theme.of(context).textTheme.titleMedium?.copyWith(
-              color: allOk
-                  ? Theme.of(context).colorScheme.onPrimaryContainer
-                  : Theme.of(context).colorScheme.onErrorContainer,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-        ],
-      ),
-    );
+    if (!allOk) {
+      return Container(
+        width: double.infinity,
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: allOk
+              ? Theme.of(context).colorScheme.primaryContainer
+              : Theme.of(context).colorScheme.errorContainer,
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const SizedBox(width: 8),
+            if (!allOk)
+              Text(
+                'Database configuration required',
+                style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                  color: Theme.of(context).colorScheme.onErrorContainer,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+          ],
+        ),
+      );
+    } else {
+      return Container();
+    }
   }
 
   @override
@@ -173,23 +169,9 @@ class DatabaseStatusDisplay extends StatelessWidget {
       child: Padding(
         padding: const EdgeInsets.all(20),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            // Header
-            Row(
-              children: [
-                Icon(Icons.storage, size: 28),
-                const SizedBox(width: 12),
-                Text(
-                  'Databases Status',
-                  style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 20),
-
             // Expression Database Status
             DatabaseStatusItem(
               title: 'Expression Database',
