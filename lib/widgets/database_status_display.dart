@@ -21,11 +21,11 @@ class DatabaseStatusItem extends StatelessWidget {
       case DatabaseStatus.ok:
         return "Ready";
       case DatabaseStatus.noResults:
-        return "Invalid database (no entries found)";
+        return "Invalid services (no entries found)";
       case DatabaseStatus.pathNotSet:
-        return "No database selected";
+        return "No services selected";
       default:
-        return "No database configured";
+        return "No services configured";
     }
   }
 

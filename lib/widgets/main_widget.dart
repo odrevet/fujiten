@@ -61,13 +61,13 @@ class _MainWidgetState extends State<MainWidget> {
   void initDb() async {
     final prefs = await _prefs;
 
-    // Initialize expression database
+    // Initialize expression services
     String? expressionPath = prefs.getString("expression_path");
     if (expressionPath != null) {
       await setExpressionDb(expressionPath);
     }
 
-    // Initialize kanji database
+    // Initialize kanji services
     String? kanjiPath = prefs.getString("kanji_path");
     if (kanjiPath != null) {
       await setKanjiDb(kanjiPath);

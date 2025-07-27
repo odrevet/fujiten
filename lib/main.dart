@@ -4,6 +4,10 @@ import 'package:fujiten/cubits/search_cubit.dart';
 
 import 'cubits/input_cubit.dart';
 import 'cubits/theme_cubit.dart';
+import 'cubits/expression_cubit.dart';
+import 'cubits/kanji_cubit.dart';
+import 'services/database_interface_expression.dart';
+import 'services/database_interface_kanji.dart';
 import 'widgets/main_widget.dart';
 
 void main() async {
@@ -22,12 +26,22 @@ class App extends StatelessWidget {
         builder: (context, themeData) => MaterialApp(
           title: "Fujiten",
           theme: themeData,
-          home: BlocProvider(
-            create: (_) => InputCubit(),
-            child: BlocProvider(
-              create: (_) => SearchCubit(),
-              child: MainWidget(),
-            ),
+          home: MultiBlocProvider(
+            providers: [
+              BlocProvider(
+                create: (_) => InputCubit(),
+              ),
+              BlocProvider(
+                create: (_) => SearchCubit(),
+              ),
+              BlocProvider(
+                create: (_) => ExpressionCubit(DatabaseInterfaceExpression()),
+              ),
+              BlocProvider(
+                create: (_) => KanjiCubit(DatabaseInterfaceKanji()),
+              ),
+            ],
+            child: MainWidget(),
           ),
         ),
       ),

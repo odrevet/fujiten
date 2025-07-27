@@ -102,7 +102,7 @@ class _ResultsWidgetState extends State<ResultsWidget> {
                   size: 64,
                   color: Theme.of(
                     context,
-                  ).colorScheme.onSurface.withOpacity(0.3),
+                  ).colorScheme.onSurface.withValues(alpha: 0.3),
                 ),
                 const SizedBox(height: 16),
                 Text(
@@ -110,7 +110,7 @@ class _ResultsWidgetState extends State<ResultsWidget> {
                   style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                     color: Theme.of(
                       context,
-                    ).colorScheme.onSurface.withOpacity(0.7),
+                    ).colorScheme.onSurface.withValues(alpha: 0.7),
                     fontWeight: FontWeight.w500,
                   ),
                 ),
@@ -120,7 +120,7 @@ class _ResultsWidgetState extends State<ResultsWidget> {
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                     color: Theme.of(
                       context,
-                    ).colorScheme.onSurface.withOpacity(0.5),
+                    ).colorScheme.onSurface.withValues(alpha: 0.5),
                   ),
                   textAlign: TextAlign.center,
                 ),
