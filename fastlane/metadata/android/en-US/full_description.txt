@@ -1,37 +1,63 @@
-<p>Fujiten is a Japanese dictionary application made with the flutter framework.</p>
+<p>Fujiten is an offline Japanese dictionary application made with the flutter framework.</p>
+
 <p>Definition and kanji comes from the EDICT dictionary, compiled as a database from the edict_database project.</p>
-<h1 id="setup">Setup</h1>
-<p>In order to fujiten to work, the Expression Database and the Kanji Database are needed.</p>
-<p>The databases can be downloaded and installed from fujiten via the &quot;settings/databases menu or by downloading the database manually from <a href="https://github.com/odrevet/edict_database">https://github.com/odrevet/edict_database</a></p>
-<h1 id="top-menu">Top menu</h1>
-<h2 id="bars">Bars</h2>
+
+<br><big>Setup</big>
+
+<p>In order for fujiten to work, the Expression Database and the Kanji Database are needed.</p>
+
+<p>The databases can be downloaded and installed from fujiten via the "settings/databases" menu or by downloading the database manually from <a href="https://github.com/odrevet/edict_database">https://github.com/odrevet/edict_database</a></p>
+
+<br><big>Top menu</big>
+
+<b>Bars</b>
+
 <p>Access the settings menu.</p>
-<p>The settings menu allow you to download the dictionaries, set brightness and read legal information.</p>
-<h2 id="insert">Insert</h2>
-<h3 id="radicals-">Radicals &lt;&gt;</h3>
+
+<p>The settings menu allows you to download the dictionaries, set brightness and read legal information.</p>
+
+<b>Insert</b>
+
+<i>Radicals &lt;&gt;</i>
+
 <p>Will match kanji composed with the selected radicals</p>
-<h3 id="kanji-character-">Kanji character Ⓚ</h3>
+
+<i>Kanji character Ⓚ</i>
+
 <p>Will match any kanji</p>
-<h3 id="kana-character-">Kana character ㋐</h3>
+
+<i>Kana character ㋐</i>
+
 <p>Will match a hiragana/katakana character</p>
-<h3 id="joker-">Joker .*</h3>
+
+<i>Joker .*</i>
+
 <p>Any match</p>
-<h2 id="convert">Convert</h2>
+
+<b>Convert</b>
+
 <p>In case your device is not equipped with a Japanese input keyboard, fujiten can convert Latin character (romaji) to hiragana or katakana.</p>
+
 <p>Lowercase romaji will be converted to hiragana, uppercase romaji will be converted to katakana.</p>
-<h1 id="kotoba-kanji-search">Kotoba / Kanji search</h1>
+
+<br><big>Kotoba / Kanji search</big>
+
 <p>When Kotoba is selected, fujiten will search for expression.</p>
+
 <p>When Kanji is selected, fujiten will search for kanji.</p>
-<h2 id="clear">Clear</h2>
+
+<b>Clear</b>
+
 <p>Clear the input field.</p>
-<h2 id="search">Search</h2>
+
+<b>Search</b>
+
 <p>Run the search.</p>
-<h1 id="tips">Tips</h1>
-<ul>
-<li><p>Search are performed with regular expression, quantifiers &quot;{}&quot; and meta-characters like &quot;.&quot; and others can be use</p>
-</li>
-<li><p>Use search by radical &lt; &gt; when searching for an expression which you do not know a kanji but recognize some of it&#39;s radical example: ＜化＞</p>
-</li>
-<li><p>When no results, add &quot;.*&quot; at the beginning or the end of your search</p>
-</li>
-</ul>
+
+<br><big>Tips</big>
+
+<p>• Search are performed with regular expression, quantifiers "{}" and meta-characters like "." and others can be used</p>
+
+<p>• Use search by radical &lt; &gt; when searching for an expression which you do not know a kanji but recognize some of its radicals example: ＜化＞</p>
+
+<p>• When no results, add ".*" at the beginning or the end of your search</p>
