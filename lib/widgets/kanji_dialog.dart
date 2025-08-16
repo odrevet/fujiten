@@ -1,25 +1,26 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../cubits/kanji_cubit.dart';
 import '../models/kanji.dart';
+import '../services/database_interface_kanji.dart';
 import 'kanji_list_tile.dart';
 
 class KanjiDialog extends StatelessWidget {
   final List<String> literals;
+  final DatabaseInterfaceKanji databaseInterfaceKanji;
 
-  const KanjiDialog({required this.literals, super.key});
+  const KanjiDialog({
+    required this.databaseInterfaceKanji,
+    required this.literals,
+    super.key,
+  });
 
   @override
   Widget build(BuildContext context) {
     return SizedBox(
       width: double.maxFinite,
       child: FutureBuilder<List<Kanji>>(
-        future: context
-            .read<KanjiCubit>()
-            .databaseInterface
-            .getCharactersFromLiterals(literals),
+        future: databaseInterfaceKanji.getCharactersFromLiterals(literals),
         builder: (context, snapshot) {
           if (snapshot.hasData) {
             final List<Kanji> sortedCharacters = List.from(snapshot.data!)

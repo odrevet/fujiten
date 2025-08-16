@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:fujiten/services/database_interface_expression.dart';
 
-import '../cubits/expression_cubit.dart';
-import '../cubits/kanji_cubit.dart';
 import '../services/database_interface.dart';
+import '../services/database_interface_kanji.dart';
 
 class DatabaseStatusItem extends StatelessWidget {
   final String title;
@@ -22,11 +21,11 @@ class DatabaseStatusItem extends StatelessWidget {
       case DatabaseStatus.ok:
         return "Ready";
       case DatabaseStatus.noResults:
-        return "Invalid services (no entries found)";
+        return "Invalid database (no entries found)";
       case DatabaseStatus.pathNotSet:
-        return "No services selected";
+        return "No database selected";
       default:
-        return "No services configured";
+        return "No database configured";
     }
   }
 
@@ -117,14 +116,19 @@ class DatabaseStatusItem extends StatelessWidget {
 
 // Updated DatabaseStatusDisplay class
 class DatabaseStatusDisplay extends StatelessWidget {
-  const DatabaseStatusDisplay({super.key});
+  final DatabaseInterfaceKanji databaseInterfaceKanji;
+  final DatabaseInterfaceExpression databaseInterfaceExpression;
+
+  const DatabaseStatusDisplay({
+    required this.databaseInterfaceExpression,
+    required this.databaseInterfaceKanji,
+    super.key,
+  });
 
   Widget _buildOverallStatus(BuildContext context) {
     final bool allOk =
-        context.read<KanjiCubit>().databaseInterface.status ==
-            DatabaseStatus.ok &&
-        context.read<ExpressionCubit>().databaseInterface.status ==
-            DatabaseStatus.ok;
+        databaseInterfaceKanji.status == DatabaseStatus.ok &&
+        databaseInterfaceExpression.status == DatabaseStatus.ok;
 
     if (!allOk) {
       return Container(
@@ -171,7 +175,7 @@ class DatabaseStatusDisplay extends StatelessWidget {
             // Expression Database Status
             DatabaseStatusItem(
               title: 'Expression Database',
-              status: context.read<ExpressionCubit>().databaseInterface.status,
+              status: databaseInterfaceExpression.status,
               kanjiChar: '言',
             ),
 
@@ -180,7 +184,7 @@ class DatabaseStatusDisplay extends StatelessWidget {
             // Kanji Database Status
             DatabaseStatusItem(
               title: 'Kanji Database',
-              status: context.read<KanjiCubit>().databaseInterface.status,
+              status: databaseInterfaceKanji.status,
               kanjiChar: '漢',
             ),
 
@@ -190,10 +194,8 @@ class DatabaseStatusDisplay extends StatelessWidget {
             _buildOverallStatus(context),
 
             // Help text for incomplete setup
-            if (context.read<ExpressionCubit>().databaseInterface.status !=
-                    DatabaseStatus.ok ||
-                context.read<KanjiCubit>().databaseInterface.status !=
-                    DatabaseStatus.ok) ...[
+            if (databaseInterfaceKanji.status != DatabaseStatus.ok ||
+                databaseInterfaceExpression.status != DatabaseStatus.ok) ...[
               const SizedBox(height: 16),
               Container(
                 padding: const EdgeInsets.all(12),

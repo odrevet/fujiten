@@ -107,7 +107,7 @@ class _DatabaseSettingsWidgetState extends State<DatabaseSettingsWidget> {
                             const SizedBox(height: 4),
                             Text(
                               snapshot.data!.isEmpty
-                                  ? 'Please download or select a services'
+                                  ? 'Please download or select a database'
                                   : snapshot.data!,
                               style: Theme.of(context).textTheme.bodyMedium
                                   ?.copyWith(

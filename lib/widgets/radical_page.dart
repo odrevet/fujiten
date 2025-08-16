@@ -1,15 +1,19 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../cubits/kanji_cubit.dart';
 import '../models/kanji.dart';
+import '../services/database_interface_kanji.dart';
 import '../string_utils.dart';
 import 'kanji_list_tile.dart';
 
 class RadicalPage extends StatefulWidget {
+  final DatabaseInterfaceKanji databaseInterfaceKanji;
   final List<String> selectedRadicals;
 
-  const RadicalPage(this.selectedRadicals, {super.key});
+  const RadicalPage(
+    this.databaseInterfaceKanji,
+    this.selectedRadicals, {
+    super.key,
+  });
 
   @override
   RadicalPageState createState() => RadicalPageState();
@@ -24,12 +28,10 @@ class RadicalPageState extends State<RadicalPage> {
 
   @override
   void initState() {
-    _radicals = context.read<KanjiCubit>().databaseInterface.getRadicals();
+    _radicals = widget.databaseInterfaceKanji.getRadicals();
 
     if (widget.selectedRadicals.isNotEmpty) {
-      context
-          .read<KanjiCubit>()
-          .databaseInterface
+      widget.databaseInterfaceKanji
           .getRadicalsForSelection(widget.selectedRadicals)
           .then(
             (validRadicals) => setState(() => _validRadicals = validRadicals),
@@ -102,9 +104,7 @@ class RadicalPageState extends State<RadicalPage> {
               Expanded(
                 flex: 1,
                 child: FutureBuilder<List<String>>(
-                  future: context
-                      .read<KanjiCubit>()
-                      .databaseInterface
+                  future: widget.databaseInterfaceKanji
                       .getCharactersFromRadicals(widget.selectedRadicals),
                   builder:
                       (
@@ -269,9 +269,7 @@ class RadicalPageState extends State<RadicalPage> {
     },
   );
 
-  Future<void> updateSelection() => context
-      .read<KanjiCubit>()
-      .databaseInterface
+  Future<void> updateSelection() => widget.databaseInterfaceKanji
       .getRadicalsForSelection(widget.selectedRadicals)
       .then((validRadicals) => setState(() => _validRadicals = validRadicals));
 
