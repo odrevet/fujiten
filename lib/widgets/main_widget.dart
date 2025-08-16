@@ -148,9 +148,7 @@ class _MainWidgetState extends State<MainWidget> {
         databaseInterfaceKanji.status == DatabaseStatus.ok;
 
     if (!databasesOk) {
-      return DatasetPage(
-        refreshDbStatus: refreshDbStatus,
-      );
+      return DatasetPage(refreshDbStatus: refreshDbStatus);
     } else {
       return BlocBuilder<SearchCubit, Search>(
         builder: (context, search) => Scaffold(
@@ -192,10 +190,7 @@ class _MainWidgetState extends State<MainWidget> {
                   onFocusChanged,
                   focusNode,
                 ),
-              ResultsWidget(
-                onEndReached,
-                refreshDbStatus,
-              ),
+              ResultsWidget(onEndReached, refreshDbStatus),
             ],
           ),
         ),

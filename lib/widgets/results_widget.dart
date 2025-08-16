@@ -2,25 +2,19 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:fujiten/cubits/search_cubit.dart';
-import 'package:fujiten/services/database_interface_kanji.dart';
 import 'package:fujiten/widgets/database_status_display.dart';
 import 'package:fujiten/widgets/result_expression_list.dart';
 
 import '../cubits/input_cubit.dart';
 import '../models/entry.dart';
 import '../models/search.dart';
-import '../services/database_interface_expression.dart';
 import 'kanji_list_tile.dart';
 
 class ResultsWidget extends StatefulWidget {
   final Function onEndReached;
   final Function() refreshDb;
 
-  const ResultsWidget(
-    this.onEndReached,
-    this.refreshDb, {
-    super.key,
-  });
+  const ResultsWidget(this.onEndReached, this.refreshDb, {super.key});
 
   @override
   State<ResultsWidget> createState() => _ResultsWidgetState();
@@ -67,9 +61,7 @@ class _ResultsWidgetState extends State<ResultsWidget> {
           .whereType<ExpressionEntry>()
           .toList();
 
-      return ResultExpressionList(
-        searchResult: expressionResults[index],
-      );
+      return ResultExpressionList(searchResult: expressionResults[index]);
     }
   }
 
@@ -128,10 +120,7 @@ class _ResultsWidgetState extends State<ResultsWidget> {
                 .inputs[context.read<InputCubit>().state.searchIndex]
                 .isEmpty) {
               // Center the DatabaseStatusDisplay vertically
-              child = Center(
-                child: DatabaseStatusDisplay(
-                ),
-              );
+              child = Center(child: DatabaseStatusDisplay());
             } else {
               child = ListView.separated(
                 separatorBuilder: (context, index) {

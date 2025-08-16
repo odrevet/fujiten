@@ -31,17 +31,20 @@ class ExpressionLoaded extends ExpressionState {
   });
 
   @override
-  List<Object?> get props => [entries, totalCount, query, currentPage, resultsPerPage];
+  List<Object?> get props => [
+    entries,
+    totalCount,
+    query,
+    currentPage,
+    resultsPerPage,
+  ];
 }
 
 class ExpressionError extends ExpressionState {
   final String message;
   final DatabaseStatus? status;
 
-  const ExpressionError({
-    required this.message,
-    this.status,
-  });
+  const ExpressionError({required this.message, this.status});
 
   @override
   List<Object?> get props => [message, status];
@@ -51,10 +54,7 @@ class ExpressionDatabaseNotReady extends ExpressionState {
   final DatabaseStatus status;
   final String? log;
 
-  const ExpressionDatabaseNotReady({
-    required this.status,
-    this.log,
-  });
+  const ExpressionDatabaseNotReady({required this.status, this.log});
 
   @override
   List<Object?> get props => [status, log];

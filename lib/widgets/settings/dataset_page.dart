@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:fujiten/widgets/settings/database_settings_widget.dart';
+
+import '../../cubits/expression_cubit.dart';
+import '../../cubits/kanji_cubit.dart';
 
 class DatasetPage extends StatefulWidget {
   final Function() refreshDbStatus;
 
-  const DatasetPage({
-    required this.refreshDbStatus,
-    super.key,
-  });
+  const DatasetPage({required this.refreshDbStatus, super.key});
 
   @override
   State<DatasetPage> createState() => _DatasetPageState();
@@ -22,12 +23,14 @@ class _DatasetPageState extends State<DatasetPage> {
         children: [
           DatabaseSettingsWidget(
             type: "expression",
-            databaseInterface: widget.databaseInterfaceExpression,
+            databaseInterface: context
+                .read<ExpressionCubit>()
+                .databaseInterface,
             refreshDbStatus: widget.refreshDbStatus,
           ),
           DatabaseSettingsWidget(
             type: "kanji",
-            databaseInterface: widget.databaseInterfaceKanji,
+            databaseInterface: context.read<KanjiCubit>().databaseInterface,
             refreshDbStatus: widget.refreshDbStatus,
           ),
         ],

@@ -2,17 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:fujiten/widgets/settings/theme_settings.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 
-import '../../services/database_interface_expression.dart';
-import '../../services/database_interface_kanji.dart';
 import 'dataset_page.dart';
 
 class SettingsPage extends StatelessWidget {
   final Function() refreshDbStatus;
 
-  const SettingsPage({
-    super.key,
-    required this.refreshDbStatus,
-  });
+  const SettingsPage({super.key, required this.refreshDbStatus});
 
   @override
   Widget build(BuildContext context) {
@@ -26,9 +21,8 @@ class SettingsPage extends StatelessWidget {
             onTap: () => Navigator.push(
               context,
               MaterialPageRoute(
-                builder: (context) => DatasetPage(
-                  refreshDbStatus: refreshDbStatus,
-                ),
+                builder: (context) =>
+                    DatasetPage(refreshDbStatus: refreshDbStatus),
               ),
             ),
           ),

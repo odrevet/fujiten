@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:fujiten/widgets/toggle_search_type_button.dart';
 
 import '../cubits/input_cubit.dart';
+import '../cubits/kanji_cubit.dart';
 import '../models/search.dart';
 import '../string_utils.dart';
 import 'radical_page.dart';
@@ -189,13 +190,12 @@ class _FujitenMenuBarState extends State<FujitenMenuBar> {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => SettingsPage(
-                      refreshDbStatus: widget.refreshDbStatus,
-                    ),
+                    builder: (context) =>
+                        SettingsPage(refreshDbStatus: widget.refreshDbStatus),
                   ),
                 ).then((_) {
-                  widget.databaseInterfaceExpression.setStatus();
-                  widget.databaseInterfaceKanji.setStatus();
+                  //widget.databaseInterfaceExpression.setStatus();
+                  //widget.databaseInterfaceKanji.setStatus();
                 }),
           ),
           Row(
@@ -233,17 +233,16 @@ class _FujitenMenuBarState extends State<FujitenMenuBar> {
     int insertPosition = 0;
     if (widget.insertPosition > 0) insertPosition = widget.insertPosition;
 
-    List<String?> radicalsFromDb = await widget.databaseInterfaceKanji
+    List<String?> radicalsFromDb = await context
+        .read<KanjiCubit>()
+        .databaseInterface
         .getRadicalsCharacter();
     radicals.removeWhere((String radical) => !radicalsFromDb.contains(radical));
 
     if (!context.mounted) return;
     Navigator.push(
       context,
-      MaterialPageRoute(
-        builder: (context) =>
-            RadicalPage(radicals),
-      ),
+      MaterialPageRoute(builder: (context) => RadicalPage(radicals)),
     ).then((results) {
       var isRadicalList = results[0];
       var selectedRadicalsOrKanji = results[1];

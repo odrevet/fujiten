@@ -3,17 +3,13 @@ import 'package:flutter/services.dart';
 
 import '../models/entry.dart';
 import '../models/sense.dart';
-import '../services/database_interface_kanji.dart';
 import '../string_utils.dart' show kanaKit;
 import 'kanji_dialog.dart';
 
 class ResultExpressionList extends StatefulWidget {
   final ExpressionEntry searchResult;
 
-  const ResultExpressionList({
-    required this.searchResult,
-    super.key,
-  });
+  const ResultExpressionList({required this.searchResult, super.key});
 
   @override
   State<ResultExpressionList> createState() => _ResultExpressionListState();
@@ -62,9 +58,7 @@ class _ResultExpressionListState extends State<ResultExpressionList> {
                     context: context,
                     builder: (_) => AlertDialog(
                       title: const Center(child: Text('Kanji')),
-                      content: KanjiDialog(
-                        literals: literals,
-                      ),
+                      content: KanjiDialog(literals: literals),
                     ),
                   )
                 : null,
@@ -96,9 +90,7 @@ class _ResultExpressionListState extends State<ResultExpressionList> {
                         context: context,
                         builder: (_) => AlertDialog(
                           title: const Center(child: Text('Kanji')),
-                          content: KanjiDialog(
-                            literals: literals,
-                          ),
+                          content: KanjiDialog(literals: literals),
                         ),
                       )
                     : null,

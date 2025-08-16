@@ -5,40 +5,46 @@ import '../models/db_state_expression.dart';
 import '../services/database_interface_expression.dart';
 
 class ExpressionCubit extends Cubit<ExpressionState> {
-  final DatabaseInterfaceExpression _databaseInterface;
+  final DatabaseInterfaceExpression databaseInterface;
 
-  ExpressionCubit(this._databaseInterface) : super(ExpressionInitial());
+  ExpressionCubit(this.databaseInterface) : super(ExpressionInitial());
 
   Future<void> openDatabase(String path) async {
     emit(ExpressionLoading());
 
     try {
-      await _databaseInterface.open(path);
-      await _databaseInterface.setStatus();
+      await databaseInterface.open(path);
+      await databaseInterface.setStatus();
 
-      if (_databaseInterface.status != DatabaseStatus.ok) {
-        emit(ExpressionDatabaseNotReady(
-          status: _databaseInterface.status!,
-          log: _databaseInterface.log,
-        ));
+      if (databaseInterface.status != DatabaseStatus.ok) {
+        emit(
+          ExpressionDatabaseNotReady(
+            status: databaseInterface.status!,
+            log: databaseInterface.log,
+          ),
+        );
       } else {
         emit(ExpressionInitial());
       }
     } catch (e) {
-      emit(ExpressionError(message: 'Failed to open database: ${e.toString()}'));
+      emit(
+        ExpressionError(message: 'Failed to open database: ${e.toString()}'),
+      );
     }
   }
 
   Future<void> search(
-      String input, {
-        int? resultsPerPage = 10,
-        int currentPage = 0,
-      }) async {
-    if (_databaseInterface.status != DatabaseStatus.ok) {
-      emit(ExpressionDatabaseNotReady(
-        status: _databaseInterface.status ?? DatabaseStatus.pathNotSet,
-        log: _databaseInterface.log,
-      ));
+    String input, {
+    int? resultsPerPage = 10,
+    int currentPage = 0,
+  }) async {
+    if (databaseInterface.status != DatabaseStatus.ok) {
+      emit(
+        ExpressionDatabaseNotReady(
+          status: databaseInterface.status ?? DatabaseStatus.pathNotSet,
+          log: databaseInterface.log,
+        ),
+      );
       return;
     }
 
@@ -50,16 +56,22 @@ class ExpressionCubit extends Cubit<ExpressionState> {
     emit(ExpressionLoading());
 
     try {
-      final entries = await _databaseInterface.search(input, resultsPerPage, currentPage);
-      final totalCount = await _databaseInterface.count();
+      final entries = await databaseInterface.search(
+        input,
+        resultsPerPage,
+        currentPage,
+      );
+      final totalCount = await databaseInterface.count();
 
-      emit(ExpressionLoaded(
-        entries: entries,
-        totalCount: totalCount,
-        query: input,
-        currentPage: currentPage,
-        resultsPerPage: resultsPerPage,
-      ));
+      emit(
+        ExpressionLoaded(
+          entries: entries,
+          totalCount: totalCount,
+          query: input,
+          currentPage: currentPage,
+          resultsPerPage: resultsPerPage,
+        ),
+      );
     } catch (e) {
       emit(ExpressionError(message: 'Search failed: ${e.toString()}'));
     }
@@ -103,7 +115,7 @@ class ExpressionCubit extends Cubit<ExpressionState> {
   }
 
   Future<void> dispose() async {
-    await _databaseInterface.dispose();
+    await databaseInterface.dispose();
   }
 
   @override

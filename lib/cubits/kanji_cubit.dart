@@ -5,22 +5,24 @@ import '../models/db_state_kanji.dart';
 import '../services/database_interface_kanji.dart';
 
 class KanjiCubit extends Cubit<KanjiState> {
-  final DatabaseInterfaceKanji _databaseInterface;
+  final DatabaseInterfaceKanji databaseInterface;
 
-  KanjiCubit(this._databaseInterface) : super(KanjiInitial());
+  KanjiCubit(this.databaseInterface) : super(KanjiInitial());
 
   Future<void> openDatabase(String path) async {
     emit(KanjiLoading());
 
     try {
-      await _databaseInterface.open(path);
-      await _databaseInterface.setStatus();
+      await databaseInterface.open(path);
+      await databaseInterface.setStatus();
 
-      if (_databaseInterface.status != DatabaseStatus.ok) {
-        emit(KanjiDatabaseNotReady(
-          status: _databaseInterface.status!,
-          log: _databaseInterface.log,
-        ));
+      if (databaseInterface.status != DatabaseStatus.ok) {
+        emit(
+          KanjiDatabaseNotReady(
+            status: databaseInterface.status!,
+            log: databaseInterface.log,
+          ),
+        );
       } else {
         emit(KanjiInitial());
       }
@@ -30,15 +32,17 @@ class KanjiCubit extends Cubit<KanjiState> {
   }
 
   Future<void> search(
-      String input, {
-        int? resultsPerPage = 10,
-        int currentPage = 0,
-      }) async {
-    if (_databaseInterface.status != DatabaseStatus.ok) {
-      emit(KanjiDatabaseNotReady(
-        status: _databaseInterface.status ?? DatabaseStatus.pathNotSet,
-        log: _databaseInterface.log,
-      ));
+    String input, {
+    int? resultsPerPage = 10,
+    int currentPage = 0,
+  }) async {
+    if (databaseInterface.status != DatabaseStatus.ok) {
+      emit(
+        KanjiDatabaseNotReady(
+          status: databaseInterface.status ?? DatabaseStatus.pathNotSet,
+          log: databaseInterface.log,
+        ),
+      );
       return;
     }
 
@@ -50,34 +54,44 @@ class KanjiCubit extends Cubit<KanjiState> {
     emit(KanjiLoading());
 
     try {
-      final entries = await _databaseInterface.search(input, resultsPerPage, currentPage);
-      final totalCount = await _databaseInterface.count();
+      final entries = await databaseInterface.search(
+        input,
+        resultsPerPage,
+        currentPage,
+      );
+      final totalCount = await databaseInterface.count();
 
-      emit(KanjiLoaded(
-        entries: entries,
-        totalCount: totalCount,
-        query: input,
-        currentPage: currentPage,
-        resultsPerPage: resultsPerPage,
-      ));
+      emit(
+        KanjiLoaded(
+          entries: entries,
+          totalCount: totalCount,
+          query: input,
+          currentPage: currentPage,
+          resultsPerPage: resultsPerPage,
+        ),
+      );
     } catch (e) {
       emit(KanjiError(message: 'Search failed: ${e.toString()}'));
     }
   }
 
   Future<void> loadCharactersFromLiterals(List<String> characters) async {
-    if (_databaseInterface.status != DatabaseStatus.ok) {
-      emit(KanjiDatabaseNotReady(
-        status: _databaseInterface.status ?? DatabaseStatus.pathNotSet,
-        log: _databaseInterface.log,
-      ));
+    if (databaseInterface.status != DatabaseStatus.ok) {
+      emit(
+        KanjiDatabaseNotReady(
+          status: databaseInterface.status ?? DatabaseStatus.pathNotSet,
+          log: databaseInterface.log,
+        ),
+      );
       return;
     }
 
     emit(KanjiLoading());
 
     try {
-      final kanjiList = await _databaseInterface.getCharactersFromLiterals(characters);
+      final kanjiList = await databaseInterface.getCharactersFromLiterals(
+        characters,
+      );
       emit(KanjiCharactersLoaded(characters: kanjiList));
     } catch (e) {
       emit(KanjiError(message: 'Failed to load characters: ${e.toString()}'));
@@ -85,57 +99,69 @@ class KanjiCubit extends Cubit<KanjiState> {
   }
 
   Future<void> searchByRadicals(List<String> radicals) async {
-    if (_databaseInterface.status != DatabaseStatus.ok) {
-      emit(KanjiDatabaseNotReady(
-        status: _databaseInterface.status ?? DatabaseStatus.pathNotSet,
-        log: _databaseInterface.log,
-      ));
+    if (databaseInterface.status != DatabaseStatus.ok) {
+      emit(
+        KanjiDatabaseNotReady(
+          status: databaseInterface.status ?? DatabaseStatus.pathNotSet,
+          log: databaseInterface.log,
+        ),
+      );
       return;
     }
 
     emit(KanjiLoading());
 
     try {
-      final characters = await _databaseInterface.getCharactersFromRadicals(radicals);
-      emit(KanjiRadicalSearchLoaded(
-        characters: characters,
-        selectedRadicals: radicals,
-      ));
+      final characters = await databaseInterface.getCharactersFromRadicals(
+        radicals,
+      );
+      emit(
+        KanjiRadicalSearchLoaded(
+          characters: characters,
+          selectedRadicals: radicals,
+        ),
+      );
     } catch (e) {
       emit(KanjiError(message: 'Radical search failed: ${e.toString()}'));
     }
   }
 
   Future<void> loadRadicals({List<String> selectedRadicals = const []}) async {
-    if (_databaseInterface.status != DatabaseStatus.ok) {
-      emit(KanjiDatabaseNotReady(
-        status: _databaseInterface.status ?? DatabaseStatus.pathNotSet,
-        log: _databaseInterface.log,
-      ));
+    if (databaseInterface.status != DatabaseStatus.ok) {
+      emit(
+        KanjiDatabaseNotReady(
+          status: databaseInterface.status ?? DatabaseStatus.pathNotSet,
+          log: databaseInterface.log,
+        ),
+      );
       return;
     }
 
     emit(KanjiLoading());
 
     try {
-      final radicals = await _databaseInterface.getRadicals();
+      final radicals = await databaseInterface.getRadicals();
       List<String> availableRadicals;
 
       if (selectedRadicals.isEmpty) {
         // Get all radicals if none selected
-        final allRadicalCharacters = await _databaseInterface.getRadicalsCharacter();
+        final allRadicalCharacters = await databaseInterface
+            .getRadicalsCharacter();
         availableRadicals = allRadicalCharacters.whereType<String>().toList();
       } else {
         // Get radicals that can be combined with selected ones
-        final compatibleRadicals = await _databaseInterface.getRadicalsForSelection(selectedRadicals);
+        final compatibleRadicals = await databaseInterface
+            .getRadicalsForSelection(selectedRadicals);
         availableRadicals = compatibleRadicals.whereType<String>().toList();
       }
 
-      emit(KanjiRadicalsLoaded(
-        radicals: radicals,
-        availableRadicals: availableRadicals,
-        selectedRadicals: selectedRadicals,
-      ));
+      emit(
+        KanjiRadicalsLoaded(
+          radicals: radicals,
+          availableRadicals: availableRadicals,
+          selectedRadicals: selectedRadicals,
+        ),
+      );
     } catch (e) {
       emit(KanjiError(message: 'Failed to load radicals: ${e.toString()}'));
     }
@@ -152,7 +178,9 @@ class KanjiCubit extends Cubit<KanjiState> {
   Future<void> removeRadicalFromSelection(String radical) async {
     final currentState = state;
     if (currentState is KanjiRadicalsLoaded) {
-      final newSelection = currentState.selectedRadicals.where((r) => r != radical).toList();
+      final newSelection = currentState.selectedRadicals
+          .where((r) => r != radical)
+          .toList();
       await loadRadicals(selectedRadicals: newSelection);
     }
   }
@@ -199,7 +227,7 @@ class KanjiCubit extends Cubit<KanjiState> {
   }
 
   Future<void> dispose() async {
-    await _databaseInterface.dispose();
+    await databaseInterface.dispose();
   }
 
   @override

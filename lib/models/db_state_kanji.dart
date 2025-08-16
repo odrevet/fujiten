@@ -32,7 +32,13 @@ class KanjiLoaded extends KanjiState {
   });
 
   @override
-  List<Object?> get props => [entries, totalCount, query, currentPage, resultsPerPage];
+  List<Object?> get props => [
+    entries,
+    totalCount,
+    query,
+    currentPage,
+    resultsPerPage,
+  ];
 }
 
 class KanjiRadicalSearchLoaded extends KanjiState {
@@ -76,10 +82,7 @@ class KanjiError extends KanjiState {
   final String message;
   final DatabaseStatus? status;
 
-  const KanjiError({
-    required this.message,
-    this.status,
-  });
+  const KanjiError({required this.message, this.status});
 
   @override
   List<Object?> get props => [message, status];
@@ -89,10 +92,7 @@ class KanjiDatabaseNotReady extends KanjiState {
   final DatabaseStatus status;
   final String? log;
 
-  const KanjiDatabaseNotReady({
-    required this.status,
-    this.log,
-  });
+  const KanjiDatabaseNotReady({required this.status, this.log});
 
   @override
   List<Object?> get props => [status, log];

@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../cubits/kanji_cubit.dart';
 import '../models/kanji.dart';
 import '../string_utils.dart';
 import 'kanji_list_tile.dart';
@@ -7,10 +9,7 @@ import 'kanji_list_tile.dart';
 class RadicalPage extends StatefulWidget {
   final List<String> selectedRadicals;
 
-  const RadicalPage(
-    this.selectedRadicals, {
-    super.key,
-  });
+  const RadicalPage(this.selectedRadicals, {super.key});
 
   @override
   RadicalPageState createState() => RadicalPageState();
@@ -25,10 +24,12 @@ class RadicalPageState extends State<RadicalPage> {
 
   @override
   void initState() {
-    _radicals = widget.databaseInterfaceKanji.getRadicals();
+    _radicals = context.read<KanjiCubit>().databaseInterface.getRadicals();
 
     if (widget.selectedRadicals.isNotEmpty) {
-      widget.databaseInterfaceKanji
+      context
+          .read<KanjiCubit>()
+          .databaseInterface
           .getRadicalsForSelection(widget.selectedRadicals)
           .then(
             (validRadicals) => setState(() => _validRadicals = validRadicals),
@@ -101,7 +102,9 @@ class RadicalPageState extends State<RadicalPage> {
               Expanded(
                 flex: 1,
                 child: FutureBuilder<List<String>>(
-                  future: widget.databaseInterfaceKanji
+                  future: context
+                      .read<KanjiCubit>()
+                      .databaseInterface
                       .getCharactersFromRadicals(widget.selectedRadicals),
                   builder:
                       (
@@ -266,7 +269,9 @@ class RadicalPageState extends State<RadicalPage> {
     },
   );
 
-  Future<void> updateSelection() => widget.databaseInterfaceKanji
+  Future<void> updateSelection() => context
+      .read<KanjiCubit>()
+      .databaseInterface
       .getRadicalsForSelection(widget.selectedRadicals)
       .then((validRadicals) => setState(() => _validRadicals = validRadicals));
 
