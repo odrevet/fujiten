@@ -15,10 +15,10 @@ dependencies:
   package_info_plus: ^8.0.0
   kana_kit: ^2.0.0
   path: ^1.8.0
-  file_picker: ^10.2.0
+  file_picker: ^10.3.1
   flutter_bloc: ^9.1.1
   path_provider: ^2.1.0
-  dio: ^5.3.0
+  dio: ^5.9.0
   archive: ^4.0.7
   equatable: ^2.0.7
 
