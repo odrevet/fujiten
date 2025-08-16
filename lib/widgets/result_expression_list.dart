@@ -9,11 +9,9 @@ import 'kanji_dialog.dart';
 
 class ResultExpressionList extends StatefulWidget {
   final ExpressionEntry searchResult;
-  final DatabaseInterfaceKanji databaseInterfaceKanji;
 
   const ResultExpressionList({
     required this.searchResult,
-    required this.databaseInterfaceKanji,
     super.key,
   });
 
@@ -65,7 +63,6 @@ class _ResultExpressionListState extends State<ResultExpressionList> {
                     builder: (_) => AlertDialog(
                       title: const Center(child: Text('Kanji')),
                       content: KanjiDialog(
-                        databaseInterfaceKanji: widget.databaseInterfaceKanji,
                         literals: literals,
                       ),
                     ),
@@ -100,8 +97,6 @@ class _ResultExpressionListState extends State<ResultExpressionList> {
                         builder: (_) => AlertDialog(
                           title: const Center(child: Text('Kanji')),
                           content: KanjiDialog(
-                            databaseInterfaceKanji:
-                                widget.databaseInterfaceKanji,
                             literals: literals,
                           ),
                         ),

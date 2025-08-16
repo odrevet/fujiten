@@ -116,12 +116,8 @@ class DatabaseStatusItem extends StatelessWidget {
 
 // Updated DatabaseStatusDisplay class
 class DatabaseStatusDisplay extends StatelessWidget {
-  final DatabaseInterfaceKanji databaseInterfaceKanji;
-  final DatabaseInterfaceExpression databaseInterfaceExpression;
 
   const DatabaseStatusDisplay({
-    required this.databaseInterfaceExpression,
-    required this.databaseInterfaceKanji,
     super.key,
   });
 

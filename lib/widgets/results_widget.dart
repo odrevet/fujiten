@@ -13,14 +13,10 @@ import '../services/database_interface_expression.dart';
 import 'kanji_list_tile.dart';
 
 class ResultsWidget extends StatefulWidget {
-  final DatabaseInterfaceKanji databaseInterfaceKanji;
-  final DatabaseInterfaceExpression databaseInterfaceExpression;
   final Function onEndReached;
   final Function() refreshDb;
 
   const ResultsWidget(
-    this.databaseInterfaceKanji,
-    this.databaseInterfaceExpression,
     this.onEndReached,
     this.refreshDb, {
     super.key,
@@ -73,7 +69,6 @@ class _ResultsWidgetState extends State<ResultsWidget> {
 
       return ResultExpressionList(
         searchResult: expressionResults[index],
-        databaseInterfaceKanji: widget.databaseInterfaceKanji,
       );
     }
   }
@@ -135,9 +130,6 @@ class _ResultsWidgetState extends State<ResultsWidget> {
               // Center the DatabaseStatusDisplay vertically
               child = Center(
                 child: DatabaseStatusDisplay(
-                  databaseInterfaceExpression:
-                      widget.databaseInterfaceExpression,
-                  databaseInterfaceKanji: widget.databaseInterfaceKanji,
                 ),
               );
             } else {

@@ -7,10 +7,8 @@ import 'kanji_list_tile.dart';
 
 class KanjiDialog extends StatelessWidget {
   final List<String> literals;
-  final DatabaseInterfaceKanji databaseInterfaceKanji;
 
   const KanjiDialog({
-    required this.databaseInterfaceKanji,
     required this.literals,
     super.key,
   });

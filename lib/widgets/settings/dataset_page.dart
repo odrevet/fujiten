@@ -1,16 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:fujiten/services/database_interface_expression.dart';
-import 'package:fujiten/services/database_interface_kanji.dart';
 import 'package:fujiten/widgets/settings/database_settings_widget.dart';
 
 class DatasetPage extends StatefulWidget {
-  final DatabaseInterfaceExpression databaseInterfaceExpression;
-  final DatabaseInterfaceKanji databaseInterfaceKanji;
   final Function() refreshDbStatus;
 
   const DatasetPage({
-    required this.databaseInterfaceExpression,
-    required this.databaseInterfaceKanji,
     required this.refreshDbStatus,
     super.key,
   });

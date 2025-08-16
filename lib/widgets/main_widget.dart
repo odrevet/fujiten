@@ -149,8 +149,6 @@ class _MainWidgetState extends State<MainWidget> {
 
     if (!databasesOk) {
       return DatasetPage(
-        databaseInterfaceExpression: databaseInterfaceExpression,
-        databaseInterfaceKanji: databaseInterfaceKanji,
         refreshDbStatus: refreshDbStatus,
       );
     } else {
@@ -175,8 +173,6 @@ class _MainWidgetState extends State<MainWidget> {
                   preferredSize: const Size.fromHeight(56),
                   child: Builder(
                     builder: (context) => FujitenMenuBar(
-                      databaseInterfaceKanji: databaseInterfaceKanji,
-                      databaseInterfaceExpression: databaseInterfaceExpression,
                       search: search,
                       textEditingController: widget._textEditingController,
                       onSearch: onSearch,
@@ -197,8 +193,6 @@ class _MainWidgetState extends State<MainWidget> {
                   focusNode,
                 ),
               ResultsWidget(
-                databaseInterfaceKanji,
-                databaseInterfaceExpression,
                 onEndReached,
                 refreshDbStatus,
               ),

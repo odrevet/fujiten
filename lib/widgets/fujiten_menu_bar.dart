@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:fujiten/services/database_interface_expression.dart';
-import 'package:fujiten/services/database_interface_kanji.dart';
 import 'package:fujiten/widgets/toggle_search_type_button.dart';
 
 import '../cubits/input_cubit.dart';
@@ -11,8 +9,6 @@ import 'radical_page.dart';
 import 'settings/settings.dart';
 
 class FujitenMenuBar extends StatefulWidget {
-  final DatabaseInterfaceKanji databaseInterfaceKanji;
-  final DatabaseInterfaceExpression databaseInterfaceExpression;
   final Search? search;
   final TextEditingController? textEditingController;
   final VoidCallback onSearch;
@@ -21,8 +17,6 @@ class FujitenMenuBar extends StatefulWidget {
   final Function() refreshDbStatus;
 
   const FujitenMenuBar({
-    required this.databaseInterfaceKanji,
-    required this.databaseInterfaceExpression,
     required this.search,
     required this.textEditingController,
     required this.onSearch,
@@ -196,9 +190,6 @@ class _FujitenMenuBarState extends State<FujitenMenuBar> {
                   context,
                   MaterialPageRoute(
                     builder: (context) => SettingsPage(
-                      databaseInterfaceExpression:
-                          widget.databaseInterfaceExpression,
-                      databaseInterfaceKanji: widget.databaseInterfaceKanji,
                       refreshDbStatus: widget.refreshDbStatus,
                     ),
                   ),
@@ -251,7 +242,7 @@ class _FujitenMenuBarState extends State<FujitenMenuBar> {
       context,
       MaterialPageRoute(
         builder: (context) =>
-            RadicalPage(widget.databaseInterfaceKanji, radicals),
+            RadicalPage(radicals),
       ),
     ).then((results) {
       var isRadicalList = results[0];

@@ -1,16 +1,13 @@
 import 'package:flutter/material.dart';
 
 import '../models/kanji.dart';
-import '../services/database_interface_kanji.dart';
 import '../string_utils.dart';
 import 'kanji_list_tile.dart';
 
 class RadicalPage extends StatefulWidget {
-  final DatabaseInterfaceKanji databaseInterfaceKanji;
   final List<String> selectedRadicals;
 
   const RadicalPage(
-    this.databaseInterfaceKanji,
     this.selectedRadicals, {
     super.key,
   });
