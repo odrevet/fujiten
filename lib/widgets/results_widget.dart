@@ -2,29 +2,19 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:fujiten/cubits/search_cubit.dart';
-import 'package:fujiten/services/database_interface_kanji.dart';
 import 'package:fujiten/widgets/database_status_display.dart';
 import 'package:fujiten/widgets/result_expression_list.dart';
 
 import '../cubits/input_cubit.dart';
 import '../models/entry.dart';
 import '../models/search.dart';
-import '../services/database_interface_expression.dart';
 import 'kanji_list_tile.dart';
 
 class ResultsWidget extends StatefulWidget {
-  final DatabaseInterfaceKanji databaseInterfaceKanji;
-  final DatabaseInterfaceExpression databaseInterfaceExpression;
   final Function onEndReached;
   final Function() refreshDb;
 
-  const ResultsWidget(
-    this.databaseInterfaceKanji,
-    this.databaseInterfaceExpression,
-    this.onEndReached,
-    this.refreshDb, {
-    super.key,
-  });
+  const ResultsWidget(this.onEndReached, this.refreshDb, {super.key});
 
   @override
   State<ResultsWidget> createState() => _ResultsWidgetState();
@@ -71,10 +61,7 @@ class _ResultsWidgetState extends State<ResultsWidget> {
           .whereType<ExpressionEntry>()
           .toList();
 
-      return ResultExpressionList(
-        searchResult: expressionResults[index],
-        databaseInterfaceKanji: widget.databaseInterfaceKanji,
-      );
+      return ResultExpressionList(searchResult: expressionResults[index]);
     }
   }
 
@@ -102,7 +89,7 @@ class _ResultsWidgetState extends State<ResultsWidget> {
                   size: 64,
                   color: Theme.of(
                     context,
-                  ).colorScheme.onSurface.withOpacity(0.3),
+                  ).colorScheme.onSurface.withValues(alpha: 0.3),
                 ),
                 const SizedBox(height: 16),
                 Text(
@@ -110,7 +97,7 @@ class _ResultsWidgetState extends State<ResultsWidget> {
                   style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                     color: Theme.of(
                       context,
-                    ).colorScheme.onSurface.withOpacity(0.7),
+                    ).colorScheme.onSurface.withValues(alpha: 0.7),
                     fontWeight: FontWeight.w500,
                   ),
                 ),
@@ -120,7 +107,7 @@ class _ResultsWidgetState extends State<ResultsWidget> {
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                     color: Theme.of(
                       context,
-                    ).colorScheme.onSurface.withOpacity(0.5),
+                    ).colorScheme.onSurface.withValues(alpha: 0.5),
                   ),
                   textAlign: TextAlign.center,
                 ),
@@ -133,13 +120,7 @@ class _ResultsWidgetState extends State<ResultsWidget> {
                 .inputs[context.read<InputCubit>().state.searchIndex]
                 .isEmpty) {
               // Center the DatabaseStatusDisplay vertically
-              child = Center(
-                child: DatabaseStatusDisplay(
-                  databaseInterfaceExpression:
-                      widget.databaseInterfaceExpression,
-                  databaseInterfaceKanji: widget.databaseInterfaceKanji,
-                ),
-              );
+              child = Center(child: DatabaseStatusDisplay());
             } else {
               child = ListView.separated(
                 separatorBuilder: (context, index) {

@@ -61,13 +61,13 @@ class _MainWidgetState extends State<MainWidget> {
   void initDb() async {
     final prefs = await _prefs;
 
-    // Initialize expression database
+    // Initialize expression services
     String? expressionPath = prefs.getString("expression_path");
     if (expressionPath != null) {
       await setExpressionDb(expressionPath);
     }
 
-    // Initialize kanji database
+    // Initialize kanji services
     String? kanjiPath = prefs.getString("kanji_path");
     if (kanjiPath != null) {
       await setKanjiDb(kanjiPath);
@@ -148,11 +148,7 @@ class _MainWidgetState extends State<MainWidget> {
         databaseInterfaceKanji.status == DatabaseStatus.ok;
 
     if (!databasesOk) {
-      return DatasetPage(
-        databaseInterfaceExpression: databaseInterfaceExpression,
-        databaseInterfaceKanji: databaseInterfaceKanji,
-        refreshDbStatus: refreshDbStatus,
-      );
+      return DatasetPage(refreshDbStatus: refreshDbStatus);
     } else {
       return BlocBuilder<SearchCubit, Search>(
         builder: (context, search) => Scaffold(
@@ -175,8 +171,6 @@ class _MainWidgetState extends State<MainWidget> {
                   preferredSize: const Size.fromHeight(56),
                   child: Builder(
                     builder: (context) => FujitenMenuBar(
-                      databaseInterfaceKanji: databaseInterfaceKanji,
-                      databaseInterfaceExpression: databaseInterfaceExpression,
                       search: search,
                       textEditingController: widget._textEditingController,
                       onSearch: onSearch,
@@ -196,12 +190,7 @@ class _MainWidgetState extends State<MainWidget> {
                   onFocusChanged,
                   focusNode,
                 ),
-              ResultsWidget(
-                databaseInterfaceKanji,
-                databaseInterfaceExpression,
-                onEndReached,
-                refreshDbStatus,
-              ),
+              ResultsWidget(onEndReached, refreshDbStatus),
             ],
           ),
         ),
