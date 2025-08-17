@@ -15,12 +15,10 @@ import '../../services/database_interface.dart';
 class DatabaseSettingsWidget extends StatefulWidget {
   final String type;
   final DatabaseInterface databaseInterface;
-  final Function() refreshDbStatus;
 
   const DatabaseSettingsWidget({
     required this.type,
     required this.databaseInterface,
-    required this.refreshDbStatus,
     super.key,
   });
 
@@ -191,7 +189,6 @@ class _DatabaseSettingsWidgetState extends State<DatabaseSettingsWidget> {
                                             );
                                             await widget.databaseInterface
                                                 .setStatus();
-                                            await widget.refreshDbStatus();
                                           } catch (e) {
                                             setState(
                                               () => downloadLog =
@@ -222,7 +219,6 @@ class _DatabaseSettingsWidgetState extends State<DatabaseSettingsWidget> {
                                       });
                                       await widget.databaseInterface
                                           .setStatus();
-                                      await widget.refreshDbStatus();
                                     }
                                   }),
                             icon: const Icon(Icons.folder_open),

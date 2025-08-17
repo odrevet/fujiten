@@ -12,9 +12,8 @@ import 'kanji_list_tile.dart';
 
 class ResultsWidget extends StatefulWidget {
   final Function onEndReached;
-  final Function() refreshDb;
 
-  const ResultsWidget(this.onEndReached, this.refreshDb, {super.key});
+  const ResultsWidget(this.onEndReached, {super.key});
 
   @override
   State<ResultsWidget> createState() => _ResultsWidgetState();

@@ -159,8 +159,7 @@ class _MainWidgetState extends State<MainWidget> {
                     textEditingController: widget._textEditingController,
                     onSearch: onSearch,
                     focusNode: focusNode,
-                    insertPosition: cursorPosition,
-                    refreshDbStatus: () {}, //WIP
+                    insertPosition: cursorPosition
                   ),
                 ),
               ),
@@ -173,8 +172,7 @@ class _MainWidgetState extends State<MainWidget> {
                       focusNode,
                     ),
                   ResultsWidget(
-                    onEndReached,
-                    () {} /*_updateDbInitialized WIP*/,
+                    onEndReached
                   ),
                 ],
               ),

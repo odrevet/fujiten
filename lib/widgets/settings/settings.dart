@@ -5,9 +5,8 @@ import 'package:package_info_plus/package_info_plus.dart';
 import 'dataset_page.dart';
 
 class SettingsPage extends StatelessWidget {
-  final Function() refreshDbStatus;
 
-  const SettingsPage({super.key, required this.refreshDbStatus});
+  const SettingsPage({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -22,7 +21,7 @@ class SettingsPage extends StatelessWidget {
               context,
               MaterialPageRoute(
                 builder: (context) =>
-                    DatasetPage(refreshDbStatus: refreshDbStatus),
+                    DatasetPage(),
               ),
             ),
           ),

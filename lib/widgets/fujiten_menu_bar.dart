@@ -15,7 +15,6 @@ class FujitenMenuBar extends StatefulWidget {
   final VoidCallback onSearch;
   final int insertPosition;
   final FocusNode focusNode;
-  final Function() refreshDbStatus;
 
   const FujitenMenuBar({
     required this.search,
@@ -23,7 +22,6 @@ class FujitenMenuBar extends StatefulWidget {
     required this.onSearch,
     required this.focusNode,
     required this.insertPosition,
-    required this.refreshDbStatus,
     super.key,
   });
 
@@ -191,7 +189,7 @@ class _FujitenMenuBarState extends State<FujitenMenuBar> {
                   context,
                   MaterialPageRoute(
                     builder: (context) =>
-                        SettingsPage(refreshDbStatus: widget.refreshDbStatus),
+                        SettingsPage(),
                   ),
                 ).then((_) {
                   //widget.databaseInterfaceExpression.setStatus();

@@ -6,9 +6,8 @@ import '../../cubits/expression_cubit.dart';
 import '../../cubits/kanji_cubit.dart';
 
 class DatasetPage extends StatefulWidget {
-  final Function() refreshDbStatus;
 
-  const DatasetPage({required this.refreshDbStatus, super.key});
+  const DatasetPage({super.key});
 
   @override
   State<DatasetPage> createState() => _DatasetPageState();
@@ -26,12 +25,10 @@ class _DatasetPageState extends State<DatasetPage> {
             databaseInterface: context
                 .read<ExpressionCubit>()
                 .databaseInterface,
-            refreshDbStatus: widget.refreshDbStatus,
           ),
           DatabaseSettingsWidget(
             type: "kanji",
             databaseInterface: context.read<KanjiCubit>().databaseInterface,
-            refreshDbStatus: widget.refreshDbStatus,
           ),
         ],
       ),
