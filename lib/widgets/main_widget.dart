@@ -5,11 +5,13 @@ import 'package:fujiten/models/search.dart';
 import 'package:fujiten/widgets/settings/dataset_page.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../cubits/expression_cubit.dart';
 import '../cubits/input_cubit.dart';
+import '../cubits/kanji_cubit.dart';
 import '../cubits/theme_cubit.dart';
+import '../models/db_state_expression.dart';
+import '../models/db_state_kanji.dart';
 import '../services/database_interface.dart';
-import '../services/database_interface_expression.dart';
-import '../services/database_interface_kanji.dart';
 import '../string_utils.dart';
 import 'fujiten_menu_bar.dart';
 import 'results_widget.dart';
@@ -27,24 +29,19 @@ class MainWidget extends StatefulWidget {
 
 class _MainWidgetState extends State<MainWidget> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
-  late DatabaseInterfaceKanji databaseInterfaceKanji;
-  late DatabaseInterfaceExpression databaseInterfaceExpression;
   int cursorPosition = -1;
   FocusNode focusNode = FocusNode();
 
   final Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
 
-  bool _isDbInitialized = false;
+  bool _isDbInitializedExpression = false;
+  bool _isDbInitializedKanji = false;
 
   @override
   initState() {
     super.initState();
 
     context.read<InputCubit>().addInput();
-
-    databaseInterfaceExpression = DatabaseInterfaceExpression();
-    databaseInterfaceKanji = DatabaseInterfaceKanji();
-
     initDb();
 
     _prefs.then((SharedPreferences prefs) {
@@ -61,47 +58,25 @@ class _MainWidgetState extends State<MainWidget> {
   void initDb() async {
     final prefs = await _prefs;
 
-    // Initialize expression services
+    // Initialize expression database
     String? expressionPath = prefs.getString("expression_path");
     if (expressionPath != null) {
-      await setExpressionDb(expressionPath);
+      context.read<ExpressionCubit>().openDatabase(expressionPath);
     }
 
-    // Initialize kanji services
+    // Initialize kanji database
     String? kanjiPath = prefs.getString("kanji_path");
     if (kanjiPath != null) {
-      await setKanjiDb(kanjiPath);
+      context.read<KanjiCubit>().openDatabase(kanjiPath);
     }
-
-    await refreshDbStatus();
-  }
-
-  Future<void> refreshDbStatus() async {
-    await databaseInterfaceExpression.setStatus();
-    await databaseInterfaceKanji.setStatus();
-    setState(() {
-      _isDbInitialized = true;
-    });
-  }
-
-  Future<void> setExpressionDb(String path) async =>
-      await databaseInterfaceExpression.open(path);
-
-  Future<void> setKanjiDb(String path) async =>
-      databaseInterfaceKanji.open(path);
-
-  @override
-  void dispose() {
-    databaseInterfaceExpression.dispose();
-    databaseInterfaceKanji.dispose();
-    super.dispose();
   }
 
   void onSearch() async {
     if (widget._textEditingController.text != "") {
+      final kanjiCubit = context.read<KanjiCubit>();
       final formattedInput = await formatInput(
         widget._textEditingController.text,
-        databaseInterfaceKanji,
+        kanjiCubit.databaseInterface,
       );
 
       // Check if the widget is still mounted before using context
@@ -109,12 +84,13 @@ class _MainWidgetState extends State<MainWidget> {
 
       context.read<InputCubit>().setFormattedInput(formattedInput);
       context.read<SearchCubit>().reset();
-      context.read<SearchCubit>().runSearch(
-        context.read<SearchCubit>().state.searchType == SearchType.kanji
-            ? databaseInterfaceKanji
-            : databaseInterfaceExpression,
-        formattedInput,
-      );
+
+      final searchType = context.read<SearchCubit>().state.searchType;
+      final databaseInterface = searchType == SearchType.kanji
+          ? context.read<KanjiCubit>().databaseInterface
+          : context.read<ExpressionCubit>().databaseInterface;
+
+      context.read<SearchCubit>().runSearch(databaseInterface, formattedInput);
     }
 
     focusNode.unfocus();
@@ -129,72 +105,95 @@ class _MainWidgetState extends State<MainWidget> {
   void onEndReached() {
     var searchType = context.read<SearchCubit>().state.searchType;
     context.read<SearchCubit>().nextPage();
+
+    final databaseInterface = searchType == SearchType.kanji
+        ? context.read<KanjiCubit>().databaseInterface
+        : context.read<ExpressionCubit>().databaseInterface;
+
     context.read<SearchCubit>().runSearch(
-      searchType == SearchType.kanji
-          ? databaseInterfaceKanji
-          : databaseInterfaceExpression,
+      databaseInterface,
       context.read<InputCubit>().state.formattedInput,
     );
   }
 
   @override
   Widget build(BuildContext context) {
-    if (!_isDbInitialized) {
-      return Scaffold(body: Center(child: CircularProgressIndicator()));
-    }
-
-    bool databasesOk =
-        databaseInterfaceExpression.status == DatabaseStatus.ok &&
-        databaseInterfaceKanji.status == DatabaseStatus.ok;
-
-    if (!databasesOk) {
-      return DatasetPage(refreshDbStatus: refreshDbStatus);
-    } else {
-      return BlocBuilder<SearchCubit, Search>(
-        builder: (context, search) => Scaffold(
-          key: _scaffoldKey,
-          floatingActionButton:
-              context.read<SearchCubit>().state.isLoadingNextPage
-              ? const FloatingActionButton(
-                  onPressed: null,
-                  backgroundColor: Colors.white,
-                  mini: true,
-                  child: SizedBox(
-                    height: 10,
-                    width: 10,
-                    child: CircularProgressIndicator(),
-                  ),
-                )
-              : null,
-          appBar: databasesOk
-              ? PreferredSize(
-                  preferredSize: const Size.fromHeight(56),
-                  child: Builder(
-                    builder: (context) => FujitenMenuBar(
-                      search: search,
-                      textEditingController: widget._textEditingController,
-                      onSearch: onSearch,
-                      focusNode: focusNode,
-                      insertPosition: cursorPosition,
-                      refreshDbStatus: refreshDbStatus,
-                    ),
-                  ),
-                )
-              : null,
-          body: Column(
-            children: <Widget>[
-              if (databasesOk)
-                SearchInput(
-                  widget._textEditingController,
-                  onSearch,
-                  onFocusChanged,
-                  focusNode,
-                ),
-              ResultsWidget(onEndReached, refreshDbStatus),
-            ],
-          ),
+    return MultiBlocListener(
+      listeners: [
+        BlocListener<ExpressionCubit, ExpressionState>(
+          listener: (context, expressionState) {
+            _updateDbInitializedExpression(expressionState);
+          },
         ),
-      );
-    }
+        BlocListener<KanjiCubit, KanjiState>(
+          listener: (context, kanjiState) {
+            _updateDbInitializedKanji(kanjiState);
+          },
+        ),
+      ],
+      child: BlocBuilder<SearchCubit, Search>(
+        builder: (context, search) {
+          //if (!_isDbInitializedExpression || !_isDbInitializedKanji) {
+          //  return DatasetPage(refreshDbStatus: () {}); //WIP
+          //} else {
+            return Scaffold(
+              key: _scaffoldKey,
+              floatingActionButton:
+                  context.read<SearchCubit>().state.isLoadingNextPage
+                  ? const FloatingActionButton(
+                      onPressed: null,
+                      backgroundColor: Colors.white,
+                      mini: true,
+                      child: SizedBox(
+                        height: 10,
+                        width: 10,
+                        child: CircularProgressIndicator(),
+                      ),
+                    )
+                  : null,
+              appBar: PreferredSize(
+                preferredSize: const Size.fromHeight(56),
+                child: Builder(
+                  builder: (context) => FujitenMenuBar(
+                    search: search,
+                    textEditingController: widget._textEditingController,
+                    onSearch: onSearch,
+                    focusNode: focusNode,
+                    insertPosition: cursorPosition,
+                    refreshDbStatus: () {}, //WIP
+                  ),
+                ),
+              ),
+              body: Column(
+                children: <Widget>[
+                    SearchInput(
+                      widget._textEditingController,
+                      onSearch,
+                      onFocusChanged,
+                      focusNode,
+                    ),
+                  ResultsWidget(
+                    onEndReached,
+                    () {} /*_updateDbInitialized WIP*/,
+                  ),
+                ],
+              ),
+            );
+          //}
+        },
+      ),
+    );
+  }
+
+  void _updateDbInitializedExpression(ExpressionState expressionState) {
+    setState(() {
+      _isDbInitializedExpression = expressionState is ExpressionLoaded;
+    });
+  }
+
+  void _updateDbInitializedKanji(KanjiState kanjiState) {
+    setState(() {
+      _isDbInitializedKanji = KanjiState is KanjiLoaded;
+    });
   }
 }
