@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:fujiten/cubits/search_cubit.dart';
 import 'package:fujiten/models/search.dart';
-import 'package:fujiten/widgets/settings/dataset_page.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../cubits/expression_cubit.dart';
@@ -11,7 +10,6 @@ import '../cubits/kanji_cubit.dart';
 import '../cubits/theme_cubit.dart';
 import '../models/db_state_expression.dart';
 import '../models/db_state_kanji.dart';
-import '../services/database_interface.dart';
 import '../string_utils.dart';
 import 'fujiten_menu_bar.dart';
 import 'results_widget.dart';
@@ -33,9 +31,6 @@ class _MainWidgetState extends State<MainWidget> {
   FocusNode focusNode = FocusNode();
 
   final Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
-
-  bool _isDbInitializedExpression = false;
-  bool _isDbInitializedKanji = false;
 
   @override
   initState() {
@@ -118,80 +113,60 @@ class _MainWidgetState extends State<MainWidget> {
 
   @override
   Widget build(BuildContext context) {
-    return MultiBlocListener(
-      listeners: [
-        BlocListener<ExpressionCubit, ExpressionState>(
-          listener: (context, expressionState) {
-            _updateDbInitializedExpression(expressionState);
-          },
-        ),
-        BlocListener<KanjiCubit, KanjiState>(
-          listener: (context, kanjiState) {
-            _updateDbInitializedKanji(kanjiState);
-          },
-        ),
-      ],
-      child: BlocBuilder<SearchCubit, Search>(
-        builder: (context, search) {
-          //if (!_isDbInitializedExpression || !_isDbInitializedKanji) {
-          //  return DatasetPage(refreshDbStatus: () {}); //WIP
-          //} else {
-            return Scaffold(
-              key: _scaffoldKey,
-              floatingActionButton:
-                  context.read<SearchCubit>().state.isLoadingNextPage
-                  ? const FloatingActionButton(
-                      onPressed: null,
-                      backgroundColor: Colors.white,
-                      mini: true,
-                      child: SizedBox(
-                        height: 10,
-                        width: 10,
-                        child: CircularProgressIndicator(),
+    return BlocBuilder<ExpressionCubit, ExpressionState>(
+      builder: (context, expressionState) {
+        return BlocBuilder<KanjiCubit, KanjiState>(
+          builder: (context, kanjiState) {
+            return BlocBuilder<SearchCubit, Search>(
+              builder: (context, search) {
+                //if (!_isDbInitializedExpression || !_isDbInitializedKanji) {
+                //  return DatasetPage(refreshDbStatus: () {}); //WIP
+                //} else {
+                return Scaffold(
+                  key: _scaffoldKey,
+                  floatingActionButton:
+                      context.read<SearchCubit>().state.isLoadingNextPage
+                      ? const FloatingActionButton(
+                          onPressed: null,
+                          backgroundColor: Colors.white,
+                          mini: true,
+                          child: SizedBox(
+                            height: 10,
+                            width: 10,
+                            child: CircularProgressIndicator(),
+                          ),
+                        )
+                      : null,
+                  appBar: PreferredSize(
+                    preferredSize: const Size.fromHeight(56),
+                    child: Builder(
+                      builder: (context) => FujitenMenuBar(
+                        search: search,
+                        textEditingController: widget._textEditingController,
+                        onSearch: onSearch,
+                        focusNode: focusNode,
+                        insertPosition: cursorPosition,
                       ),
-                    )
-                  : null,
-              appBar: PreferredSize(
-                preferredSize: const Size.fromHeight(56),
-                child: Builder(
-                  builder: (context) => FujitenMenuBar(
-                    search: search,
-                    textEditingController: widget._textEditingController,
-                    onSearch: onSearch,
-                    focusNode: focusNode,
-                    insertPosition: cursorPosition
-                  ),
-                ),
-              ),
-              body: Column(
-                children: <Widget>[
-                    SearchInput(
-                      widget._textEditingController,
-                      onSearch,
-                      onFocusChanged,
-                      focusNode,
                     ),
-                  ResultsWidget(
-                    onEndReached
                   ),
-                ],
-              ),
+                  body: Column(
+                    children: <Widget>[
+                      SearchInput(
+                        widget._textEditingController,
+                        onSearch,
+                        onFocusChanged,
+                        focusNode,
+                      ),
+                      ResultsWidget(onEndReached),
+                    ],
+                  ),
+                );
+                //}
+              },
             );
-          //}
-        },
-      ),
+          },
+        );
+      },
     );
-  }
-
-  void _updateDbInitializedExpression(ExpressionState expressionState) {
-    setState(() {
-      _isDbInitializedExpression = expressionState is ExpressionLoaded;
-    });
-  }
-
-  void _updateDbInitializedKanji(KanjiState kanjiState) {
-    setState(() {
-      _isDbInitializedKanji = KanjiState is KanjiLoaded;
-    });
   }
 }

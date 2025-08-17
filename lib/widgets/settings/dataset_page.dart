@@ -6,7 +6,6 @@ import '../../cubits/expression_cubit.dart';
 import '../../cubits/kanji_cubit.dart';
 
 class DatasetPage extends StatefulWidget {
-
   const DatasetPage({super.key});
 
   @override
@@ -22,13 +21,9 @@ class _DatasetPageState extends State<DatasetPage> {
         children: [
           DatabaseSettingsWidget(
             type: "expression",
-            databaseInterface: context
-                .read<ExpressionCubit>()
-                .databaseInterface,
           ),
           DatabaseSettingsWidget(
             type: "kanji",
-            databaseInterface: context.read<KanjiCubit>().databaseInterface,
           ),
         ],
       ),

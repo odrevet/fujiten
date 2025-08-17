@@ -24,7 +24,7 @@ class KanjiCubit extends Cubit<KanjiState> {
           ),
         );
       } else {
-        emit(KanjiInitial());
+        emit(KanjiReady());
       }
     } catch (e) {
       emit(KanjiError(message: 'Failed to open database: ${e.toString()}'));
@@ -235,4 +235,16 @@ class KanjiCubit extends Cubit<KanjiState> {
     await dispose();
     return super.close();
   }
+
+  void refreshDatabaseStatus() async {
+    await databaseInterface.setStatus();
+
+    if (databaseInterface.status == DatabaseStatus.ok) {
+      emit(KanjiReady());
+    }
+    else{
+      emit(KanjiError(message: "ERROR"));
+    }
+  }
+
 }

@@ -13,6 +13,8 @@ abstract class ExpressionState extends Equatable {
 
 class ExpressionInitial extends ExpressionState {}
 
+class ExpressionReady extends ExpressionState {}
+
 class ExpressionLoading extends ExpressionState {}
 
 class ExpressionLoaded extends ExpressionState {

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:fujiten/widgets/toggle_search_type_button.dart';
 
+import '../cubits/expression_cubit.dart';
 import '../cubits/input_cubit.dart';
 import '../cubits/kanji_cubit.dart';
 import '../models/search.dart';
@@ -187,13 +188,10 @@ class _FujitenMenuBarState extends State<FujitenMenuBar> {
             onPressed: () =>
                 Navigator.push(
                   context,
-                  MaterialPageRoute(
-                    builder: (context) =>
-                        SettingsPage(),
-                  ),
+                  MaterialPageRoute(builder: (context) => SettingsPage()),
                 ).then((_) {
-                  //widget.databaseInterfaceExpression.setStatus();
-                  //widget.databaseInterfaceKanji.setStatus();
+                  context.read<ExpressionCubit>().refreshDatabaseStatus();
+                  context.read<KanjiCubit>().refreshDatabaseStatus();
                 }),
           ),
           Row(

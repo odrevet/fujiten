@@ -14,6 +14,8 @@ abstract class KanjiState extends Equatable {
 
 class KanjiInitial extends KanjiState {}
 
+class KanjiReady extends KanjiState {}
+
 class KanjiLoading extends KanjiState {}
 
 class KanjiLoaded extends KanjiState {

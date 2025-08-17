@@ -5,7 +5,6 @@ import 'package:package_info_plus/package_info_plus.dart';
 import 'dataset_page.dart';
 
 class SettingsPage extends StatelessWidget {
-
   const SettingsPage({super.key});
 
   @override
@@ -19,10 +18,7 @@ class SettingsPage extends StatelessWidget {
             title: const Text("Databases"),
             onTap: () => Navigator.push(
               context,
-              MaterialPageRoute(
-                builder: (context) =>
-                    DatasetPage(),
-              ),
+              MaterialPageRoute(builder: (context) => DatasetPage()),
             ),
           ),
           ListTile(

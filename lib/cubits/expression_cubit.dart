@@ -24,7 +24,7 @@ class ExpressionCubit extends Cubit<ExpressionState> {
           ),
         );
       } else {
-        emit(ExpressionInitial());
+        emit(ExpressionReady());
       }
     } catch (e) {
       emit(
@@ -49,7 +49,7 @@ class ExpressionCubit extends Cubit<ExpressionState> {
     }
 
     if (input.trim().isEmpty) {
-      emit(ExpressionInitial());
+      emit(ExpressionReady());
       return;
     }
 
@@ -122,5 +122,16 @@ class ExpressionCubit extends Cubit<ExpressionState> {
   Future<void> close() async {
     await dispose();
     return super.close();
+  }
+
+  void refreshDatabaseStatus() async {
+    await databaseInterface.setStatus();
+
+    if (databaseInterface.status == DatabaseStatus.ok) {
+      emit(ExpressionReady());
+    }
+    else{
+      emit(ExpressionError(message: "ERROR"));
+    }
   }
 }

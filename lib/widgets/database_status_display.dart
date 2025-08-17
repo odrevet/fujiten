@@ -3,6 +3,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../cubits/expression_cubit.dart';
 import '../cubits/kanji_cubit.dart';
+import '../models/db_state_expression.dart';
+import '../models/db_state_kanji.dart';
 import '../services/database_interface.dart';
 
 class DatabaseStatusItem extends StatelessWidget {
@@ -22,11 +24,11 @@ class DatabaseStatusItem extends StatelessWidget {
       case DatabaseStatus.ok:
         return "Ready";
       case DatabaseStatus.noResults:
-        return "Invalid services (no entries found)";
+        return "Invalid database (no entries found)";
       case DatabaseStatus.pathNotSet:
-        return "No services selected";
+        return "No database selected";
       default:
-        return "No services configured";
+        return "No database configured";
     }
   }
 
@@ -115,46 +117,8 @@ class DatabaseStatusItem extends StatelessWidget {
   }
 }
 
-// Updated DatabaseStatusDisplay class
 class DatabaseStatusDisplay extends StatelessWidget {
   const DatabaseStatusDisplay({super.key});
-
-  Widget _buildOverallStatus(BuildContext context) {
-    final bool allOk =
-        context.read<KanjiCubit>().databaseInterface.status ==
-            DatabaseStatus.ok &&
-        context.read<ExpressionCubit>().databaseInterface.status ==
-            DatabaseStatus.ok;
-
-    if (!allOk) {
-      return Container(
-        width: double.infinity,
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: allOk
-              ? Theme.of(context).colorScheme.primaryContainer
-              : Theme.of(context).colorScheme.errorContainer,
-          borderRadius: BorderRadius.circular(12),
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const SizedBox(width: 8),
-            if (!allOk)
-              Text(
-                'Database configuration required',
-                style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  color: Theme.of(context).colorScheme.onErrorContainer,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-          ],
-        ),
-      );
-    } else {
-      return Container();
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -169,61 +133,43 @@ class DatabaseStatusDisplay extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             // Expression Database Status
-            DatabaseStatusItem(
-              title: 'Expression Database',
-              status: context.read<ExpressionCubit>().databaseInterface.status,
-              kanjiChar: '言',
+            BlocBuilder<ExpressionCubit, ExpressionState>(
+              builder: (context, state) {
+                DatabaseStatus status;
+                if (state is ExpressionLoaded || state is ExpressionReady) {
+                  status = DatabaseStatus.ok;
+                } else {
+                  status = DatabaseStatus.pathNotSet;
+                }
+
+                return DatabaseStatusItem(
+                  title: 'Expression Database',
+                  status: status,
+                  kanjiChar: '言',
+                );
+              },
             ),
 
-            const SizedBox(height: 12),
+            const SizedBox(height: 16),
 
             // Kanji Database Status
-            DatabaseStatusItem(
-              title: 'Kanji Database',
-              status: context.read<KanjiCubit>().databaseInterface.status,
-              kanjiChar: '漢',
+            BlocBuilder<KanjiCubit, KanjiState>(
+              builder: (context, state) {
+                print("-------------");
+                print(state.runtimeType);
+                DatabaseStatus status;
+                if (state is KanjiLoaded || state is KanjiReady) {
+                  status = DatabaseStatus.ok;
+                } else {
+                  status = DatabaseStatus.pathNotSet;
+                }
+                return DatabaseStatusItem(
+                  title: 'Kanji Database',
+                  status: status,
+                  kanjiChar: '漢',
+                );
+              },
             ),
-
-            const SizedBox(height: 20),
-
-            // Overall Status
-            _buildOverallStatus(context),
-
-            // Help text for incomplete setup
-            if (context.read<ExpressionCubit>().databaseInterface.status !=
-                    DatabaseStatus.ok ||
-                context.read<KanjiCubit>().databaseInterface.status !=
-                    DatabaseStatus.ok) ...[
-              const SizedBox(height: 16),
-              Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: Theme.of(
-                    context,
-                  ).colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Row(
-                  children: [
-                    Icon(
-                      Icons.info_outline,
-                      size: 16,
-                      color: Theme.of(context).colorScheme.onSurfaceVariant,
-                    ),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: Text(
-                        'Configure databases in the settings menu to continue',
-                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: Theme.of(context).colorScheme.onSurfaceVariant,
-                          fontStyle: FontStyle.italic,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
           ],
         ),
       ),

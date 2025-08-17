@@ -6,19 +6,22 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:fujiten/widgets/database_status_display.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../../cubits/expression_cubit.dart';
+import '../../cubits/kanji_cubit.dart';
+import '../../models/db_state_expression.dart';
+import '../../models/db_state_kanji.dart';
 import '../../services/database_interface.dart';
 
 class DatabaseSettingsWidget extends StatefulWidget {
-  final String type;
-  final DatabaseInterface databaseInterface;
+  final String type; // 'kanji' or 'expression'
 
   const DatabaseSettingsWidget({
     required this.type,
-    required this.databaseInterface,
     super.key,
   });
 
@@ -44,11 +47,33 @@ class _DatabaseSettingsWidgetState extends State<DatabaseSettingsWidget> {
     final SharedPreferences prefs = await _prefs;
     setState(() {
       pathDb = prefs.setString('${widget.type}_path', path).then((
-        bool success,
-      ) {
+          bool success,
+          ) {
         return path;
       });
     });
+  }
+
+  dynamic _getCubit(BuildContext context) {
+    if (widget.type == 'kanji') {
+      return context.read<KanjiCubit>();
+    } else {
+      return context.read<ExpressionCubit>();
+    }
+  }
+
+  DatabaseInterface _getDatabaseInterface(BuildContext context) {
+    final cubit = _getCubit(context);
+    return cubit.databaseInterface;
+  }
+
+  void _refreshDatabaseStatus(BuildContext context) {
+    final cubit = _getCubit(context);
+    if (widget.type == 'kanji') {
+      (cubit as KanjiCubit).refreshDatabaseStatus();
+    } else {
+      (cubit as ExpressionCubit).refreshDatabaseStatus();
+    }
   }
 
   @override
@@ -63,6 +88,8 @@ class _DatabaseSettingsWidgetState extends State<DatabaseSettingsWidget> {
             if (snapshot.hasError) {
               return Text('Error: ${snapshot.error}');
             } else {
+              final databaseInterface = _getDatabaseInterface(context);
+
               return Card(
                 elevation: 4,
                 margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -74,11 +101,25 @@ class _DatabaseSettingsWidgetState extends State<DatabaseSettingsWidget> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      // Header with database type
-                      DatabaseStatusItem(
-                        title: widget.type == 'kanji' ? 'Kanji' : 'Expression',
-                        status: widget.databaseInterface.status,
-                        kanjiChar: widget.type == 'kanji' ? '漢' : '言',
+                      // Header with database type - Use BlocBuilder to show current status
+                      widget.type == 'kanji'
+                          ? BlocBuilder<KanjiCubit, KanjiState>(
+                        builder: (context, state) {
+                          return DatabaseStatusItem(
+                            title: 'Kanji',
+                            status: databaseInterface.status,
+                            kanjiChar: '漢',
+                          );
+                        },
+                      )
+                          : BlocBuilder<ExpressionCubit, ExpressionState>(
+                        builder: (context, state) {
+                          return DatabaseStatusItem(
+                            title: 'Expression',
+                            status: databaseInterface.status,
+                            kanjiChar: '言',
+                          );
+                        },
                       ),
 
                       const SizedBox(height: 16),
@@ -109,15 +150,15 @@ class _DatabaseSettingsWidgetState extends State<DatabaseSettingsWidget> {
                                   : snapshot.data!,
                               style: Theme.of(context).textTheme.bodyMedium
                                   ?.copyWith(
-                                    color: snapshot.data!.isEmpty
-                                        ? Theme.of(context).colorScheme.error
-                                        : Theme.of(
-                                            context,
-                                          ).colorScheme.onSurface,
-                                    fontStyle: snapshot.data!.isEmpty
-                                        ? FontStyle.italic
-                                        : FontStyle.normal,
-                                  ),
+                                color: snapshot.data!.isEmpty
+                                    ? Theme.of(context).colorScheme.error
+                                    : Theme.of(
+                                  context,
+                                ).colorScheme.onSurface,
+                                fontStyle: snapshot.data!.isEmpty
+                                    ? FontStyle.italic
+                                    : FontStyle.normal,
+                              ),
                             ),
                           ],
                         ),
@@ -134,69 +175,69 @@ class _DatabaseSettingsWidgetState extends State<DatabaseSettingsWidget> {
                             onPressed: downloadLog.isNotEmpty
                                 ? null
                                 : () async {
-                                    Directory appDocDir =
-                                        await getApplicationDocumentsDirectory();
-                                    String appDocPath = appDocDir.path;
-                                    String downloadTo =
-                                        "$appDocPath/${widget.type}.db";
-                                    Dio()
-                                        .download(
-                                          "https://github.com/odrevet/edict_database/releases/latest/download/${widget.type}.zip",
-                                          downloadTo,
-                                          onReceiveProgress: (received, total) {
-                                            if (total != -1) {
-                                              setState(
-                                                () => downloadLog =
-                                                    ("Downloading... ${(received / total * 100).toStringAsFixed(0)}%"),
-                                              );
-                                            }
-                                          },
-                                        )
-                                        .then((_) async {
-                                          String path =
-                                              "$appDocPath/${widget.type}.db";
+                              Directory appDocDir =
+                              await getApplicationDocumentsDirectory();
+                              String appDocPath = appDocDir.path;
+                              String downloadTo =
+                                  "$appDocPath/${widget.type}.db";
+                              Dio()
+                                  .download(
+                                "https://github.com/odrevet/edict_database/releases/latest/download/${widget.type}.zip",
+                                downloadTo,
+                                onReceiveProgress: (received, total) {
+                                  if (total != -1) {
+                                    setState(
+                                          () => downloadLog =
+                                      ("Downloading... ${(received / total * 100).toStringAsFixed(0)}%"),
+                                    );
+                                  }
+                                },
+                              )
+                                  .then((_) async {
+                                String path =
+                                    "$appDocPath/${widget.type}.db";
 
-                                          // Extract zip
-                                          try {
-                                            // Read the Zip file from disk.
-                                            final bytes = File(
-                                              downloadTo,
-                                            ).readAsBytesSync();
+                                // Extract zip
+                                try {
+                                  // Read the Zip file from disk.
+                                  final bytes = File(
+                                    downloadTo,
+                                  ).readAsBytesSync();
 
-                                            // Decode the Zip file
-                                            final archive = ZipDecoder()
-                                                .decodeBytes(bytes);
+                                  // Decode the Zip file
+                                  final archive = ZipDecoder()
+                                      .decodeBytes(bytes);
 
-                                            // Extract the contents of the Zip archive to disk.
-                                            for (final file in archive) {
-                                              final data =
-                                                  file.content as List<int>;
-                                              File(
-                                                  '$appDocPath/${widget.type}.db',
-                                                )
-                                                ..createSync(recursive: true)
-                                                ..writeAsBytesSync(data);
-                                            }
+                                  // Extract the contents of the Zip archive to disk.
+                                  for (final file in archive) {
+                                    final data =
+                                    file.content as List<int>;
+                                    File(
+                                      '$appDocPath/${widget.type}.db',
+                                    )
+                                      ..createSync(recursive: true)
+                                      ..writeAsBytesSync(data);
+                                  }
 
-                                            // Set DB Path and open the Database
-                                            await setPath(path);
-                                            setState(() {
-                                              downloadLog = "";
-                                            });
+                                  // Set DB Path and open the Database
+                                  await setPath(path);
+                                  setState(() {
+                                    downloadLog = "";
+                                  });
 
-                                            await widget.databaseInterface.open(
-                                              path,
-                                            );
-                                            await widget.databaseInterface
-                                                .setStatus();
-                                          } catch (e) {
-                                            setState(
-                                              () => downloadLog =
-                                                  "Error ${e.toString()}",
-                                            );
-                                          }
-                                        });
-                                  },
+                                  await databaseInterface.open(path);
+                                  await databaseInterface.setStatus();
+
+                                  // Refresh the cubit state
+                                  _refreshDatabaseStatus(context);
+                                } catch (e) {
+                                  setState(
+                                        () => downloadLog =
+                                    "Error ${e.toString()}",
+                                  );
+                                }
+                              });
+                            },
                             icon: const Icon(Icons.download),
                             label: const Text('Download'),
                             style: ElevatedButton.styleFrom(
@@ -210,17 +251,19 @@ class _DatabaseSettingsWidgetState extends State<DatabaseSettingsWidget> {
                             onPressed: downloadLog.isNotEmpty
                                 ? null
                                 : () => _pickFile().then((result) async {
-                                    if (result != null) {
-                                      String path = result.first.path!;
-                                      await setPath(path);
-                                      await widget.databaseInterface.open(path);
-                                      setState(() {
-                                        downloadLog = '';
-                                      });
-                                      await widget.databaseInterface
-                                          .setStatus();
-                                    }
-                                  }),
+                              if (result != null) {
+                                String path = result.first.path!;
+                                await setPath(path);
+                                await databaseInterface.open(path);
+                                setState(() {
+                                  downloadLog = '';
+                                });
+                                await databaseInterface.setStatus();
+
+                                // Refresh the cubit state
+                                _refreshDatabaseStatus(context);
+                              }
+                            }),
                             icon: const Icon(Icons.folder_open),
                             label: const Text('Pick File'),
                             style: OutlinedButton.styleFrom(
@@ -234,15 +277,17 @@ class _DatabaseSettingsWidgetState extends State<DatabaseSettingsWidget> {
                             onPressed: snapshot.data == ''
                                 ? null
                                 : () async {
-                                    String path = '';
-                                    setPath(path);
-                                    await widget.databaseInterface.open(path);
-                                    setState(() {
-                                      downloadLog = '';
-                                      widget.databaseInterface.status =
-                                          DatabaseStatus.pathNotSet;
-                                    });
-                                  },
+                              String path = '';
+                              setPath(path);
+                              await databaseInterface.open(path);
+                              setState(() {
+                                downloadLog = '';
+                              });
+                              databaseInterface.status = DatabaseStatus.pathNotSet;
+
+                              // Refresh the cubit state
+                              _refreshDatabaseStatus(context);
+                            },
                             icon: const Icon(Icons.clear),
                             label: const Text('Clear'),
                             style: TextButton.styleFrom(
@@ -268,8 +313,8 @@ class _DatabaseSettingsWidgetState extends State<DatabaseSettingsWidget> {
                             color: downloadLog.contains('Error')
                                 ? Theme.of(context).colorScheme.errorContainer
                                 : Theme.of(
-                                    context,
-                                  ).colorScheme.primaryContainer,
+                              context,
+                            ).colorScheme.primaryContainer,
                             borderRadius: BorderRadius.circular(8),
                           ),
                           child: Row(
@@ -301,15 +346,15 @@ class _DatabaseSettingsWidgetState extends State<DatabaseSettingsWidget> {
                                   downloadLog,
                                   style: Theme.of(context).textTheme.bodyMedium
                                       ?.copyWith(
-                                        color: downloadLog.contains('Error')
-                                            ? Theme.of(
-                                                context,
-                                              ).colorScheme.onErrorContainer
-                                            : Theme.of(
-                                                context,
-                                              ).colorScheme.onPrimaryContainer,
-                                        fontWeight: FontWeight.normal,
-                                      ),
+                                    color: downloadLog.contains('Error')
+                                        ? Theme.of(
+                                      context,
+                                    ).colorScheme.onErrorContainer
+                                        : Theme.of(
+                                      context,
+                                    ).colorScheme.onPrimaryContainer,
+                                    fontWeight: FontWeight.normal,
+                                  ),
                                 ),
                               ),
                             ],
