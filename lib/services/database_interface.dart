@@ -36,12 +36,12 @@ abstract class DatabaseInterface {
   Future<void> setStatus() async {
     if (database == null) {
       status = DatabaseStatus.pathNotSet;
-      log = 'No database selected';
+      log = 'No services selected';
     } else {
       int nbEntries = await count();
       if (nbEntries == 0) {
         status = DatabaseStatus.noResults;
-        log = 'No entry found in database';
+        log = 'No entry found in services';
       } else {
         status = DatabaseStatus.ok;
         log = 'Database loaded';

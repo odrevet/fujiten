@@ -1,34 +1,28 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:fujiten/services/database_interface_expression.dart';
-import 'package:fujiten/services/database_interface_kanji.dart';
 import 'package:fujiten/widgets/toggle_search_type_button.dart';
 
+import '../cubits/expression_cubit.dart';
 import '../cubits/input_cubit.dart';
+import '../cubits/kanji_cubit.dart';
 import '../models/search.dart';
 import '../string_utils.dart';
 import 'radical_page.dart';
 import 'settings/settings.dart';
 
 class FujitenMenuBar extends StatefulWidget {
-  final DatabaseInterfaceKanji databaseInterfaceKanji;
-  final DatabaseInterfaceExpression databaseInterfaceExpression;
   final Search? search;
   final TextEditingController? textEditingController;
   final VoidCallback onSearch;
   final int insertPosition;
   final FocusNode focusNode;
-  final Function() refreshDbStatus;
 
   const FujitenMenuBar({
-    required this.databaseInterfaceKanji,
-    required this.databaseInterfaceExpression,
     required this.search,
     required this.textEditingController,
     required this.onSearch,
     required this.focusNode,
     required this.insertPosition,
-    required this.refreshDbStatus,
     super.key,
   });
 
@@ -194,17 +188,10 @@ class _FujitenMenuBarState extends State<FujitenMenuBar> {
             onPressed: () =>
                 Navigator.push(
                   context,
-                  MaterialPageRoute(
-                    builder: (context) => SettingsPage(
-                      databaseInterfaceExpression:
-                          widget.databaseInterfaceExpression,
-                      databaseInterfaceKanji: widget.databaseInterfaceKanji,
-                      refreshDbStatus: widget.refreshDbStatus,
-                    ),
-                  ),
+                  MaterialPageRoute(builder: (context) => SettingsPage()),
                 ).then((_) {
-                  widget.databaseInterfaceExpression.setStatus();
-                  widget.databaseInterfaceKanji.setStatus();
+                  context.read<ExpressionCubit>().refreshDatabaseStatus();
+                  context.read<KanjiCubit>().refreshDatabaseStatus();
                 }),
           ),
           Row(
@@ -242,17 +229,16 @@ class _FujitenMenuBarState extends State<FujitenMenuBar> {
     int insertPosition = 0;
     if (widget.insertPosition > 0) insertPosition = widget.insertPosition;
 
-    List<String?> radicalsFromDb = await widget.databaseInterfaceKanji
+    List<String?> radicalsFromDb = await context
+        .read<KanjiCubit>()
+        .databaseInterface
         .getRadicalsCharacter();
     radicals.removeWhere((String radical) => !radicalsFromDb.contains(radical));
 
     if (!context.mounted) return;
     Navigator.push(
       context,
-      MaterialPageRoute(
-        builder: (context) =>
-            RadicalPage(widget.databaseInterfaceKanji, radicals),
-      ),
+      MaterialPageRoute(builder: (context) => RadicalPage(radicals)),
     ).then((results) {
       var isRadicalList = results[0];
       var selectedRadicalsOrKanji = results[1];
