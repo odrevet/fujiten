@@ -24,7 +24,7 @@ class ExpressionCubit extends Cubit<ExpressionState> {
           ),
         );
       } else {
-        emit(ExpressionReady());
+        emit(ExpressionInitial());
       }
     } catch (e) {
       emit(
@@ -49,7 +49,7 @@ class ExpressionCubit extends Cubit<ExpressionState> {
     }
 
     if (input.trim().isEmpty) {
-      emit(ExpressionReady());
+      emit(ExpressionInitial());
       return;
     }
 
@@ -64,7 +64,7 @@ class ExpressionCubit extends Cubit<ExpressionState> {
       final totalCount = await databaseInterface.count();
 
       emit(
-        ExpressionLoaded(
+        ExpressionReady(
           entries: entries,
           totalCount: totalCount,
           query: input,
@@ -79,7 +79,7 @@ class ExpressionCubit extends Cubit<ExpressionState> {
 
   Future<void> loadNextPage() async {
     final currentState = state;
-    if (currentState is ExpressionLoaded) {
+    if (currentState is ExpressionReady) {
       await search(
         currentState.query,
         resultsPerPage: currentState.resultsPerPage,
@@ -90,7 +90,7 @@ class ExpressionCubit extends Cubit<ExpressionState> {
 
   Future<void> loadPreviousPage() async {
     final currentState = state;
-    if (currentState is ExpressionLoaded && currentState.currentPage > 0) {
+    if (currentState is ExpressionReady && currentState.currentPage > 0) {
       await search(
         currentState.query,
         resultsPerPage: currentState.resultsPerPage,
@@ -101,7 +101,7 @@ class ExpressionCubit extends Cubit<ExpressionState> {
 
   Future<void> refreshSearch() async {
     final currentState = state;
-    if (currentState is ExpressionLoaded) {
+    if (currentState is ExpressionReady) {
       await search(
         currentState.query,
         resultsPerPage: currentState.resultsPerPage,
@@ -128,9 +128,8 @@ class ExpressionCubit extends Cubit<ExpressionState> {
     await databaseInterface.setStatus();
 
     if (databaseInterface.status == DatabaseStatus.ok) {
-      emit(ExpressionReady());
-    }
-    else{
+      emit(ExpressionInitial());
+    } else {
       emit(ExpressionError(message: "ERROR"));
     }
   }

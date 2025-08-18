@@ -20,10 +20,7 @@ import '../../services/database_interface.dart';
 class DatabaseSettingsWidget extends StatefulWidget {
   final String type; // 'kanji' or 'expression'
 
-  const DatabaseSettingsWidget({
-    required this.type,
-    super.key,
-  });
+  const DatabaseSettingsWidget({required this.type, super.key});
 
   @override
   State<DatabaseSettingsWidget> createState() => _DatabaseSettingsWidgetState();
@@ -47,8 +44,8 @@ class _DatabaseSettingsWidgetState extends State<DatabaseSettingsWidget> {
     final SharedPreferences prefs = await _prefs;
     setState(() {
       pathDb = prefs.setString('${widget.type}_path', path).then((
-          bool success,
-          ) {
+        bool success,
+      ) {
         return path;
       });
     });
@@ -104,23 +101,23 @@ class _DatabaseSettingsWidgetState extends State<DatabaseSettingsWidget> {
                       // Header with database type - Use BlocBuilder to show current status
                       widget.type == 'kanji'
                           ? BlocBuilder<KanjiCubit, KanjiState>(
-                        builder: (context, state) {
-                          return DatabaseStatusItem(
-                            title: 'Kanji',
-                            status: databaseInterface.status,
-                            kanjiChar: '漢',
-                          );
-                        },
-                      )
+                              builder: (context, state) {
+                                return DatabaseStatusItem(
+                                  title: 'Kanji',
+                                  status: databaseInterface.status,
+                                  kanjiChar: '漢',
+                                );
+                              },
+                            )
                           : BlocBuilder<ExpressionCubit, ExpressionState>(
-                        builder: (context, state) {
-                          return DatabaseStatusItem(
-                            title: 'Expression',
-                            status: databaseInterface.status,
-                            kanjiChar: '言',
-                          );
-                        },
-                      ),
+                              builder: (context, state) {
+                                return DatabaseStatusItem(
+                                  title: 'Expression',
+                                  status: databaseInterface.status,
+                                  kanjiChar: '言',
+                                );
+                              },
+                            ),
 
                       const SizedBox(height: 16),
 
@@ -150,15 +147,15 @@ class _DatabaseSettingsWidgetState extends State<DatabaseSettingsWidget> {
                                   : snapshot.data!,
                               style: Theme.of(context).textTheme.bodyMedium
                                   ?.copyWith(
-                                color: snapshot.data!.isEmpty
-                                    ? Theme.of(context).colorScheme.error
-                                    : Theme.of(
-                                  context,
-                                ).colorScheme.onSurface,
-                                fontStyle: snapshot.data!.isEmpty
-                                    ? FontStyle.italic
-                                    : FontStyle.normal,
-                              ),
+                                    color: snapshot.data!.isEmpty
+                                        ? Theme.of(context).colorScheme.error
+                                        : Theme.of(
+                                            context,
+                                          ).colorScheme.onSurface,
+                                    fontStyle: snapshot.data!.isEmpty
+                                        ? FontStyle.italic
+                                        : FontStyle.normal,
+                                  ),
                             ),
                           ],
                         ),
@@ -175,69 +172,70 @@ class _DatabaseSettingsWidgetState extends State<DatabaseSettingsWidget> {
                             onPressed: downloadLog.isNotEmpty
                                 ? null
                                 : () async {
-                              Directory appDocDir =
-                              await getApplicationDocumentsDirectory();
-                              String appDocPath = appDocDir.path;
-                              String downloadTo =
-                                  "$appDocPath/${widget.type}.db";
-                              Dio()
-                                  .download(
-                                "https://github.com/odrevet/edict_database/releases/latest/download/${widget.type}.zip",
-                                downloadTo,
-                                onReceiveProgress: (received, total) {
-                                  if (total != -1) {
-                                    setState(
-                                          () => downloadLog =
-                                      ("Downloading... ${(received / total * 100).toStringAsFixed(0)}%"),
-                                    );
-                                  }
-                                },
-                              )
-                                  .then((_) async {
-                                String path =
-                                    "$appDocPath/${widget.type}.db";
+                                    Directory appDocDir =
+                                        await getApplicationDocumentsDirectory();
+                                    String appDocPath = appDocDir.path;
+                                    String downloadTo =
+                                        "$appDocPath/${widget.type}.db";
+                                    Dio()
+                                        .download(
+                                          "https://github.com/odrevet/edict_database/releases/latest/download/${widget.type}.zip",
+                                          downloadTo,
+                                          onReceiveProgress: (received, total) {
+                                            if (total != -1) {
+                                              setState(
+                                                () => downloadLog =
+                                                    ("Downloading... ${(received / total * 100).toStringAsFixed(0)}%"),
+                                              );
+                                            }
+                                          },
+                                        )
+                                        .then((_) async {
+                                          String path =
+                                              "$appDocPath/${widget.type}.db";
 
-                                // Extract zip
-                                try {
-                                  // Read the Zip file from disk.
-                                  final bytes = File(
-                                    downloadTo,
-                                  ).readAsBytesSync();
+                                          // Extract zip
+                                          try {
+                                            // Read the Zip file from disk.
+                                            final bytes = File(
+                                              downloadTo,
+                                            ).readAsBytesSync();
 
-                                  // Decode the Zip file
-                                  final archive = ZipDecoder()
-                                      .decodeBytes(bytes);
+                                            // Decode the Zip file
+                                            final archive = ZipDecoder()
+                                                .decodeBytes(bytes);
 
-                                  // Extract the contents of the Zip archive to disk.
-                                  for (final file in archive) {
-                                    final data =
-                                    file.content as List<int>;
-                                    File(
-                                      '$appDocPath/${widget.type}.db',
-                                    )
-                                      ..createSync(recursive: true)
-                                      ..writeAsBytesSync(data);
-                                  }
+                                            // Extract the contents of the Zip archive to disk.
+                                            for (final file in archive) {
+                                              final data =
+                                                  file.content as List<int>;
+                                              File(
+                                                  '$appDocPath/${widget.type}.db',
+                                                )
+                                                ..createSync(recursive: true)
+                                                ..writeAsBytesSync(data);
+                                            }
 
-                                  // Set DB Path and open the Database
-                                  await setPath(path);
-                                  setState(() {
-                                    downloadLog = "";
-                                  });
+                                            // Set DB Path and open the Database
+                                            await setPath(path);
+                                            setState(() {
+                                              downloadLog = "";
+                                            });
 
-                                  await databaseInterface.open(path);
-                                  await databaseInterface.setStatus();
+                                            await databaseInterface.open(path);
+                                            await databaseInterface.setStatus();
 
-                                  // Refresh the cubit state
-                                  _refreshDatabaseStatus(context);
-                                } catch (e) {
-                                  setState(
-                                        () => downloadLog =
-                                    "Error ${e.toString()}",
-                                  );
-                                }
-                              });
-                            },
+                                            // Refresh the cubit state
+                                            if (!context.mounted) return;
+                                            _refreshDatabaseStatus(context);
+                                          } catch (e) {
+                                            setState(
+                                              () => downloadLog =
+                                                  "Error ${e.toString()}",
+                                            );
+                                          }
+                                        });
+                                  },
                             icon: const Icon(Icons.download),
                             label: const Text('Download'),
                             style: ElevatedButton.styleFrom(
@@ -251,19 +249,20 @@ class _DatabaseSettingsWidgetState extends State<DatabaseSettingsWidget> {
                             onPressed: downloadLog.isNotEmpty
                                 ? null
                                 : () => _pickFile().then((result) async {
-                              if (result != null) {
-                                String path = result.first.path!;
-                                await setPath(path);
-                                await databaseInterface.open(path);
-                                setState(() {
-                                  downloadLog = '';
-                                });
-                                await databaseInterface.setStatus();
+                                    if (result != null) {
+                                      String path = result.first.path!;
+                                      await setPath(path);
+                                      await databaseInterface.open(path);
+                                      setState(() {
+                                        downloadLog = '';
+                                      });
+                                      await databaseInterface.setStatus();
+                                      if (!context.mounted) return;
 
-                                // Refresh the cubit state
-                                _refreshDatabaseStatus(context);
-                              }
-                            }),
+                                      // Refresh the cubit state
+                                      _refreshDatabaseStatus(context);
+                                    }
+                                  }),
                             icon: const Icon(Icons.folder_open),
                             label: const Text('Pick File'),
                             style: OutlinedButton.styleFrom(
@@ -277,17 +276,19 @@ class _DatabaseSettingsWidgetState extends State<DatabaseSettingsWidget> {
                             onPressed: snapshot.data == ''
                                 ? null
                                 : () async {
-                              String path = '';
-                              setPath(path);
-                              await databaseInterface.open(path);
-                              setState(() {
-                                downloadLog = '';
-                              });
-                              databaseInterface.status = DatabaseStatus.pathNotSet;
+                                    String path = '';
+                                    setPath(path);
+                                    await databaseInterface.open(path);
+                                    setState(() {
+                                      downloadLog = '';
+                                    });
+                                    databaseInterface.status =
+                                        DatabaseStatus.pathNotSet;
+                                    if (!context.mounted) return;
 
-                              // Refresh the cubit state
-                              _refreshDatabaseStatus(context);
-                            },
+                                    // Refresh the cubit state
+                                    _refreshDatabaseStatus(context);
+                                  },
                             icon: const Icon(Icons.clear),
                             label: const Text('Clear'),
                             style: TextButton.styleFrom(
@@ -313,8 +314,8 @@ class _DatabaseSettingsWidgetState extends State<DatabaseSettingsWidget> {
                             color: downloadLog.contains('Error')
                                 ? Theme.of(context).colorScheme.errorContainer
                                 : Theme.of(
-                              context,
-                            ).colorScheme.primaryContainer,
+                                    context,
+                                  ).colorScheme.primaryContainer,
                             borderRadius: BorderRadius.circular(8),
                           ),
                           child: Row(
@@ -346,15 +347,15 @@ class _DatabaseSettingsWidgetState extends State<DatabaseSettingsWidget> {
                                   downloadLog,
                                   style: Theme.of(context).textTheme.bodyMedium
                                       ?.copyWith(
-                                    color: downloadLog.contains('Error')
-                                        ? Theme.of(
-                                      context,
-                                    ).colorScheme.onErrorContainer
-                                        : Theme.of(
-                                      context,
-                                    ).colorScheme.onPrimaryContainer,
-                                    fontWeight: FontWeight.normal,
-                                  ),
+                                        color: downloadLog.contains('Error')
+                                            ? Theme.of(
+                                                context,
+                                              ).colorScheme.onErrorContainer
+                                            : Theme.of(
+                                                context,
+                                              ).colorScheme.onPrimaryContainer,
+                                        fontWeight: FontWeight.normal,
+                                      ),
                                 ),
                               ),
                             ],

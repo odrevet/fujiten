@@ -51,18 +51,23 @@ class _MainWidgetState extends State<MainWidget> {
   }
 
   void initDb() async {
+    if (!context.mounted) return;
+
+    final expressionCubit = context.read<ExpressionCubit>();
+    final kanjiCubit = context.read<KanjiCubit>();
+
     final prefs = await _prefs;
 
     // Initialize expression database
     String? expressionPath = prefs.getString("expression_path");
     if (expressionPath != null) {
-      context.read<ExpressionCubit>().openDatabase(expressionPath);
+      await expressionCubit.openDatabase(expressionPath);
     }
 
     // Initialize kanji database
     String? kanjiPath = prefs.getString("kanji_path");
     if (kanjiPath != null) {
-      context.read<KanjiCubit>().openDatabase(kanjiPath);
+      await kanjiCubit.openDatabase(kanjiPath);
     }
   }
 

@@ -14,18 +14,16 @@ abstract class KanjiState extends Equatable {
 
 class KanjiInitial extends KanjiState {}
 
-class KanjiReady extends KanjiState {}
-
 class KanjiLoading extends KanjiState {}
 
-class KanjiLoaded extends KanjiState {
+class KanjiReady extends KanjiState {
   final List<KanjiEntry> entries;
   final int totalCount;
   final String query;
   final int currentPage;
   final int? resultsPerPage;
 
-  const KanjiLoaded({
+  const KanjiReady({
     required this.entries,
     required this.totalCount,
     required this.query,

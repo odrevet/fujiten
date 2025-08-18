@@ -13,18 +13,16 @@ abstract class ExpressionState extends Equatable {
 
 class ExpressionInitial extends ExpressionState {}
 
-class ExpressionReady extends ExpressionState {}
-
 class ExpressionLoading extends ExpressionState {}
 
-class ExpressionLoaded extends ExpressionState {
+class ExpressionReady extends ExpressionState {
   final List<ExpressionEntry> entries;
   final int totalCount;
   final String query;
   final int currentPage;
   final int? resultsPerPage;
 
-  const ExpressionLoaded({
+  const ExpressionReady({
     required this.entries,
     required this.totalCount,
     required this.query,
