@@ -57,7 +57,5 @@ Run the search.<br><br>
 <big><b>Tips</b></big><br><br>
 
 • Search are performed with regular expression, quantifiers "{}" and meta-characters like "." and others can be used<br><br>
-
 • Use search by radical &lt; &gt; when searching for an expression which you do not know a kanji but recognize some of its radicals example: ＜化＞<br><br>
-
 • When no results, add ".*" at the beginning or/and the end of your search
