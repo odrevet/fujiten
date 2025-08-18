@@ -136,7 +136,7 @@ class DatabaseStatusDisplay extends StatelessWidget {
             BlocBuilder<ExpressionCubit, ExpressionState>(
               builder: (context, state) {
                 DatabaseStatus status;
-                if (state is ExpressionReady || state is ExpressionInitial) {
+                if (state is ExpressionLoaded || state is ExpressionReady) {
                   status = DatabaseStatus.ok;
                 } else {
                   status = DatabaseStatus.pathNotSet;
@@ -155,8 +155,10 @@ class DatabaseStatusDisplay extends StatelessWidget {
             // Kanji Database Status
             BlocBuilder<KanjiCubit, KanjiState>(
               builder: (context, state) {
+                print("-------------");
+                print(state.runtimeType);
                 DatabaseStatus status;
-                if (state is KanjiReady || state is KanjiInitial) {
+                if (state is KanjiLoaded || state is KanjiReady) {
                   status = DatabaseStatus.ok;
                 } else {
                   status = DatabaseStatus.pathNotSet;

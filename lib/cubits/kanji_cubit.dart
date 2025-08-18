@@ -24,7 +24,7 @@ class KanjiCubit extends Cubit<KanjiState> {
           ),
         );
       } else {
-        emit(KanjiInitial());
+        emit(KanjiReady());
       }
     } catch (e) {
       emit(KanjiError(message: 'Failed to open database: ${e.toString()}'));
@@ -62,7 +62,7 @@ class KanjiCubit extends Cubit<KanjiState> {
       final totalCount = await databaseInterface.count();
 
       emit(
-        KanjiReady(
+        KanjiLoaded(
           entries: entries,
           totalCount: totalCount,
           query: input,
@@ -191,7 +191,7 @@ class KanjiCubit extends Cubit<KanjiState> {
 
   Future<void> loadNextPage() async {
     final currentState = state;
-    if (currentState is KanjiReady) {
+    if (currentState is KanjiLoaded) {
       await search(
         currentState.query,
         resultsPerPage: currentState.resultsPerPage,
@@ -202,7 +202,7 @@ class KanjiCubit extends Cubit<KanjiState> {
 
   Future<void> loadPreviousPage() async {
     final currentState = state;
-    if (currentState is KanjiReady && currentState.currentPage > 0) {
+    if (currentState is KanjiLoaded && currentState.currentPage > 0) {
       await search(
         currentState.query,
         resultsPerPage: currentState.resultsPerPage,
@@ -213,7 +213,7 @@ class KanjiCubit extends Cubit<KanjiState> {
 
   Future<void> refreshSearch() async {
     final currentState = state;
-    if (currentState is KanjiReady) {
+    if (currentState is KanjiLoaded) {
       await search(
         currentState.query,
         resultsPerPage: currentState.resultsPerPage,
@@ -240,9 +240,11 @@ class KanjiCubit extends Cubit<KanjiState> {
     await databaseInterface.setStatus();
 
     if (databaseInterface.status == DatabaseStatus.ok) {
-      emit(KanjiInitial());
-    } else {
+      emit(KanjiReady());
+    }
+    else{
       emit(KanjiError(message: "ERROR"));
     }
   }
+
 }
