@@ -129,8 +129,7 @@ class ExpressionCubit extends Cubit<ExpressionState> {
 
     if (databaseInterface.status == DatabaseStatus.ok) {
       emit(ExpressionReady());
-    }
-    else{
+    } else {
       emit(ExpressionError(message: "ERROR"));
     }
   }

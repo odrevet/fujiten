@@ -33,7 +33,7 @@ class RadicalPageState extends State<RadicalPage> {
           .getRadicalsForSelection(widget.selectedRadicals)
           .then(
             (validRadicals) => setState(() => _validRadicals = validRadicals),
-      );
+          );
     }
     super.initState();
   }
@@ -72,27 +72,27 @@ class RadicalPageState extends State<RadicalPage> {
               radicals = radicals
                   .where(
                     (radical) => radical.meanings == null
-                    ? false
-                    : radical.meanings!.any(
-                      (meaning) => meaning.contains(filter),
-                ),
-              )
+                        ? false
+                        : radical.meanings!.any(
+                            (meaning) => meaning.contains(filter),
+                          ),
+                  )
                   .toList();
             } else if (kanaKit.isHiragana(filter)) {
               radicals = radicals
                   .where(
                     (radical) => radical.kun == null
-                    ? false
-                    : radical.kun!.any((kun) => kun.contains(filter)),
-              )
+                        ? false
+                        : radical.kun!.any((kun) => kun.contains(filter)),
+                  )
                   .toList();
             } else if (kanaKit.isKatakana(filter)) {
               radicals = radicals
                   .where(
                     (radical) => radical.on == null
-                    ? false
-                    : radical.on!.any((on) => on.contains(filter)),
-              )
+                        ? false
+                        : radical.on!.any((on) => on.contains(filter)),
+                  )
                   .toList();
             }
           }
@@ -108,23 +108,23 @@ class RadicalPageState extends State<RadicalPage> {
                       .getCharactersFromRadicals(widget.selectedRadicals),
                   builder:
                       (
-                      BuildContext context,
-                      AsyncSnapshot<List<String>> snapshot,
+                        BuildContext context,
+                        AsyncSnapshot<List<String>> snapshot,
                       ) {
-                    if (snapshot.hasData) {
-                      var buttonList = snapshot.data!
-                          .map<Widget>((kanji) => kanjiButton(kanji))
-                          .toList();
-                      return ListView(
-                        scrollDirection: Axis.horizontal,
-                        children: buttonList,
-                      );
-                    } else {
-                      return const Center(
-                        child: Text("Matched Kanji will appears here"),
-                      );
-                    }
-                  },
+                        if (snapshot.hasData) {
+                          var buttonList = snapshot.data!
+                              .map<Widget>((kanji) => kanjiButton(kanji))
+                              .toList();
+                          return ListView(
+                            scrollDirection: Axis.horizontal,
+                            children: buttonList,
+                          );
+                        } else {
+                          return const Center(
+                            child: Text("Matched Kanji will appears here"),
+                          );
+                        }
+                      },
                 ),
               ),
               Expanded(
@@ -212,9 +212,9 @@ class RadicalPageState extends State<RadicalPage> {
     radicals = radicals
         .where(
           (radical) =>
-      _validRadicals.isEmpty ||
-          _validRadicals.contains(radical.literal),
-    )
+              _validRadicals.isEmpty ||
+              _validRadicals.contains(radical.literal),
+        )
         .toList();
 
     return ListView.separated(
@@ -240,9 +240,9 @@ class RadicalPageState extends State<RadicalPage> {
     radicals = radicals
         .where(
           (radical) =>
-      _validRadicals.isEmpty ||
-          _validRadicals.contains(radical.literal),
-    )
+              _validRadicals.isEmpty ||
+              _validRadicals.contains(radical.literal),
+        )
         .toList();
 
     return GridView.builder(

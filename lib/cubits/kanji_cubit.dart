@@ -241,10 +241,8 @@ class KanjiCubit extends Cubit<KanjiState> {
 
     if (databaseInterface.status == DatabaseStatus.ok) {
       emit(KanjiReady());
-    }
-    else{
+    } else {
       emit(KanjiError(message: "ERROR"));
     }
   }
-
 }
