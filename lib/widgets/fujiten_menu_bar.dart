@@ -190,8 +190,10 @@ class _FujitenMenuBarState extends State<FujitenMenuBar> {
                   context,
                   MaterialPageRoute(builder: (context) => SettingsPage()),
                 ).then((_) {
-                  context.read<ExpressionCubit>().refreshDatabaseStatus();
-                  context.read<KanjiCubit>().refreshDatabaseStatus();
+                  if (context.mounted) {
+                    context.read<ExpressionCubit>().refreshDatabaseStatus();
+                    context.read<KanjiCubit>().refreshDatabaseStatus();
+                  }
                 }),
           ),
           Row(
