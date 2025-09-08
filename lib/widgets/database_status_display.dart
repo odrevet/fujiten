@@ -155,8 +155,6 @@ class DatabaseStatusDisplay extends StatelessWidget {
             // Kanji Database Status
             BlocBuilder<KanjiCubit, KanjiState>(
               builder: (context, state) {
-                print("-------------");
-                print(state.runtimeType);
                 DatabaseStatus status;
                 if (state is KanjiLoaded || state is KanjiReady) {
                   status = DatabaseStatus.ok;
