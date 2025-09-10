@@ -6,6 +6,7 @@ import '../cubits/expression_cubit.dart';
 import '../cubits/input_cubit.dart';
 import '../cubits/kanji_cubit.dart';
 import '../models/search.dart';
+import '../services/database_interface.dart';
 import '../string_utils.dart';
 import 'radical_page.dart';
 import 'settings/settings.dart';
@@ -83,7 +84,7 @@ class _FujitenMenuBarState extends State<FujitenMenuBar> {
             addStringInController(charKana);
             break;
           case 3:
-            addStringInController('.*');
+            addStringInController(DatabaseInterface.useRegexp ? '.*' : '%');
             break;
         }
         context.read<InputCubit>().setInput(widget.textEditingController!.text);
@@ -92,7 +93,7 @@ class _FujitenMenuBarState extends State<FujitenMenuBar> {
         const PopupMenuItem(value: 0, child: Text('<> Radicals')),
         const PopupMenuItem(value: 1, child: Text('$charKanji Kanji')),
         const PopupMenuItem(value: 2, child: Text('$charKana Kana')),
-        const PopupMenuItem(value: 3, child: Text('.* Anything')),
+        const PopupMenuItem(value: 3, child: Text('Anything')),
       ],
     );
 

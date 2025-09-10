@@ -74,9 +74,28 @@ Run the search.
 
 # Platforms
 
-The Android releases are build from the main branch using the sqflite package to access the databases. 
+When fhe dart flag FFI is true, sqflite_common_ffi will be used otherwise the sqflite package will
+be used
 
-The Linux releases are build from the sqlite3 branch using the sqlite3 package to access the databases. 
+* Using command line:
 
-Fujiten may be build for Windows, Mac and IOS but I cannot provide release for those OS at this moment. 
+```bash
+flutter run --dart-define=FFI=true
+```
 
+* Android studio configuration: 
+
+```xml
+<component name="ProjectRunConfigurationManager">
+<configuration default="false" name="ffi" type="FlutterRunConfigurationType" factoryName="Flutter">
+<option name="additionalArgs" value="--dart-define=FFI=true" />
+<option name="filePath" value="$PROJECT_DIR$/lib/main.dart" />
+<method v="2" />
+</configuration>
+</component>
+```
+
+# Regexp support
+
+Some build of sqlite do not include the regexp extension, in this case matches must be made using 
+the sql LIKE operator.  
