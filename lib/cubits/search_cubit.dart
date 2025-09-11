@@ -20,17 +20,16 @@ class SearchCubit extends Cubit<Search> {
     emit(state.copyWith(page: ++state.page, isLoadingNextPage: true));
   }
 
-  void runSearch(DatabaseInterface databaseInterface, String formattedInput) {
+  void runSearch(
+    DatabaseInterface databaseInterface,
+    String formattedInput,
+    int resultsPerPage,
+    bool useRegexp,
+  ) {
     emit(state.copyWith(isLoading: true));
 
     databaseInterface
-        .search(
-          formattedInput,
-          state.searchType == SearchType.kanji
-              ? state.resultsPerPageKanji
-              : state.resultsPerPageExpression,
-          state.page,
-        )
+        .search(formattedInput, resultsPerPage, state.page, useRegexp)
         .then((searchResults) {
           emit(
             state.copyWith(
@@ -42,12 +41,4 @@ class SearchCubit extends Cubit<Search> {
           );
         });
   }
-
-  void toggleSearchType() => emit(
-    state.copyWith(
-      searchType: state.searchType == SearchType.kanji
-          ? SearchType.expression
-          : SearchType.kanji,
-    ),
-  );
 }

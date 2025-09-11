@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:fujiten/widgets/settings/search_options_widget.dart';
 import 'package:fujiten/widgets/toggle_search_type_button.dart';
 
 import '../cubits/expression_cubit.dart';
 import '../cubits/input_cubit.dart';
 import '../cubits/kanji_cubit.dart';
+import '../cubits/search_options_cubit.dart';
 import '../models/search.dart';
+import '../models/states/search_options_state.dart';
 import '../string_utils.dart';
 import 'radical_page.dart';
 import 'settings/settings.dart';
@@ -69,67 +72,72 @@ class _FujitenMenuBarState extends State<FujitenMenuBar> {
 
   @override
   Widget build(BuildContext context) {
-    var popupMenuButtonInsert = PopupMenuButton(
-      icon: const Icon(Icons.input),
-      onSelected: (dynamic result) {
-        switch (result) {
-          case 0:
-            displayRadicalWidget(context);
-            break;
-          case 1:
-            addStringInController(charKanji);
-            break;
-          case 2:
-            addStringInController(charKana);
-            break;
-          case 3:
-            addStringInController('.*');
-            break;
-        }
-        context.read<InputCubit>().setInput(widget.textEditingController!.text);
-      },
-      itemBuilder: (context) => [
-        const PopupMenuItem(value: 0, child: Text('<> Radicals')),
-        const PopupMenuItem(value: 1, child: Text('$charKanji Kanji')),
-        const PopupMenuItem(value: 2, child: Text('$charKana Kana')),
-        const PopupMenuItem(value: 3, child: Text('.* Anything')),
-      ],
-    );
+    return BlocBuilder<SearchOptionsCubit, SearchOptionsState>(
+      builder: (context, searchOptionsState) {
+        var popupMenuButtonInsert = PopupMenuButton(
+          icon: const Icon(Icons.input),
+          onSelected: (dynamic result) {
+            switch (result) {
+              case 0:
+                displayRadicalWidget(context);
+                break;
+              case 1:
+                addStringInController(charKanji);
+                break;
+              case 2:
+                addStringInController(charKana);
+                break;
+              case 3:
+                addStringInController(searchOptionsState.useRegexp ? '.*' : '%');
+                break;
+            }
+            context.read<InputCubit>().setInput(widget.textEditingController!.text);
+          },
+          itemBuilder: (context) => [
+            const PopupMenuItem(value: 0, child: Text('<> Radicals')),
+            const PopupMenuItem(value: 1, child: Text('$charKanji Kanji')),
+            const PopupMenuItem(value: 2, child: Text('$charKana Kana')),
+            PopupMenuItem(
+              value: 3,
+              child: Text('Anything ${searchOptionsState.useRegexp ? "(.*)" : "(%)"}'),
+            ),
+          ],
+        );
 
-    var popupMenuButtonInputs = PopupMenuButton(
-      icon: const Icon(Icons.list),
-      onSelected: (dynamic result) {
-        if (result == "add") {
-          context.read<InputCubit>().addInput();
-          int searchIndex = context.read<InputCubit>().state.inputs.length - 1;
-          context.read<InputCubit>().setSearchIndex(searchIndex);
-          widget.textEditingController!.text = context
-              .read<InputCubit>()
-              .state
-              .inputs[searchIndex];
-        } else if (result == "remove") {
-          context.read<InputCubit>().removeInput();
-          widget.textEditingController!.text = context
-              .read<InputCubit>()
-              .state
-              .inputs[context.read<InputCubit>().state.searchIndex];
-        } else if (result == "clear") {
-          widget.textEditingController!.clear();
-          context.read<InputCubit>().state.inputs[context
+        var popupMenuButtonInputs = PopupMenuButton(
+          icon: const Icon(Icons.list),
+          onSelected: (dynamic result) {
+            if (result == "add") {
+              context.read<InputCubit>().addInput();
+              int searchIndex = context.read<InputCubit>().state.inputs.length - 1;
+              context.read<InputCubit>().setSearchIndex(searchIndex);
+              widget.textEditingController!.text = context
+                  .read<InputCubit>()
+                  .state
+                  .inputs[searchIndex];
+            } else if (result == "remove") {
+              context.read<InputCubit>().removeInput();
+              widget.textEditingController!.text = context
+                  .read<InputCubit>()
+                  .state
+                  .inputs[context.read<InputCubit>().state.searchIndex];
+            } else if (result == "clear") {
+              widget.textEditingController!.clear();
+              context.read<InputCubit>().state.inputs[context
                   .read<InputCubit>()
                   .state
                   .searchIndex] =
               "";
-          widget.focusNode.requestFocus();
-        } else {
-          context.read<InputCubit>().setSearchIndex(result);
-          widget.textEditingController!.text = context
-              .read<InputCubit>()
-              .state
-              .inputs[result];
-        }
-      },
-      itemBuilder: (itemBuilderContext) =>
+              widget.focusNode.requestFocus();
+            } else {
+              context.read<InputCubit>().setSearchIndex(result);
+              widget.textEditingController!.text = context
+                  .read<InputCubit>()
+                  .state
+                  .inputs[result];
+            }
+          },
+          itemBuilder: (itemBuilderContext) =>
           context
               .read<InputCubit>()
               .state
@@ -138,16 +146,16 @@ class _FujitenMenuBarState extends State<FujitenMenuBar> {
               .entries
               .map<PopupMenuEntry<dynamic>>(
                 (entry) => PopupMenuItem(
-                  value: entry.key,
-                  child: ListTile(
-                    leading: Text(entry.key.toString()),
-                    title: Text(entry.value),
-                    selected:
-                        entry.key ==
-                        context.read<InputCubit>().state.searchIndex,
-                  ),
-                ),
-              )
+              value: entry.key,
+              child: ListTile(
+                leading: Text(entry.key.toString()),
+                title: Text(entry.value),
+                selected:
+                entry.key ==
+                    context.read<InputCubit>().state.searchIndex,
+              ),
+            ),
+          )
               .toList()
             ..add(
               const PopupMenuItem(
@@ -177,36 +185,59 @@ class _FujitenMenuBarState extends State<FujitenMenuBar> {
                 ),
               ),
             ),
-    );
+        );
 
-    return AppBar(
-      title: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          IconButton(
-            icon: const Icon(Icons.menu),
-            onPressed: () =>
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => SettingsPage()),
-                ).then((_) {
-                  context.read<ExpressionCubit>().refreshDatabaseStatus();
-                  context.read<KanjiCubit>().refreshDatabaseStatus();
-                }),
-          ),
-          Row(
-            children: <Widget>[
-              popupMenuButtonInsert,
-              IconButton(icon: const Icon(Icons.translate), onPressed: convert),
-              const ToggleSearchTypeButton(),
-              popupMenuButtonInputs,
+        return AppBar(
+          title: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              IconButton(
+                icon: const Icon(Icons.menu),
+                onPressed: () =>
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => SettingsPage()),
+                    ).then((_) {
+                      if (context.mounted) {
+                        context.read<ExpressionCubit>().refreshDatabaseStatus();
+                        context.read<KanjiCubit>().refreshDatabaseStatus();
+                      }
+                    }),
+              ),
+              Row(
+                children: <Widget>[
+                  popupMenuButtonInsert,
+                  IconButton(icon: const Icon(Icons.translate), onPressed: convert),
+                  //const ToggleSearchTypeButton(),
+                  popupMenuButtonInputs,
+                  // Optional: Add search options button
+                  IconButton(
+                    icon: const Icon(Icons.tune),
+                    tooltip: 'Search Options',
+                    onPressed: () {
+                      showDialog(
+                        context: context,
+                        builder: (context) => AlertDialog(
+                          title: const Text('Search Options'),
+                          content: const CompactSearchOptionsWidget(),
+                          actions: [
+                            TextButton(
+                              onPressed: () => Navigator.of(context).pop(),
+                              child: const Text('Close'),
+                            ),
+                          ],
+                        ),
+                      );
+                    },
+                  ),
+                ],
+              ),
             ],
           ),
-        ],
-      ),
+        );
+      },
     );
   }
-
   Future<void> displayRadicalWidget(BuildContext context) async {
     //send the radicals inside < > to the radical page
     var exp = RegExp(r'<(.*?)>');

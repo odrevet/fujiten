@@ -3,8 +3,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../cubits/expression_cubit.dart';
 import '../cubits/kanji_cubit.dart';
-import '../models/db_state_expression.dart';
-import '../models/db_state_kanji.dart';
+import '../models/states/db_state_expression.dart';
+import '../models/states/db_state_kanji.dart';
 import '../services/database_interface.dart';
 
 class DatabaseStatusItem extends StatelessWidget {
@@ -155,8 +155,6 @@ class DatabaseStatusDisplay extends StatelessWidget {
             // Kanji Database Status
             BlocBuilder<KanjiCubit, KanjiState>(
               builder: (context, state) {
-                print("-------------");
-                print(state.runtimeType);
                 DatabaseStatus status;
                 if (state is KanjiLoaded || state is KanjiReady) {
                   status = DatabaseStatus.ok;

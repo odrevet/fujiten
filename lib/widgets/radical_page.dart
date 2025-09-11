@@ -150,14 +150,6 @@ class RadicalPageState extends State<RadicalPage> {
                         }),
                       ),
                     ),
-                    /*IconButton(
-                        icon: const Icon(Icons.clear),
-                        onPressed: () {
-                          filterController.text = "";
-                          setState(() {
-                            filter = "";
-                          });
-                        }),*/
                   ],
                 ),
               ),
@@ -235,39 +227,67 @@ class RadicalPageState extends State<RadicalPage> {
     );
   }
 
-  Widget radicalGridView(List<Kanji> radicals) => GridView.builder(
-    gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-      crossAxisCount: 5,
-    ),
-    itemCount: radicals.length,
-    itemBuilder: (BuildContext context, int index) {
-      if (index == 0 ||
-          radicals[index].strokeCount != radicals[index - 1].strokeCount) {
-        return Stack(
-          children: <Widget>[
-            Positioned.fill(child: radicalButton(radicals[index])),
-            Stack(
-              children: [
-                Icon(
-                  Icons.bookmark,
-                  color: Theme.of(context).brightness == Brightness.light
-                      ? Colors.white
-                      : Colors.black,
-                ),
-                Positioned(
-                  top: 3,
-                  left: 5,
-                  child: Text(radicals[index].strokeCount.toString()),
-                ),
-              ],
-            ),
-          ],
+  Widget radicalGridView(List<Kanji> radicals) {
+    // Filter out invalid radicals before building the grid
+    radicals = radicals
+        .where(
+          (radical) =>
+              _validRadicals.isEmpty ||
+              _validRadicals.contains(radical.literal),
+        )
+        .toList();
+
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        // Calculate crossAxisCount based on screen width
+        int crossAxisCount;
+        if (constraints.maxWidth < 600) {
+          crossAxisCount = 5; // Mobile
+        } else if (constraints.maxWidth < 900) {
+          crossAxisCount = 10; // Tablet
+        } else if (constraints.maxWidth < 1200) {
+          crossAxisCount = 15; // Small desktop
+        } else {
+          crossAxisCount = 20; // Large desktop
+        }
+
+        return GridView.builder(
+          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: crossAxisCount,
+          ),
+          itemCount: radicals.length,
+          itemBuilder: (BuildContext context, int index) {
+            if (index == 0 ||
+                radicals[index].strokeCount !=
+                    radicals[index - 1].strokeCount) {
+              return Stack(
+                children: <Widget>[
+                  Positioned.fill(child: radicalButton(radicals[index])),
+                  Stack(
+                    children: [
+                      Icon(
+                        Icons.bookmark,
+                        color: Theme.of(context).brightness == Brightness.light
+                            ? Colors.white
+                            : Colors.black,
+                      ),
+                      Positioned(
+                        top: 3,
+                        left: 5,
+                        child: Text(radicals[index].strokeCount.toString()),
+                      ),
+                    ],
+                  ),
+                ],
+              );
+            } else {
+              return radicalButton(radicals[index]);
+            }
+          },
         );
-      } else {
-        return radicalButton(radicals[index]);
-      }
-    },
-  );
+      },
+    );
+  }
 
   Future<void> updateSelection() => context
       .read<KanjiCubit>()
@@ -286,16 +306,7 @@ class RadicalPageState extends State<RadicalPage> {
   }
 
   Widget radicalButton(Kanji radical) => TextButton(
-    style: ButtonStyle(
-      backgroundColor: WidgetStateProperty.resolveWith<Color?>(
-        (Set<WidgetState> states) =>
-            states.contains(WidgetState.disabled) ? Colors.grey : null,
-      ),
-    ),
-    onPressed:
-        _validRadicals.isEmpty || _validRadicals.contains(radical.literal)
-        ? () => onRadicalButtonPress(radical.literal)
-        : null,
+    onPressed: () => onRadicalButtonPress(radical.literal),
     child: Text(
       radical.literal,
       style: TextStyle(

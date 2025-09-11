@@ -6,48 +6,53 @@ import '../string_utils.dart';
 import 'database_interface.dart';
 
 class DatabaseInterfaceKanji extends DatabaseInterface {
-  DatabaseInterfaceKanji({super.database});
+
+  DatabaseInterfaceKanji({
+    super.database
+  });
 
   @override
   Future<List<KanjiEntry>> search(
-    String input, [
-    int? resultsPerPage,
-    int currentPage = 0,
-  ]) async {
+      String input, [
+        int? resultsPerPage,
+        int currentPage = 0,
+        bool useRegexp = false
+      ]) async {
     String where;
+    String searchOperator = useRegexp ? 'REGEXP' : 'LIKE';
 
     Iterable<RegExpMatch> matchesKanji = RegExp(regexKanji).allMatches(input);
 
     if (matchesKanji.isNotEmpty) {
       where =
-          "WHERE character.id IN (${matchesKanji.map((m) => "'${m.group(0)}'").join(',')})";
+      "WHERE character.id IN (${matchesKanji.map((m) => "'${m.group(0)}'").join(',')})";
     } else if (kanaKit.isHiragana(input)) {
       where =
-          '''WHERE character.id IN (SELECT character.id
+      '''WHERE character.id IN (SELECT character.id
         FROM character 
         INNER JOIN kun_yomi ON kun_yomi.id_character = character.id 
         WHERE REPLACE(REPLACE(kun_yomi.reading,'-',''),'.','') = '$input'
         GROUP BY character.id)''';
     } else if (kanaKit.isKatakana(input)) {
       where =
-          '''WHERE character.id IN (SELECT character.id
+      '''WHERE character.id IN (SELECT character.id
         FROM character 
         INNER JOIN on_yomi ON on_yomi.id_character = character.id 
         WHERE on_yomi.reading = '$input'
         GROUP BY character.id)''';
     } else if (kanaKit.isRomaji(input)) {
       where =
-          '''WHERE character.id IN (SELECT character.id
+      '''WHERE character.id IN (SELECT character.id
         FROM character 
         LEFT JOIN meaning ON meaning.id_character = character.id
-        WHERE meaning.content REGEXP '$input'
+        WHERE meaning.content $searchOperator '$input'
         GROUP BY character.id)''';
     } else {
-      where = "WHERE character.id REGEXP '$input'";
+      where = "WHERE character.id $searchOperator '$input'";
     }
 
     String sql =
-        '''SELECT character.*,
+    '''SELECT character.*,
         GROUP_CONCAT(DISTINCT character_radical.id_radical) as radicals,
         GROUP_CONCAT(DISTINCT on_yomi.reading) AS on_reading,
         GROUP_CONCAT(DISTINCT kun_yomi.reading) AS kun_reading,
@@ -86,7 +91,7 @@ class DatabaseInterfaceKanji extends DatabaseInterface {
 
   Future<List<Kanji>> getCharactersFromLiterals(List<String> characters) async {
     String sql =
-        '''SELECT character.*,
+    '''SELECT character.*,
         GROUP_CONCAT(DISTINCT character_radical.id_radical) as radicals,
         GROUP_CONCAT(DISTINCT on_yomi.reading) AS on_reading,
         GROUP_CONCAT(DISTINCT kun_yomi.reading) AS kun_reading,
@@ -110,7 +115,7 @@ class DatabaseInterfaceKanji extends DatabaseInterface {
     String sql = ' SELECT id FROM character WHERE id IN (';
     radicals.asMap().forEach((i, radical) {
       sql +=
-          "SELECT id_character FROM character_radical WHERE id_radical = '$radical'";
+      "SELECT id_character FROM character_radical WHERE id_radical = '$radical'";
       sql += i < radicals.length - 1
           ? ' INTERSECT '
           : ') ORDER BY stroke_count;';
@@ -154,13 +159,13 @@ class DatabaseInterfaceKanji extends DatabaseInterface {
   }
 
   Future<List<String?>> getRadicalsForSelection(
-    List<String> selectedRadicals,
-  ) async {
+      List<String> selectedRadicals,
+      ) async {
     String sql =
         'SELECT DISTINCT id_radical FROM character_radical WHERE id_character IN (';
     selectedRadicals.asMap().forEach((i, radical) {
       sql +=
-          "SELECT DISTINCT id_character FROM character_radical WHERE id_radical = '$radical'";
+      "SELECT DISTINCT id_character FROM character_radical WHERE id_radical = '$radical'";
       if (i < selectedRadicals.length - 1) sql += ' INTERSECT ';
     });
     sql += ')';

@@ -1,6 +1,7 @@
+import 'package:fujiten/models/states/search_options_state.dart';
+
 import 'entry.dart';
 
-enum SearchType { expression, kanji }
 
 class Search {
   int totalResult;
@@ -20,7 +21,6 @@ class Search {
     this.resultsPerPageKanji,
     this.resultsPerPageExpression = 10,
     this.searchResults = const [],
-    this.searchType,
   });
 
   Search copyWith({
@@ -31,7 +31,6 @@ class Search {
     int? resultsPerPageKanji,
     int? resultsPerPageExpression,
     int? totalResult,
-    SearchType? searchType,
   }) {
     return Search(
       isLoading: isLoading ?? this.isLoading,
@@ -41,7 +40,6 @@ class Search {
       resultsPerPageKanji: resultsPerPageKanji ?? this.resultsPerPageKanji,
       resultsPerPageExpression:
           resultsPerPageExpression ?? this.resultsPerPageExpression,
-      searchType: searchType ?? this.searchType,
       searchResults: searchResults ?? this.searchResults,
     );
   }

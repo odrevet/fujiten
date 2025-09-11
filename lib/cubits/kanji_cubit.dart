@@ -1,7 +1,7 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:fujiten/services/database_interface.dart';
 
-import '../models/db_state_kanji.dart';
+import '../models/states/db_state_kanji.dart';
 import '../services/database_interface_kanji.dart';
 
 class KanjiCubit extends Cubit<KanjiState> {
@@ -32,10 +32,11 @@ class KanjiCubit extends Cubit<KanjiState> {
   }
 
   Future<void> search(
-    String input, {
-    int? resultsPerPage = 10,
-    int currentPage = 0,
-  }) async {
+    String input,
+    int resultsPerPage,
+    int currentPage,
+    bool useRegexp,
+  ) async {
     if (databaseInterface.status != DatabaseStatus.ok) {
       emit(
         KanjiDatabaseNotReady(
@@ -189,39 +190,6 @@ class KanjiCubit extends Cubit<KanjiState> {
     await loadRadicals();
   }
 
-  Future<void> loadNextPage() async {
-    final currentState = state;
-    if (currentState is KanjiLoaded) {
-      await search(
-        currentState.query,
-        resultsPerPage: currentState.resultsPerPage,
-        currentPage: currentState.currentPage + 1,
-      );
-    }
-  }
-
-  Future<void> loadPreviousPage() async {
-    final currentState = state;
-    if (currentState is KanjiLoaded && currentState.currentPage > 0) {
-      await search(
-        currentState.query,
-        resultsPerPage: currentState.resultsPerPage,
-        currentPage: currentState.currentPage - 1,
-      );
-    }
-  }
-
-  Future<void> refreshSearch() async {
-    final currentState = state;
-    if (currentState is KanjiLoaded) {
-      await search(
-        currentState.query,
-        resultsPerPage: currentState.resultsPerPage,
-        currentPage: currentState.currentPage,
-      );
-    }
-  }
-
   void clearSearch() {
     emit(KanjiInitial());
   }
@@ -241,10 +209,8 @@ class KanjiCubit extends Cubit<KanjiState> {
 
     if (databaseInterface.status == DatabaseStatus.ok) {
       emit(KanjiReady());
-    }
-    else{
+    } else {
       emit(KanjiError(message: "ERROR"));
     }
   }
-
 }

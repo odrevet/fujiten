@@ -5,6 +5,7 @@ import 'package:fujiten/cubits/search_cubit.dart';
 import 'cubits/expression_cubit.dart';
 import 'cubits/input_cubit.dart';
 import 'cubits/kanji_cubit.dart';
+import 'cubits/search_options_cubit.dart';
 import 'cubits/theme_cubit.dart';
 import 'services/database_interface_expression.dart';
 import 'services/database_interface_kanji.dart';
@@ -27,6 +28,7 @@ class App extends StatelessWidget {
           providers: [
             BlocProvider(create: (_) => InputCubit()),
             BlocProvider(create: (_) => SearchCubit()),
+            BlocProvider(create: (_) => SearchOptionsCubit()),
             BlocProvider(
               create: (_) => ExpressionCubit(DatabaseInterfaceExpression()),
             ),

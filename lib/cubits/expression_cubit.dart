@@ -1,7 +1,7 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:fujiten/services/database_interface.dart';
 
-import '../models/db_state_expression.dart';
+import '../models/states/db_state_expression.dart';
 import '../services/database_interface_expression.dart';
 
 class ExpressionCubit extends Cubit<ExpressionState> {
@@ -34,10 +34,11 @@ class ExpressionCubit extends Cubit<ExpressionState> {
   }
 
   Future<void> search(
-    String input, {
-    int? resultsPerPage = 10,
-    int currentPage = 0,
-  }) async {
+    String input,
+    int resultsPerPage,
+    int currentPage,
+    bool useRegexp,
+  ) async {
     if (databaseInterface.status != DatabaseStatus.ok) {
       emit(
         ExpressionDatabaseNotReady(
@@ -60,6 +61,7 @@ class ExpressionCubit extends Cubit<ExpressionState> {
         input,
         resultsPerPage,
         currentPage,
+        useRegexp,
       );
       final totalCount = await databaseInterface.count();
 
@@ -77,38 +79,6 @@ class ExpressionCubit extends Cubit<ExpressionState> {
     }
   }
 
-  Future<void> loadNextPage() async {
-    final currentState = state;
-    if (currentState is ExpressionLoaded) {
-      await search(
-        currentState.query,
-        resultsPerPage: currentState.resultsPerPage,
-        currentPage: currentState.currentPage + 1,
-      );
-    }
-  }
-
-  Future<void> loadPreviousPage() async {
-    final currentState = state;
-    if (currentState is ExpressionLoaded && currentState.currentPage > 0) {
-      await search(
-        currentState.query,
-        resultsPerPage: currentState.resultsPerPage,
-        currentPage: currentState.currentPage - 1,
-      );
-    }
-  }
-
-  Future<void> refreshSearch() async {
-    final currentState = state;
-    if (currentState is ExpressionLoaded) {
-      await search(
-        currentState.query,
-        resultsPerPage: currentState.resultsPerPage,
-        currentPage: currentState.currentPage,
-      );
-    }
-  }
 
   void clearSearch() {
     emit(ExpressionInitial());
@@ -129,8 +99,7 @@ class ExpressionCubit extends Cubit<ExpressionState> {
 
     if (databaseInterface.status == DatabaseStatus.ok) {
       emit(ExpressionReady());
-    }
-    else{
+    } else {
       emit(ExpressionError(message: "ERROR"));
     }
   }

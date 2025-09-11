@@ -1,8 +1,12 @@
 import 'package:sqflite/sqflite.dart';
 
+import 'package:sqflite_common/sqlite_api.dart';
+import 'package:sqflite_common_ffi/sqflite_ffi.dart';
+
 import '../models/entry.dart';
 
 enum DatabaseStatus { ok, pathNotSet, noResults }
+
 
 abstract class DatabaseInterface {
   Database? database;
@@ -13,8 +17,13 @@ abstract class DatabaseInterface {
 
   Future<void> open(String path) async {
     try {
-      database = await openDatabase(path, readOnly: true);
+      if (const bool.fromEnvironment('FFI', defaultValue: true)) {
+        database = await databaseFactoryFfi.openDatabase(path);
+      } else {
+        database = await openDatabase(path, readOnly: true);
+      }
     } catch (e) {
+      print(e.toString());
       database = null;
       status = DatabaseStatus.noResults;
       log = e.toString();
@@ -26,10 +35,11 @@ abstract class DatabaseInterface {
   }
 
   Future<List<Entry>> search(
-    String input, [
-    int? resultsPerPage = 10,
-    int currentPage = 0,
-  ]);
+    String input,
+    int resultsPerPage,
+    int currentPage,
+    bool useRegexp
+  );
 
   Future<int> count();
 

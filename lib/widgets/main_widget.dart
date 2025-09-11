@@ -7,9 +7,11 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../cubits/expression_cubit.dart';
 import '../cubits/input_cubit.dart';
 import '../cubits/kanji_cubit.dart';
+import '../cubits/search_options_cubit.dart';
 import '../cubits/theme_cubit.dart';
-import '../models/db_state_expression.dart';
-import '../models/db_state_kanji.dart';
+import '../models/states/db_state_expression.dart';
+import '../models/states/db_state_kanji.dart';
+import '../models/states/search_options_state.dart';
 import '../string_utils.dart';
 import 'fujiten_menu_bar.dart';
 import 'results_widget.dart';
@@ -38,6 +40,7 @@ class _MainWidgetState extends State<MainWidget> {
 
     context.read<InputCubit>().addInput();
     initDb();
+    loadSearchOptions();
 
     _prefs.then((SharedPreferences prefs) {
       if (!mounted) return;
@@ -66,9 +69,40 @@ class _MainWidgetState extends State<MainWidget> {
     }
   }
 
+  void loadSearchOptions() async {
+    final prefs = await _prefs;
+    if (!mounted) return;
+
+    // Load search options from SharedPreferences
+    final useRegexp = prefs.getBool("search_use_regexp") ?? false;
+    final resultsPerPageKanji = prefs.getInt("search_results_per_page_kanji") ?? 20;
+    final resultsPerPageExpression = prefs.getInt("search_results_per_page_expression") ?? 20;
+    final searchTypeIndex = prefs.getInt("search_type") ?? 0;
+    final searchType = searchTypeIndex == 0 ? SearchType.expression : SearchType.kanji;
+
+    context.read<SearchOptionsCubit>().updateSearchOptions(
+      useRegexp: useRegexp,
+      resultsPerPageKanji: resultsPerPageKanji,
+      resultsPerPageExpression: resultsPerPageExpression,
+      searchType: searchType,
+    );
+  }
+
+  void saveSearchOptions(SearchOptionsState searchOptions) async {
+    final prefs = await _prefs;
+
+    // Save search options to SharedPreferences
+    await prefs.setBool("search_use_regexp", searchOptions.useRegexp);
+    await prefs.setInt("search_results_per_page_kanji", searchOptions.resultsPerPageKanji);
+    await prefs.setInt("search_results_per_page_expression", searchOptions.resultsPerPageExpression);
+    await prefs.setInt("search_type", searchOptions.searchType.index);
+  }
+
   void onSearch() async {
     if (widget._textEditingController.text != "") {
+      final searchOptions = context.read<SearchOptionsCubit>().state;
       final kanjiCubit = context.read<KanjiCubit>();
+
       final formattedInput = await formatInput(
         widget._textEditingController.text,
         kanjiCubit.databaseInterface,
@@ -80,12 +114,23 @@ class _MainWidgetState extends State<MainWidget> {
       context.read<InputCubit>().setFormattedInput(formattedInput);
       context.read<SearchCubit>().reset();
 
-      final searchType = context.read<SearchCubit>().state.searchType;
+      // Use search type from SearchOptionsCubit
+      final searchType = searchOptions.searchType;
       final databaseInterface = searchType == SearchType.kanji
           ? context.read<KanjiCubit>().databaseInterface
           : context.read<ExpressionCubit>().databaseInterface;
 
-      context.read<SearchCubit>().runSearch(databaseInterface, formattedInput);
+      // Use results per page from SearchOptionsCubit
+      final resultsPerPage = searchType == SearchType.kanji
+          ? searchOptions.resultsPerPageKanji
+          : searchOptions.resultsPerPageExpression;
+
+      context.read<SearchCubit>().runSearch(
+        databaseInterface,
+        formattedInput,
+        resultsPerPage,
+        searchOptions.useRegexp,
+      );
     }
 
     focusNode.unfocus();
@@ -98,16 +143,25 @@ class _MainWidgetState extends State<MainWidget> {
   }
 
   void onEndReached() {
-    var searchType = context.read<SearchCubit>().state.searchType;
+    final searchOptions = context.read<SearchOptionsCubit>().state;
+    final searchType = searchOptions.searchType;
+
     context.read<SearchCubit>().nextPage();
 
     final databaseInterface = searchType == SearchType.kanji
         ? context.read<KanjiCubit>().databaseInterface
         : context.read<ExpressionCubit>().databaseInterface;
 
+    // Use results per page from SearchOptionsCubit
+    final resultsPerPage = searchType == SearchType.kanji
+        ? searchOptions.resultsPerPageKanji
+        : searchOptions.resultsPerPageExpression;
+
     context.read<SearchCubit>().runSearch(
       databaseInterface,
       context.read<InputCubit>().state.formattedInput,
+      resultsPerPage,
+      searchOptions.useRegexp,
     );
   }
 
@@ -119,49 +173,50 @@ class _MainWidgetState extends State<MainWidget> {
           builder: (context, kanjiState) {
             return BlocBuilder<SearchCubit, Search>(
               builder: (context, search) {
-                //if (!_isDbInitializedExpression || !_isDbInitializedKanji) {
-                //  return DatasetPage(refreshDbStatus: () {}); //WIP
-                //} else {
-                return Scaffold(
-                  key: _scaffoldKey,
-                  floatingActionButton:
-                      context.read<SearchCubit>().state.isLoadingNextPage
-                      ? const FloatingActionButton(
-                          onPressed: null,
-                          backgroundColor: Colors.white,
-                          mini: true,
-                          child: SizedBox(
-                            height: 10,
-                            width: 10,
-                            child: CircularProgressIndicator(),
-                          ),
-                        )
-                      : null,
-                  appBar: PreferredSize(
-                    preferredSize: const Size.fromHeight(56),
-                    child: Builder(
-                      builder: (context) => FujitenMenuBar(
-                        search: search,
-                        textEditingController: widget._textEditingController,
-                        onSearch: onSearch,
-                        focusNode: focusNode,
-                        insertPosition: cursorPosition,
+                return BlocListener<SearchOptionsCubit, SearchOptionsState>(
+                  listener: (context, searchOptionsState) {
+                    saveSearchOptions(searchOptionsState);
+                  },
+                  child: Scaffold(
+                    key: _scaffoldKey,
+                    floatingActionButton:
+                    context.read<SearchCubit>().state.isLoadingNextPage
+                        ? const FloatingActionButton(
+                      onPressed: null,
+                      backgroundColor: Colors.white,
+                      mini: true,
+                      child: SizedBox(
+                        height: 10,
+                        width: 10,
+                        child: CircularProgressIndicator(),
+                      ),
+                    )
+                        : null,
+                    appBar: PreferredSize(
+                      preferredSize: const Size.fromHeight(56),
+                      child: Builder(
+                        builder: (context) => FujitenMenuBar(
+                          search: search,
+                          textEditingController: widget._textEditingController,
+                          onSearch: onSearch,
+                          focusNode: focusNode,
+                          insertPosition: cursorPosition,
+                        ),
                       ),
                     ),
-                  ),
-                  body: Column(
-                    children: <Widget>[
-                      SearchInput(
-                        widget._textEditingController,
-                        onSearch,
-                        onFocusChanged,
-                        focusNode,
-                      ),
-                      ResultsWidget(onEndReached),
-                    ],
+                    body: Column(
+                      children: <Widget>[
+                        SearchInput(
+                          widget._textEditingController,
+                          onSearch,
+                          onFocusChanged,
+                          focusNode,
+                        ),
+                        ResultsWidget(onEndReached),
+                      ],
+                    ),
                   ),
                 );
-                //}
               },
             );
           },

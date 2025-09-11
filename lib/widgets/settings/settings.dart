@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:fujiten/widgets/settings/search_options_widget.dart';
 import 'package:fujiten/widgets/settings/theme_settings.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 
@@ -19,6 +20,14 @@ class SettingsPage extends StatelessWidget {
             onTap: () => Navigator.push(
               context,
               MaterialPageRoute(builder: (context) => DatasetPage()),
+            ),
+          ),
+          ListTile(
+            leading: const Icon(Icons.search),
+            title: const Text("Search Options"),
+            onTap: () => Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => SearchOptionsWidget()),
             ),
           ),
           ListTile(
