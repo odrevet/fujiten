@@ -99,7 +99,7 @@ class _FujitenMenuBarState extends State<FujitenMenuBar> {
             const PopupMenuItem(value: 2, child: Text('$charKana Kana')),
             PopupMenuItem(
               value: 3,
-              child: Text('Anything ${searchOptionsState.useRegexp ? "(.*)" : "(%)"}'),
+              child: Text('${searchOptionsState.useRegexp ? ".*" : "%"} Anything'),
             ),
           ],
         );
