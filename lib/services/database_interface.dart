@@ -12,6 +12,7 @@ abstract class DatabaseInterface {
   Database? database;
   DatabaseStatus? status;
   String? log;
+  static bool useRegexp = false;
 
   DatabaseInterface({this.database});
 
