@@ -3,10 +3,41 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../cubits/search_options_cubit.dart';
+import '../../cubits/expression_cubit.dart';
 import '../../models/states/search_options_state.dart';
 
-class SearchOptionsWidget extends StatelessWidget {
+class SearchOptionsWidget extends StatefulWidget {
   const SearchOptionsWidget({super.key});
+
+  @override
+  State<SearchOptionsWidget> createState() => _SearchOptionsWidgetState();
+}
+
+class _SearchOptionsWidgetState extends State<SearchOptionsWidget> {
+  bool _isTestingRegexp = false;
+  String? _regexpTestResult;
+
+  Future<void> _testRegexpAvailability() async {
+    setState(() {
+      _isTestingRegexp = true;
+      _regexpTestResult = null;
+    });
+
+    try {
+      final database = context.read<ExpressionCubit>().databaseInterface.database;
+      await database!.rawQuery('SELECT * FROM r_ele WHERE reb_el REGEXP \'*\' LIMIT 1');
+
+      setState(() {
+        _regexpTestResult = 'RegExp is available';
+        _isTestingRegexp = false;
+      });
+    } catch (e) {
+      setState(() {
+        _regexpTestResult = 'RegExp not available: ${e.toString()}';
+        _isTestingRegexp = false;
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -28,8 +59,8 @@ class SearchOptionsWidget extends StatelessWidget {
                   ),
                   const SizedBox(height: 16),
 
-                  // Use Regexp Toggle
-                  _buildRegexpToggle(context, state),
+                  // Use Regexp Toggle with Test Button
+                  _buildRegexpToggleWithTest(context, state),
                   const SizedBox(height: 16),
 
                   // Results Per Page for Kanji
@@ -51,34 +82,105 @@ class SearchOptionsWidget extends StatelessWidget {
     );
   }
 
-  Widget _buildRegexpToggle(BuildContext context, SearchOptionsState state) {
-    return Row(
+  Widget _buildRegexpToggleWithTest(BuildContext context, SearchOptionsState state) {
+    return Column(
       children: [
-        Icon(
-          state.useRegexp ? Icons.code : Icons.text_fields,
-          color: Theme.of(context).colorScheme.primary,
+        Row(
+          children: [
+            Icon(
+              state.useRegexp ? Icons.code : Icons.text_fields,
+              color: Theme.of(context).colorScheme.primary,
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Text(
+                'Use Regular Expressions',
+                style: Theme.of(context).textTheme.titleMedium,
+              ),
+            ),
+            // Test RegExp Button
+            OutlinedButton.icon(
+              onPressed: _isTestingRegexp ? null : _testRegexpAvailability,
+              icon: _isTestingRegexp
+                  ? const SizedBox(
+                  width: 16,
+                  height: 16,
+                  child: CircularProgressIndicator(strokeWidth: 2)
+              )
+                  : const Icon(Icons.science, size: 16),
+              label: Text(_isTestingRegexp ? 'Testing...' : 'Test'),
+              style: OutlinedButton.styleFrom(
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                minimumSize: const Size(0, 32),
+              ),
+            ),
+            const SizedBox(width: 8),
+            Switch(
+              value: state.useRegexp,
+              onChanged: (bool value) {
+                context.read<SearchOptionsCubit>().setUseRegexp(value);
+              },
+            ),
+          ],
         ),
-        const SizedBox(width: 12),
-        Expanded(
-          child: Text(
-            'Use Regular Expressions',
-            style: Theme.of(context).textTheme.titleMedium,
+        // Test Result Display
+        if (_regexpTestResult != null) ...[
+          const SizedBox(height: 8),
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: _regexpTestResult!.contains('available')
+                  ? Colors.green.withOpacity(0.1)
+                  : Colors.red.withOpacity(0.1),
+              border: Border.all(
+                color: _regexpTestResult!.contains('available')
+                    ? Colors.green
+                    : Colors.red,
+                width: 1,
+              ),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Row(
+              children: [
+                Icon(
+                  _regexpTestResult!.contains('available')
+                      ? Icons.check_circle
+                      : Icons.error,
+                  size: 16,
+                  color: _regexpTestResult!.contains('available')
+                      ? Colors.green
+                      : Colors.red,
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    _regexpTestResult!,
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: _regexpTestResult!.contains('available')
+                          ? Colors.green[700]
+                          : Colors.red[700],
+                    ),
+                  ),
+                ),
+                IconButton(
+                  onPressed: () => setState(() => _regexpTestResult = null),
+                  icon: const Icon(Icons.close, size: 16),
+                  padding: EdgeInsets.zero,
+                  constraints: const BoxConstraints(minWidth: 24, minHeight: 24),
+                ),
+              ],
+            ),
           ),
-        ),
-        Switch(
-          value: state.useRegexp,
-          onChanged: (bool value) {
-            context.read<SearchOptionsCubit>().setUseRegexp(value);
-          },
-        ),
+        ],
       ],
     );
   }
 
   Widget _buildResultsPerPageKanji(
-    BuildContext context,
-    SearchOptionsState state,
-  ) {
+      BuildContext context,
+      SearchOptionsState state,
+      ) {
     return _buildResultsPerPageField(
       context: context,
       title: 'Results per Page (Kanji)',
@@ -91,9 +193,9 @@ class SearchOptionsWidget extends StatelessWidget {
   }
 
   Widget _buildResultsPerPageExpression(
-    BuildContext context,
-    SearchOptionsState state,
-  ) {
+      BuildContext context,
+      SearchOptionsState state,
+      ) {
     return _buildResultsPerPageField(
       context: context,
       title: 'Results per Page (Expression)',
@@ -190,8 +292,38 @@ class SearchOptionsWidget extends StatelessWidget {
   }
 }
 
-class CompactSearchOptionsWidget extends StatelessWidget {
+class CompactSearchOptionsWidget extends StatefulWidget {
   const CompactSearchOptionsWidget({super.key});
+
+  @override
+  State<CompactSearchOptionsWidget> createState() => _CompactSearchOptionsWidgetState();
+}
+
+class _CompactSearchOptionsWidgetState extends State<CompactSearchOptionsWidget> {
+  bool _isTestingRegexp = false;
+  String? _regexpTestResult;
+
+  Future<void> _testRegexpAvailability() async {
+    setState(() {
+      _isTestingRegexp = true;
+      _regexpTestResult = null;
+    });
+
+    try {
+      final database = context.read<ExpressionCubit>().databaseInterface.database;
+      await database!.rawQuery('SELECT * FROM r_ele WHERE reb_el REGEXP \'*\' LIMIT 1');
+
+      setState(() {
+        _regexpTestResult = 'RegExp is available';
+        _isTestingRegexp = false;
+      });
+    } catch (e) {
+      setState(() {
+        _regexpTestResult = 'RegExp not available: ${e.toString()}';
+        _isTestingRegexp = false;
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -225,9 +357,31 @@ class CompactSearchOptionsWidget extends StatelessWidget {
               ),
               const SizedBox(height: 16),
 
-              // Regexp Toggle
+              // Regexp Toggle with Test Button
               SwitchListTile(
-                title: const Text('Use Regular Expressions'),
+                title: Row(
+                  children: [
+                    const Expanded(child: Text('Use Regular Expressions')),
+                    OutlinedButton.icon(
+                      onPressed: _isTestingRegexp ? null : _testRegexpAvailability,
+                      icon: _isTestingRegexp
+                          ? const SizedBox(
+                          width: 12,
+                          height: 12,
+                          child: CircularProgressIndicator(strokeWidth: 1.5)
+                      )
+                          : const Icon(Icons.science, size: 14),
+                      label: Text(
+                        _isTestingRegexp ? 'Testing...' : 'Test',
+                        style: const TextStyle(fontSize: 12),
+                      ),
+                      style: OutlinedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                        minimumSize: const Size(0, 28),
+                      ),
+                    ),
+                  ],
+                ),
                 subtitle: const Text(
                   'Enable regexp pattern matching if available',
                 ),
@@ -236,6 +390,56 @@ class CompactSearchOptionsWidget extends StatelessWidget {
                   context.read<SearchOptionsCubit>().setUseRegexp(value);
                 },
               ),
+
+              // Test Result Display
+              if (_regexpTestResult != null) ...[
+                const SizedBox(height: 8),
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: _regexpTestResult!.contains('available')
+                        ? Colors.green.withOpacity(0.1)
+                        : Colors.red.withOpacity(0.1),
+                    border: Border.all(
+                      color: _regexpTestResult!.contains('available')
+                          ? Colors.green
+                          : Colors.red,
+                      width: 1,
+                    ),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(
+                        _regexpTestResult!.contains('available')
+                            ? Icons.check_circle
+                            : Icons.error,
+                        size: 14,
+                        color: _regexpTestResult!.contains('available')
+                            ? Colors.green
+                            : Colors.red,
+                      ),
+                      const SizedBox(width: 6),
+                      Expanded(
+                        child: Text(
+                          _regexpTestResult!,
+                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                            color: _regexpTestResult!.contains('available')
+                                ? Colors.green[700]
+                                : Colors.red[700],
+                          ),
+                        ),
+                      ),
+                      InkWell(
+                        onTap: () => setState(() => _regexpTestResult = null),
+                        child: const Icon(Icons.close, size: 14),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+
               const SizedBox(height: 8),
 
               // Current results per page indicator
@@ -254,8 +458,8 @@ class CompactSearchOptionsWidget extends StatelessWidget {
                         '${context.read<SearchOptionsCubit>().currentResultsPerPage}',
                         style: Theme.of(context).textTheme.titleMedium
                             ?.copyWith(
-                              color: Theme.of(context).colorScheme.primary,
-                            ),
+                          color: Theme.of(context).colorScheme.primary,
+                        ),
                       ),
                     ],
                   ),
