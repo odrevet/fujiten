@@ -1,5 +1,4 @@
 import 'package:sqflite/sqflite.dart';
-
 import 'package:sqflite_common/sqlite_api.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 
@@ -24,7 +23,6 @@ abstract class DatabaseInterface {
         database = await openDatabase(path, readOnly: true);
       }
     } catch (e) {
-      print(e.toString());
       database = null;
       status = DatabaseStatus.noResults;
       log = e.toString();

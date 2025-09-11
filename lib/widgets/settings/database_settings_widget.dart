@@ -226,7 +226,9 @@ class _DatabaseSettingsWidgetState extends State<DatabaseSettingsWidget> {
                                             await databaseInterface.setStatus();
 
                                             // Refresh the cubit state
-                                            _refreshDatabaseStatus(context);
+                                            if(context.mounted) {
+                                              _refreshDatabaseStatus(context);
+                                            }
                                           } catch (e) {
                                             setState(
                                               () => downloadLog =
@@ -258,7 +260,9 @@ class _DatabaseSettingsWidgetState extends State<DatabaseSettingsWidget> {
                                       await databaseInterface.setStatus();
 
                                       // Refresh the cubit state
-                                      _refreshDatabaseStatus(context);
+                                      if(context.mounted) {
+                                        _refreshDatabaseStatus(context);
+                                      }
                                     }
                                   }),
                             icon: const Icon(Icons.folder_open),
@@ -284,7 +288,9 @@ class _DatabaseSettingsWidgetState extends State<DatabaseSettingsWidget> {
                                         DatabaseStatus.pathNotSet;
 
                                     // Refresh the cubit state
-                                    _refreshDatabaseStatus(context);
+                                    if(context.mounted) {
+                                      _refreshDatabaseStatus(context);
+                                    }
                                   },
                             icon: const Icon(Icons.clear),
                             label: const Text('Clear'),

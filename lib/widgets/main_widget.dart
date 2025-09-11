@@ -58,13 +58,13 @@ class _MainWidgetState extends State<MainWidget> {
 
     // Initialize expression database
     String? expressionPath = prefs.getString("expression_path");
-    if (expressionPath != null) {
+    if (expressionPath != null && mounted) {
       context.read<ExpressionCubit>().openDatabase(expressionPath);
     }
 
     // Initialize kanji database
     String? kanjiPath = prefs.getString("kanji_path");
-    if (kanjiPath != null) {
+    if (kanjiPath != null && mounted) {
       context.read<KanjiCubit>().openDatabase(kanjiPath);
     }
   }
@@ -75,10 +75,14 @@ class _MainWidgetState extends State<MainWidget> {
 
     // Load search options from SharedPreferences
     final useRegexp = prefs.getBool("search_use_regexp") ?? false;
-    final resultsPerPageKanji = prefs.getInt("search_results_per_page_kanji") ?? 20;
-    final resultsPerPageExpression = prefs.getInt("search_results_per_page_expression") ?? 20;
+    final resultsPerPageKanji =
+        prefs.getInt("search_results_per_page_kanji") ?? 20;
+    final resultsPerPageExpression =
+        prefs.getInt("search_results_per_page_expression") ?? 20;
     final searchTypeIndex = prefs.getInt("search_type") ?? 0;
-    final searchType = searchTypeIndex == 0 ? SearchType.expression : SearchType.kanji;
+    final searchType = searchTypeIndex == 0
+        ? SearchType.expression
+        : SearchType.kanji;
 
     context.read<SearchOptionsCubit>().updateSearchOptions(
       useRegexp: useRegexp,
@@ -93,8 +97,14 @@ class _MainWidgetState extends State<MainWidget> {
 
     // Save search options to SharedPreferences
     await prefs.setBool("search_use_regexp", searchOptions.useRegexp);
-    await prefs.setInt("search_results_per_page_kanji", searchOptions.resultsPerPageKanji);
-    await prefs.setInt("search_results_per_page_expression", searchOptions.resultsPerPageExpression);
+    await prefs.setInt(
+      "search_results_per_page_kanji",
+      searchOptions.resultsPerPageKanji,
+    );
+    await prefs.setInt(
+      "search_results_per_page_expression",
+      searchOptions.resultsPerPageExpression,
+    );
     await prefs.setInt("search_type", searchOptions.searchType.index);
   }
 
@@ -180,17 +190,17 @@ class _MainWidgetState extends State<MainWidget> {
                   child: Scaffold(
                     key: _scaffoldKey,
                     floatingActionButton:
-                    context.read<SearchCubit>().state.isLoadingNextPage
+                        context.read<SearchCubit>().state.isLoadingNextPage
                         ? const FloatingActionButton(
-                      onPressed: null,
-                      backgroundColor: Colors.white,
-                      mini: true,
-                      child: SizedBox(
-                        height: 10,
-                        width: 10,
-                        child: CircularProgressIndicator(),
-                      ),
-                    )
+                            onPressed: null,
+                            backgroundColor: Colors.white,
+                            mini: true,
+                            child: SizedBox(
+                              height: 10,
+                              width: 10,
+                              child: CircularProgressIndicator(),
+                            ),
+                          )
                         : null,
                     appBar: PreferredSize(
                       preferredSize: const Size.fromHeight(56),
