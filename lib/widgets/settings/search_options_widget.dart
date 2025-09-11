@@ -5,7 +5,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../cubits/search_options_cubit.dart';
 import '../../models/states/search_options_state.dart';
 
-
 class SearchOptionsWidget extends StatelessWidget {
   const SearchOptionsWidget({super.key});
 
@@ -76,7 +75,10 @@ class SearchOptionsWidget extends StatelessWidget {
     );
   }
 
-  Widget _buildResultsPerPageKanji(BuildContext context, SearchOptionsState state) {
+  Widget _buildResultsPerPageKanji(
+    BuildContext context,
+    SearchOptionsState state,
+  ) {
     return _buildResultsPerPageField(
       context: context,
       title: 'Results per Page (Kanji)',
@@ -88,7 +90,10 @@ class SearchOptionsWidget extends StatelessWidget {
     );
   }
 
-  Widget _buildResultsPerPageExpression(BuildContext context, SearchOptionsState state) {
+  Widget _buildResultsPerPageExpression(
+    BuildContext context,
+    SearchOptionsState state,
+  ) {
     return _buildResultsPerPageField(
       context: context,
       title: 'Results per Page (Expression)',
@@ -111,17 +116,11 @@ class SearchOptionsWidget extends StatelessWidget {
 
     return Row(
       children: [
-        Icon(
-          icon,
-          color: Theme.of(context).colorScheme.primary,
-        ),
+        Icon(icon, color: Theme.of(context).colorScheme.primary),
         const SizedBox(width: 12),
         Expanded(
           flex: 2,
-          child: Text(
-            title,
-            style: Theme.of(context).textTheme.titleMedium,
-          ),
+          child: Text(title, style: Theme.of(context).textTheme.titleMedium),
         ),
         Expanded(
           child: TextFormField(
@@ -176,8 +175,6 @@ class SearchOptionsWidget extends StatelessWidget {
         const SizedBox(width: 8),
         ElevatedButton.icon(
           onPressed: () {
-            // You can add additional logic here if needed
-            // For example, validating settings or triggering a search
             ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(
                 content: Text('Search options updated!'),
@@ -211,17 +208,19 @@ class CompactSearchOptionsWidget extends StatelessWidget {
                   ButtonSegment<SearchType>(
                     value: SearchType.expression,
                     label: Text('Expression'),
-                    icon: Icon(Icons.language),
+                    icon: Text('言', style: TextStyle(fontSize: 20)),
                   ),
                   ButtonSegment<SearchType>(
                     value: SearchType.kanji,
                     label: Text('Kanji'),
-                    icon: Icon(Icons.translate),
+                    icon: Text('漢', style: TextStyle(fontSize: 20)),
                   ),
                 ],
                 selected: {state.searchType},
                 onSelectionChanged: (Set<SearchType> selected) {
-                  context.read<SearchOptionsCubit>().setSearchType(selected.first);
+                  context.read<SearchOptionsCubit>().setSearchType(
+                    selected.first,
+                  );
                 },
               ),
               const SizedBox(height: 16),
@@ -229,12 +228,13 @@ class CompactSearchOptionsWidget extends StatelessWidget {
               // Regexp Toggle
               SwitchListTile(
                 title: const Text('Use Regular Expressions'),
-                subtitle: const Text('Enable pattern matching'),
+                subtitle: const Text(
+                  'Enable regexp pattern matching if available',
+                ),
                 value: state.useRegexp,
                 onChanged: (bool value) {
                   context.read<SearchOptionsCubit>().setUseRegexp(value);
                 },
-                secondary: const Icon(Icons.code),
               ),
               const SizedBox(height: 8),
 
@@ -252,9 +252,10 @@ class CompactSearchOptionsWidget extends StatelessWidget {
                       ),
                       Text(
                         '${context.read<SearchOptionsCubit>().currentResultsPerPage}',
-                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                          color: Theme.of(context).colorScheme.primary,
-                        ),
+                        style: Theme.of(context).textTheme.titleMedium
+                            ?.copyWith(
+                              color: Theme.of(context).colorScheme.primary,
+                            ),
                       ),
                     ],
                   ),
