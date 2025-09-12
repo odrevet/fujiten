@@ -83,6 +83,8 @@ be used
 flutter run --dart-define=FFI=true
 ```
 
+Desktop build must use FFI
+
 * Android studio configuration: 
 
 ```xml
