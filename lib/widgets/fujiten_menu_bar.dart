@@ -214,17 +214,13 @@ class _FujitenMenuBarState extends State<FujitenMenuBar> {
                     icon: const Icon(Icons.tune),
                     tooltip: 'Search Options',
                     onPressed: () {
-                      showDialog(
-                        context: context,
-                        builder: (context) => AlertDialog(
-                          title: const Text('Search Options'),
-                          content: const SearchOptionsWidget(),
-                          actions: [
-                            TextButton(
-                              onPressed: () => Navigator.of(context).pop(),
-                              child: const Text('Close'),
-                            ),
-                          ],
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => Scaffold(
+                            appBar: AppBar(title: const Text('Search option')),
+                            body: SearchOptionsWidget(),
+                          ),
                         ),
                       );
                     },

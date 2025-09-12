@@ -70,118 +70,146 @@ class _SearchOptionsWidgetState extends State<SearchOptionsWidget> {
   Widget build(BuildContext context) {
     return BlocBuilder<SearchOptionsCubit, SearchOptionsState>(
       builder: (context, state) {
-        return Padding(
+        return ListView(
           padding: const EdgeInsets.all(16),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              // Search Type Toggle
-              Column(
-                children: [
-                  Text(
-                    'Search For',
-                    style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                      color: Theme.of(context).colorScheme.onSurface.withOpacity(0.8),
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  SegmentedButton<SearchType>(
-                    showSelectedIcon: false,
-                    style: ButtonStyle(
-                      padding: WidgetStateProperty.all(
-                        const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-                      ),
-                      backgroundColor: WidgetStateProperty.resolveWith((states) {
-                        if (states.contains(WidgetState.selected)) {
-                          return Theme.of(context).colorScheme.primary;
-                        }
-                        return null;
-                      }),
-                      foregroundColor: WidgetStateProperty.resolveWith((states) {
-                        if (states.contains(WidgetState.selected)) {
-                          return Theme.of(context).colorScheme.onPrimary;
-                        }
-                        return Theme.of(context).colorScheme.onSurface;
-                      }),
-                    ),
-                    segments: const [
-                      ButtonSegment<SearchType>(
-                        value: SearchType.expression,
-                        label: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Text('言', style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
-                            SizedBox(height: 2),
-                            Text('Expression', style: TextStyle(fontSize: 10, fontWeight: FontWeight.normal)),
-                          ],
-                        ),
-                      ),
-                      ButtonSegment<SearchType>(
-                        value: SearchType.kanji,
-                        label: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Text('漢', style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
-                            SizedBox(height: 2),
-                            Text('Kanji', style: TextStyle(fontSize: 10, fontWeight: FontWeight.normal)),
-                          ],
-                        ),
-                      ),
-                    ],
-                    selected: {state.searchType},
-                    onSelectionChanged: (Set<SearchType> selected) {
-                      context.read<SearchOptionsCubit>().setSearchType(
-                        selected.first,
-                      );
-                    },
-                  ),
-                ],
-              ),
-              const SizedBox(height: 16),
+          children: [
+            // Search Type Section
+            _buildSectionHeader(context, 'Search For'),
+            const SizedBox(height: 8),
+            _buildSearchTypeSelector(context, state),
+            const SizedBox(height: 24),
 
-              // Regexp Toggle (only show if available or testing)
-              if (_isTestingRegexp || _isRegexpAvailable) ...[
-                SwitchListTile(
-                  title: Row(
-                    children: [
-                      const Expanded(child: Text('Use Regular Expressions')),
-                      if (_isTestingRegexp)
-                        const SizedBox(
-                          width: 16,
-                          height: 16,
-                          child: CircularProgressIndicator(strokeWidth: 2),
-                        ),
-                    ],
-                  ),
-                  subtitle: Text(
-                    _isTestingRegexp
-                        ? 'Checking regexp availability...'
-                        : 'Enable regexp pattern matching',
-                  ),
-                  value: state.useRegexp && _isRegexpAvailable,
-                  onChanged: _isTestingRegexp
-                      ? null
-                      : (bool value) {
-                    context.read<SearchOptionsCubit>().setUseRegexp(value);
-                  },
-                ),
-                const SizedBox(height: 16),
-              ],
-
-              // Results Per Page Fields
-              _buildResultsPerPageKanji(context, state),
-              const SizedBox(height: 12),
-              _buildResultsPerPageExpression(context, state),
-
-              const SizedBox(height: 16),
-
-              // Action Buttons
-              _buildActionButtons(context),
+            // Regular Expressions Section
+            if (_isTestingRegexp || _isRegexpAvailable) ...[
+              _buildSectionHeader(context, 'Advanced Options'),
+              const SizedBox(height: 8),
+              _buildRegexpTile(context, state),
+              const SizedBox(height: 24),
             ],
-          ),
+
+            // Results Per Page Section
+            _buildSectionHeader(context, 'Results Per Page'),
+            const SizedBox(height: 8),
+            _buildResultsPerPageKanji(context, state),
+            const SizedBox(height: 8),
+            _buildResultsPerPageExpression(context, state),
+            const SizedBox(height: 24),
+
+            // Actions Section
+            _buildSectionHeader(context, 'Actions'),
+            const SizedBox(height: 8),
+            _buildActionButtons(context),
+
+            // Add some bottom padding
+            const SizedBox(height: 24),
+          ],
         );
       },
+    );
+  }
+
+  Widget _buildSectionHeader(BuildContext context, String title) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 4),
+      child: Text(
+        title,
+        style: Theme.of(context).textTheme.titleMedium?.copyWith(
+          color: Theme.of(context).colorScheme.primary,
+          fontWeight: FontWeight.w600,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSearchTypeSelector(BuildContext context, SearchOptionsState state) {
+    return Card(
+      elevation: 0,
+      color: Theme.of(context).colorScheme.surfaceContainerLow,
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: SegmentedButton<SearchType>(
+          showSelectedIcon: false,
+          style: ButtonStyle(
+            padding: WidgetStateProperty.all(
+              const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+            ),
+            backgroundColor: WidgetStateProperty.resolveWith((states) {
+              if (states.contains(WidgetState.selected)) {
+                return Theme.of(context).colorScheme.primary;
+              }
+              return null;
+            }),
+            foregroundColor: WidgetStateProperty.resolveWith((states) {
+              if (states.contains(WidgetState.selected)) {
+                return Theme.of(context).colorScheme.onPrimary;
+              }
+              return Theme.of(context).colorScheme.onSurface;
+            }),
+          ),
+          segments: const [
+            ButtonSegment<SearchType>(
+              value: SearchType.expression,
+              label: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text('言', style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
+                  SizedBox(height: 2),
+                  Text('Expression', style: TextStyle(fontSize: 10, fontWeight: FontWeight.normal)),
+                ],
+              ),
+            ),
+            ButtonSegment<SearchType>(
+              value: SearchType.kanji,
+              label: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text('漢', style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
+                  SizedBox(height: 2),
+                  Text('Kanji', style: TextStyle(fontSize: 10, fontWeight: FontWeight.normal)),
+                ],
+              ),
+            ),
+          ],
+          selected: {state.searchType},
+          onSelectionChanged: (Set<SearchType> selected) {
+            context.read<SearchOptionsCubit>().setSearchType(
+              selected.first,
+            );
+          },
+        ),
+      ),
+    );
+  }
+
+  Widget _buildRegexpTile(BuildContext context, SearchOptionsState state) {
+    return Card(
+      elevation: 0,
+      color: Theme.of(context).colorScheme.surfaceContainerLow,
+      child: SwitchListTile(
+        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+        title: Row(
+          children: [
+            const Expanded(child: Text('Use Regular Expressions')),
+            if (_isTestingRegexp)
+              const SizedBox(
+                width: 16,
+                height: 16,
+                child: CircularProgressIndicator(strokeWidth: 2),
+              ),
+          ],
+        ),
+        subtitle: Text(
+          _isTestingRegexp
+              ? 'Checking regexp availability...'
+              : 'Enable regexp pattern matching',
+        ),
+        value: state.useRegexp && _isRegexpAvailable,
+        onChanged: _isTestingRegexp
+            ? null
+            : (bool value) {
+          context.read<SearchOptionsCubit>().setUseRegexp(value);
+        },
+      ),
     );
   }
 
@@ -189,9 +217,9 @@ class _SearchOptionsWidgetState extends State<SearchOptionsWidget> {
       BuildContext context,
       SearchOptionsState state,
       ) {
-    return _buildResultsPerPageField(
+    return _buildResultsPerPageCard(
       context: context,
-      title: 'Results per Page (Kanji)',
+      title: 'Kanji Results',
       value: state.resultsPerPageKanji,
       icon: Icons.translate,
       controller: _kanjiController,
@@ -205,9 +233,9 @@ class _SearchOptionsWidgetState extends State<SearchOptionsWidget> {
       BuildContext context,
       SearchOptionsState state,
       ) {
-    return _buildResultsPerPageField(
+    return _buildResultsPerPageCard(
       context: context,
-      title: 'Results per Page (Expression)',
+      title: 'Expression Results',
       value: state.resultsPerPageExpression,
       icon: Icons.language,
       controller: _expressionController,
@@ -217,7 +245,7 @@ class _SearchOptionsWidgetState extends State<SearchOptionsWidget> {
     );
   }
 
-  Widget _buildResultsPerPageField({
+  Widget _buildResultsPerPageCard({
     required BuildContext context,
     required String title,
     required int value,
@@ -225,41 +253,30 @@ class _SearchOptionsWidgetState extends State<SearchOptionsWidget> {
     required TextEditingController controller,
     required Function(int) onChanged,
   }) {
-    return Container(
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surfaceContainerHighest.withOpacity(0.5),
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(
-          color: Theme.of(context).colorScheme.outline.withOpacity(0.2),
+    return Card(
+      elevation: 0,
+      color: Theme.of(context).colorScheme.surfaceContainerLow,
+      child: ListTile(
+        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        leading: Icon(
+          icon,
+          color: Theme.of(context).colorScheme.primary,
+          size: 24,
         ),
-      ),
-      child: Row(
-        children: [
-          Icon(
-            icon,
-            color: Theme.of(context).colorScheme.primary,
-            size: 20,
+        title: Text(
+          title,
+          style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+            fontWeight: FontWeight.w500,
           ),
-          const SizedBox(width: 12),
-          Expanded(
-            flex: 2,
-            child: Text(
-              title,
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-          ),
-          _buildIntegerInput(
-            context: context,
-            controller: controller,
-            currentValue: value,
-            onChanged: onChanged,
-            min: 1,
-            max: 999,
-          ),
-        ],
+        ),
+        trailing: _buildIntegerInput(
+          context: context,
+          controller: controller,
+          currentValue: value,
+          onChanged: onChanged,
+          min: 1,
+          max: 999,
+        ),
       ),
     );
   }
@@ -395,10 +412,13 @@ class _SearchOptionsWidgetState extends State<SearchOptionsWidget> {
   }
 
   Widget _buildActionButtons(BuildContext context) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-      children: [
-        Expanded(
+    return Card(
+      elevation: 0,
+      color: Theme.of(context).colorScheme.surfaceContainerLow,
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: SizedBox(
+          width: double.infinity,
           child: OutlinedButton.icon(
             onPressed: () {
               context.read<SearchOptionsCubit>().reset();
@@ -408,10 +428,10 @@ class _SearchOptionsWidgetState extends State<SearchOptionsWidget> {
               _expressionController.text = state.resultsPerPageExpression.toString();
             },
             icon: const Icon(Icons.refresh, size: 16),
-            label: const Text('Reset'),
+            label: const Text('Reset to Defaults'),
           ),
         ),
-      ],
+      ),
     );
   }
 }
