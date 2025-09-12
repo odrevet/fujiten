@@ -14,13 +14,19 @@ class SearchOptionsWidget extends StatefulWidget {
 }
 
 class _SearchOptionsWidgetState extends State<SearchOptionsWidget> {
-  bool _isTestingRegexp = false;
-  String? _regexpTestResult;
+  bool _isTestingRegexp = true; // Start as testing
+  bool _isRegexpAvailable = false;
+
+  @override
+  void initState() {
+    super.initState();
+    // Automatically test regexp availability when widget initializes
+    _testRegexpAvailability();
+  }
 
   Future<void> _testRegexpAvailability() async {
     setState(() {
       _isTestingRegexp = true;
-      _regexpTestResult = null;
     });
 
     try {
@@ -28,14 +34,19 @@ class _SearchOptionsWidgetState extends State<SearchOptionsWidget> {
       await database!.rawQuery('SELECT * FROM r_ele WHERE reb_el REGEXP \'*\' LIMIT 1');
 
       setState(() {
-        _regexpTestResult = 'RegExp is available';
+        _isRegexpAvailable = true;
         _isTestingRegexp = false;
       });
     } catch (e) {
       setState(() {
-        _regexpTestResult = 'RegExp not available: ${e.toString()}';
+        _isRegexpAvailable = false;
         _isTestingRegexp = false;
       });
+
+      // Disable regexp if it's not available and currently enabled
+      if (context.read<SearchOptionsCubit>().state.useRegexp) {
+        context.read<SearchOptionsCubit>().setUseRegexp(false);
+      }
     }
   }
 
@@ -71,88 +82,44 @@ class _SearchOptionsWidgetState extends State<SearchOptionsWidget> {
               ),
               const SizedBox(height: 16),
 
-              // Regexp Toggle with Test Button
+              // Regexp Toggle (disabled if not available or still testing)
               SwitchListTile(
                 title: Row(
                   children: [
                     const Expanded(child: Text('Use Regular Expressions')),
-                    OutlinedButton.icon(
-                      onPressed: _isTestingRegexp ? null : _testRegexpAvailability,
-                      icon: _isTestingRegexp
-                          ? const SizedBox(
-                          width: 12,
-                          height: 12,
-                          child: CircularProgressIndicator(strokeWidth: 1.5)
+                    if (_isTestingRegexp)
+                      const SizedBox(
+                        width: 16,
+                        height: 16,
+                        child: CircularProgressIndicator(strokeWidth: 2),
                       )
-                          : const Icon(Icons.science, size: 14),
-                      label: Text(
-                        _isTestingRegexp ? 'Testing...' : 'Test',
-                        style: const TextStyle(fontSize: 12),
+                    else if (!_isRegexpAvailable)
+                      Icon(
+                        Icons.error_outline,
+                        size: 16,
+                        color: Colors.red[600],
                       ),
-                      style: OutlinedButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                        minimumSize: const Size(0, 28),
-                      ),
-                    ),
                   ],
                 ),
-                subtitle: const Text(
-                  'Enable regexp pattern matching if available',
+                subtitle: Text(
+                  _isTestingRegexp
+                      ? 'Checking regexp availability...'
+                      : _isRegexpAvailable
+                      ? 'Enable regexp pattern matching'
+                      : 'RegExp not available',
+                  style: TextStyle(
+                    color: !_isRegexpAvailable && !_isTestingRegexp
+                        ? Colors.red[600]
+                        : null,
+                  ),
                 ),
-                value: state.useRegexp,
-                onChanged: (bool value) {
+                value: state.useRegexp && _isRegexpAvailable,
+                onChanged: (_isTestingRegexp || !_isRegexpAvailable)
+                    ? null
+                    : (bool value) {
                   context.read<SearchOptionsCubit>().setUseRegexp(value);
                 },
               ),
-
-              // Test Result Display
-              if (_regexpTestResult != null) ...[
-                const SizedBox(height: 8),
-                Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                    color: _regexpTestResult!.contains('available')
-                        ? Colors.green.withOpacity(0.1)
-                        : Colors.red.withOpacity(0.1),
-                    border: Border.all(
-                      color: _regexpTestResult!.contains('available')
-                          ? Colors.green
-                          : Colors.red,
-                      width: 1,
-                    ),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Row(
-                    children: [
-                      Icon(
-                        _regexpTestResult!.contains('available')
-                            ? Icons.check_circle
-                            : Icons.error,
-                        size: 14,
-                        color: _regexpTestResult!.contains('available')
-                            ? Colors.green
-                            : Colors.red,
-                      ),
-                      const SizedBox(width: 6),
-                      Expanded(
-                        child: Text(
-                          _regexpTestResult!,
-                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color: _regexpTestResult!.contains('available')
-                                ? Colors.green[700]
-                                : Colors.red[700],
-                          ),
-                        ),
-                      ),
-                      InkWell(
-                        onTap: () => setState(() => _regexpTestResult = null),
-                        child: const Icon(Icons.close, size: 14),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
 
               const SizedBox(height: 16),
 
