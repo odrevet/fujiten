@@ -216,7 +216,7 @@ class _ResultExpressionListState extends State<ResultExpressionList> {
                 ],
               ),
             );
-          }).toList(),
+          })
         ],
       ),
     );
@@ -247,7 +247,7 @@ class _ResultExpressionListState extends State<ResultExpressionList> {
             buildAlternativeReadings(),
             ...sensesGroupedByPosses.entries.map((entry) {
               return _buildSenseGroup(entry.key, entry.value);
-            }).toList(),
+            }),
           ],
         ),
       ),

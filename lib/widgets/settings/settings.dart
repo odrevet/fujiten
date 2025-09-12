@@ -53,6 +53,12 @@ class SettingsPage extends StatelessWidget {
 
                 if (!context.mounted) return;
 
+                // Check FFI environment variable
+                const bool ffiEnabled = bool.fromEnvironment(
+                  'FFI',
+                  defaultValue: true,
+                );
+
                 showAboutDialog(
                   context: context,
                   applicationName: appName,
@@ -60,7 +66,9 @@ class SettingsPage extends StatelessWidget {
                   applicationLegalese:
                       '''2022-2025 Olivier Drevet All right reserved
 This software uses data from JMDict, Kanjidic2, Radkfile by the Electronic Dictionary Research and Development Group
-under the Creative Commons Attribution-ShareAlike Licence (V3.0)''',
+under the Creative Commons Attribution-ShareAlike Licence (V3.0)
+
+${ffiEnabled ? 'Database: SQLite via FFI' : 'Database: SQLite native'}''',
                 );
               });
             },
