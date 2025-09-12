@@ -27,7 +27,12 @@ class SettingsPage extends StatelessWidget {
             title: const Text("Search Options"),
             onTap: () => Navigator.push(
               context,
-              MaterialPageRoute(builder: (context) => SearchOptionsWidget()),
+              MaterialPageRoute(
+                builder: (context) => Scaffold(
+                  appBar: AppBar(title: const Text('Search option')),
+                  body: SearchOptionsWidget(),
+                ),
+              ),
             ),
           ),
           ListTile(

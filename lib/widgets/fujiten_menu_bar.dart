@@ -218,7 +218,7 @@ class _FujitenMenuBarState extends State<FujitenMenuBar> {
                         context: context,
                         builder: (context) => AlertDialog(
                           title: const Text('Search Options'),
-                          content: const CompactSearchOptionsWidget(),
+                          content: const SearchOptionsWidget(),
                           actions: [
                             TextButton(
                               onPressed: () => Navigator.of(context).pop(),
