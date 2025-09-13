@@ -50,38 +50,54 @@ class DatabaseInterfaceExpression extends DatabaseInterface {
     int currentPage,
     useRegexp,
   ) async {
-    String sql =
-        '''SELECT entry.id as entry_id,
-                  sense.id as sense_id, 
-                  (
-                    SELECT
-                      GROUP_CONCAT(IFNULL(keb || ':', '') || reb)
-                    FROM
-                      r_ele r_ele_sub
-                      LEFT JOIN r_ele_k_ele ON r_ele_k_ele.id_r_ele = r_ele_sub.id
-                      LEFT JOIN k_ele k_ele_sub ON r_ele_k_ele.id_k_ele = k_ele_sub.id
-                    WHERE
-                      r_ele_sub.id_entry = entry.id
-                  ) keb_reb_group,
-                  GROUP_CONCAT(DISTINCT gloss.content) gloss_group,
-                  GROUP_CONCAT(DISTINCT pos.description) pos_group,
-                  GROUP_CONCAT(DISTINCT dial.name) dial_group,
-                  GROUP_CONCAT(DISTINCT field.name) field_group,
-                  GROUP_CONCAT(DISTINCT misc.name) misc_group
-           FROM entry
-           JOIN sense ON sense.id_entry = entry.id
-           JOIN gloss ON gloss.id_sense = sense.id
-           LEFT JOIN sense_pos on sense.id = sense_pos.id_sense 
-           LEFT JOIN pos on sense_pos.id_pos = pos.id
-           LEFT JOIN sense_dial on sense.id = sense_dial.id_sense 
-           LEFT JOIN dial on sense_dial.id_dial = dial.id
-           LEFT JOIN sense_field on sense.id = sense_field.id_sense 
-           LEFT JOIN field on sense_field.id_field = field.id
-           LEFT JOIN sense_misc on sense.id = sense_misc.id_sense 
-           LEFT JOIN misc on sense_misc.id_misc = misc.id
-           WHERE entry.id IN (${subQuery(input, resultsPerPage, currentPage, useRegexp)})
-           GROUP BY sense.id''';
-
+    String sql = '''SELECT
+                    entry.id AS entry_id,
+                    sense.id AS sense_id,
+                    GROUP_CONCAT(DISTINCT 
+                        CASE 
+                            WHEN k_ele.keb IS NOT NULL 
+                            THEN k_ele.keb || ':' || r_ele.reb
+                            ELSE r_ele.reb
+                        END
+                    ) AS keb_reb_group,
+                    GROUP_CONCAT(DISTINCT gloss.content) AS gloss_group,
+                    GROUP_CONCAT(DISTINCT pos.name) AS pos_group,
+                    GROUP_CONCAT(DISTINCT dial.name) AS dial_group,
+                    GROUP_CONCAT(DISTINCT misc.name) AS misc_group,
+                    GROUP_CONCAT(DISTINCT field.name) AS field_group,
+                    GROUP_CONCAT(DISTINCT
+                        CASE
+                            WHEN sense_xref.reb IS NOT NULL
+                            THEN COALESCE(sense_xref.keb, '') || ':' || sense_xref.reb
+                            WHEN sense_xref.keb IS NOT NULL
+                            THEN sense_xref.keb
+                        END
+                    ) AS xref_group,
+                    GROUP_CONCAT(DISTINCT
+                        CASE
+                            WHEN sense_ant.reb IS NOT NULL
+                            THEN COALESCE(sense_ant.keb, '') || ':' || sense_ant.reb
+                            WHEN sense_ant.keb IS NOT NULL
+                            THEN sense_ant.keb
+                        END
+                    ) AS ant_group
+                FROM entry
+                    JOIN r_ele ON entry.id = r_ele.id_entry
+                    JOIN sense ON sense.id_entry = entry.id
+                    JOIN gloss ON gloss.id_sense = sense.id
+                    LEFT JOIN k_ele ON entry.id = k_ele.id_entry
+                    LEFT JOIN sense_pos ON sense.id = sense_pos.id_sense
+                    LEFT JOIN pos ON sense_pos.id_pos = pos.id
+                    LEFT JOIN sense_dial ON sense.id = sense_dial.id_sense
+                    LEFT JOIN dial ON sense_dial.id_dial = dial.id
+                    LEFT JOIN sense_misc ON sense.id = sense_misc.id_sense
+                    LEFT JOIN misc ON sense_misc.id_misc = misc.id
+                    LEFT JOIN sense_field ON sense.id = sense_field.id_sense
+                    LEFT JOIN field ON sense_field.id_field = field.id
+                    LEFT JOIN sense_xref ON sense.id = sense_xref.id_sense
+                    LEFT JOIN sense_ant ON sense.id = sense_ant.id_sense
+                WHERE entry.id IN (${subQuery(input, resultsPerPage, currentPage, useRegexp)})
+                GROUP BY entry.id, sense.id;''';
     log(sql);
     List<Map<String, dynamic>> queryResults;
     try {
@@ -106,6 +122,8 @@ class DatabaseInterfaceExpression extends DatabaseInterface {
                 ? queryResult['keb_reb_group'].split(',')
                 : [],
             senses: senses,
+            xref:  queryResult['xref_group'] != null ? queryResult['xref_group'].split(',') : [],
+            ant:  queryResult['ant_group'] != null ? queryResult['ant_group'].split(',') : [],
           ),
         );
         entryId = queryResult['entry_id'];

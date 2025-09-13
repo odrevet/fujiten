@@ -18,6 +18,7 @@ class ResultExpressionList extends StatefulWidget {
 class _ResultExpressionListState extends State<ResultExpressionList> {
   late TextStyle _styleFieldInformation;
   late TextStyle _posStyle;
+  late TextStyle _referenceStyle;
 
   @override
   initState() {
@@ -31,6 +32,11 @@ class _ResultExpressionListState extends State<ResultExpressionList> {
       fontSize: 12,
       fontWeight: FontWeight.w600,
       color: Colors.blueGrey,
+    );
+    _referenceStyle = const TextStyle(
+      fontSize: 12,
+      fontWeight: FontWeight.w500,
+      color: Colors.indigo,
     );
   }
 
@@ -106,6 +112,55 @@ class _ResultExpressionListState extends State<ResultExpressionList> {
             child: Text(reading),
           );
         }).toList(),
+      ),
+    );
+  }
+
+  Widget _buildReferences() {
+    final hasXref = widget.searchResult.xref.isNotEmpty;
+    final hasAnt = widget.searchResult.ant.isNotEmpty;
+
+    if (!hasXref && !hasAnt) return const SizedBox.shrink();
+
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.only(bottom: 16.0),
+      child: Wrap(
+        alignment: WrapAlignment.center,
+        spacing: 8.0,
+        runSpacing: 4.0,
+        children: [
+          ...widget.searchResult.xref.map<Widget>((reference) {
+            final literals = _extractKanjiFromReading(reference);
+
+            return GestureDetector(
+              onTap: () => _showKanjiDialog(literals),
+              onLongPress: () => _copyToClipboard(reference),
+              child: Text(
+                reference,
+                style: TextStyle(
+                  color: Colors.blue,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            );
+          }),
+          ...widget.searchResult.ant.map<Widget>((reference) {
+            final literals = _extractKanjiFromReading(reference);
+
+            return GestureDetector(
+              onTap: () => _showKanjiDialog(literals),
+              onLongPress: () => _copyToClipboard(reference),
+              child: Text(
+                reference,
+                style: TextStyle(
+                  color: Colors.red,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            );
+          }),
+        ],
       ),
     );
   }
@@ -238,6 +293,7 @@ class _ResultExpressionListState extends State<ResultExpressionList> {
           children: [
             _buildMainReading(),
             buildAlternativeReadings(),
+            _buildReferences(),
             ...sensesGroupedByPosses.entries.map((entry) {
               return _buildSenseGroup(entry.key, entry.value);
             }),
