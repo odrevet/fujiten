@@ -165,8 +165,8 @@ class _ResultExpressionListState extends State<ResultExpressionList> {
       padding: const EdgeInsets.all(12.0),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(8),
-        color: Colors.grey.withValues(alpha:0.05),
-        border: Border.all(color: Colors.grey.withValues(alpha:0.2)),
+        color: Colors.grey.withValues(alpha: 0.05),
+        border: Border.all(color: Colors.grey.withValues(alpha: 0.2)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -188,32 +188,39 @@ class _ResultExpressionListState extends State<ResultExpressionList> {
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Container(
-                    margin: const EdgeInsets.only(top: 2.0, right: 8.0),
-                    child: Text(
-                      '${index + 1}.',
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: Colors.grey[600],
-                        fontWeight: FontWeight.w500,
+                  if (senses.length > 1)
+                    Container(
+                      margin: const EdgeInsets.only(top: 2.0, right: 8.0),
+                      child: Text(
+                        '${index + 1}.',
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: Colors.grey[600],
+                          fontWeight: FontWeight.w500,
+                        ),
                       ),
                     ),
-                  ),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
                           sense.glosses.join(', '),
-                          style: Theme.of(
-                            context,
-                          ).textTheme.bodyMedium?.copyWith(height: 1.3),
+                          style: Theme.of(context)
+                              .textTheme
+                              .bodyMedium
+                              ?.copyWith(height: 1.3),
+                          softWrap: true,
+                          overflow: TextOverflow.visible,
                         ),
-                        if (sense.dial.isNotEmpty || sense.misc.isNotEmpty || sense.fields.isNotEmpty)
+                        if (sense.dial.isNotEmpty ||
+                            sense.misc.isNotEmpty ||
+                            sense.fields.isNotEmpty)
                           Padding(
                             padding: const EdgeInsets.only(top: 4.0),
                             child: Wrap(
                               spacing: 8.0,
+                              runSpacing: 4.0, // Added for better vertical spacing
                               children: [
                                 if (sense.dial.isNotEmpty)
                                   Container(
@@ -223,13 +230,15 @@ class _ResultExpressionListState extends State<ResultExpressionList> {
                                     ),
                                     decoration: BoxDecoration(
                                       borderRadius: BorderRadius.circular(4),
-                                      color: Colors.orange.withValues(alpha:0.1),
+                                      color: Colors.orange.withValues(alpha: 0.1),
                                     ),
                                     child: Text(
                                       sense.dial.join(', '),
                                       style: _styleFieldInformation.copyWith(
                                         color: Colors.orange[700],
                                       ),
+                                      softWrap: true,
+                                      overflow: TextOverflow.visible,
                                     ),
                                   ),
                                 if (sense.misc.isNotEmpty)
@@ -240,13 +249,15 @@ class _ResultExpressionListState extends State<ResultExpressionList> {
                                     ),
                                     decoration: BoxDecoration(
                                       borderRadius: BorderRadius.circular(4),
-                                      color: Colors.purple.withValues(alpha:0.1),
+                                      color: Colors.purple.withValues(alpha: 0.1),
                                     ),
                                     child: Text(
                                       sense.misc.join(', '),
                                       style: _styleFieldInformation.copyWith(
                                         color: Colors.purple[700],
                                       ),
+                                      softWrap: true,
+                                      overflow: TextOverflow.visible,
                                     ),
                                   ),
                                 if (sense.fields.isNotEmpty)
@@ -257,13 +268,15 @@ class _ResultExpressionListState extends State<ResultExpressionList> {
                                     ),
                                     decoration: BoxDecoration(
                                       borderRadius: BorderRadius.circular(4),
-                                      color: Colors.green.withValues(alpha:0.1),
+                                      color: Colors.green.withValues(alpha: 0.1),
                                     ),
                                     child: Text(
                                       sense.fields.join(', '),
                                       style: _styleFieldInformation.copyWith(
                                         color: Colors.green[700],
                                       ),
+                                      softWrap: true,
+                                      overflow: TextOverflow.visible,
                                     ),
                                   ),
                               ],
@@ -280,7 +293,7 @@ class _ResultExpressionListState extends State<ResultExpressionList> {
       ),
     );
   }
-
+  
   @override
   Widget build(BuildContext context) {
     // Group senses by part of speech
