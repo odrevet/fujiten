@@ -3,6 +3,7 @@ class Sense {
   List<String> posses;
   List<String> dial;
   List<String> misc;
+  List<String> fields;
   String lang;
 
   Sense({
@@ -10,6 +11,7 @@ class Sense {
     required this.posses,
     required this.dial,
     required this.misc,
+    required this.fields,
     this.lang = "eng",
   });
 }

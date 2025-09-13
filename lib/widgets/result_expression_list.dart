@@ -215,7 +215,7 @@ class _ResultExpressionListState extends State<ResultExpressionList> {
                             context,
                           ).textTheme.bodyMedium?.copyWith(height: 1.3),
                         ),
-                        if (sense.dial.isNotEmpty || sense.misc.isNotEmpty)
+                        if (sense.dial.isNotEmpty || sense.misc.isNotEmpty || sense.fields.isNotEmpty)
                           Padding(
                             padding: const EdgeInsets.only(top: 4.0),
                             child: Wrap(
@@ -252,6 +252,23 @@ class _ResultExpressionListState extends State<ResultExpressionList> {
                                       sense.misc.join(', '),
                                       style: _styleFieldInformation.copyWith(
                                         color: Colors.purple[700],
+                                      ),
+                                    ),
+                                  ),
+                                if (sense.fields.isNotEmpty)
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 6.0,
+                                      vertical: 2.0,
+                                    ),
+                                    decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.circular(4),
+                                      color: Colors.green.withValues(alpha:0.1),
+                                    ),
+                                    child: Text(
+                                      sense.fields.join(', '),
+                                      style: _styleFieldInformation.copyWith(
+                                        color: Colors.green[700],
                                       ),
                                     ),
                                   ),

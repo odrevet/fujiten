@@ -53,7 +53,7 @@ class DatabaseInterfaceExpression extends DatabaseInterface {
     String sql = '''SELECT
                     entry.id AS entry_id,
                     sense.id AS sense_id,
-                    GROUP_CONCAT(COALESCE(k_ele.keb || ':', '') || r_ele.reb) keb_reb_group,
+                    GROUP_CONCAT(DISTINCT COALESCE(k_ele.keb || ':', '') || r_ele.reb) keb_reb_group,
                     GROUP_CONCAT(DISTINCT gloss.content) AS gloss_group,
                     GROUP_CONCAT(DISTINCT pos.name) AS pos_group,
                     GROUP_CONCAT(DISTINCT dial.name) AS dial_group,
@@ -135,6 +135,9 @@ class DatabaseInterfaceExpression extends DatabaseInterface {
                 : [],
             misc: queryResult['misc_group'] != null
                 ? queryResult['misc_group'].split(',')
+                : [],
+            fields: queryResult['field_group'] != null
+                ? queryResult['field_group'].split(',')
                 : [],
             lang: "eng",
           ),
