@@ -69,7 +69,7 @@ class _SearchOptionsWidgetState extends State<SearchOptionsWidget> {
       });
 
       // Disable regexp if it's not available and currently enabled
-      if (context.read<SearchOptionsCubit>().state.useRegexp) {
+      if (mounted && context.read<SearchOptionsCubit>().state.useRegexp) {
         context.read<SearchOptionsCubit>().setUseRegexp(false);
       }
     }
@@ -353,7 +353,7 @@ class _SearchOptionsWidgetState extends State<SearchOptionsWidget> {
                       ? Theme.of(context).colorScheme.primary
                       : Theme.of(
                           context,
-                        ).colorScheme.onSurface.withOpacity(0.3),
+                        ).colorScheme.onSurface.withValues(alpha:0.3),
                 ),
               ),
             ),
@@ -431,7 +431,7 @@ class _SearchOptionsWidgetState extends State<SearchOptionsWidget> {
                       ? Theme.of(context).colorScheme.primary
                       : Theme.of(
                           context,
-                        ).colorScheme.onSurface.withOpacity(0.3),
+                        ).colorScheme.onSurface.withValues(alpha:0.3),
                 ),
               ),
             ),

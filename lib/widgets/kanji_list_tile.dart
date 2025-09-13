@@ -27,7 +27,7 @@ class KanjiListTile extends StatelessWidget {
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(12.0),
         color: selected
-            ? colorScheme.primaryContainer.withOpacity(0.3)
+            ? colorScheme.primaryContainer.withValues(alpha:0.3)
             : Colors.transparent,
         border: selected
             ? Border.all(color: colorScheme.primary, width: 2.0)
@@ -66,11 +66,11 @@ class KanjiListTile extends StatelessWidget {
       height: 60,
       decoration: BoxDecoration(
         color: selected
-            ? theme.colorScheme.primary.withOpacity(0.1)
+            ? theme.colorScheme.primary.withValues(alpha:0.1)
             : theme.colorScheme.surface,
         borderRadius: BorderRadius.circular(8.0),
         border: Border.all(
-          color: theme.colorScheme.outline.withOpacity(0.3),
+          color: theme.colorScheme.outline.withValues(alpha:0.3),
           width: 1.0,
         ),
       ),
@@ -138,9 +138,9 @@ class KanjiListTile extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
+        color: color.withValues(alpha:0.1),
         borderRadius: BorderRadius.circular(16.0),
-        border: Border.all(color: color.withOpacity(0.3)),
+        border: Border.all(color: color.withValues(alpha:0.3)),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -228,7 +228,7 @@ class KanjiListTile extends StatelessWidget {
         Icon(
           Icons.translate,
           size: 16.0,
-          color: theme.colorScheme.onSurface.withOpacity(0.6),
+          color: theme.colorScheme.onSurface.withValues(alpha:0.6),
         ),
         const SizedBox(width: 8.0),
         Expanded(

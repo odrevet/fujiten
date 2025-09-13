@@ -116,8 +116,8 @@ class _ResultExpressionListState extends State<ResultExpressionList> {
       padding: const EdgeInsets.all(12.0),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(8),
-        color: Colors.grey.withOpacity(0.05),
-        border: Border.all(color: Colors.grey.withOpacity(0.2)),
+        color: Colors.grey.withValues(alpha:0.05),
+        border: Border.all(color: Colors.grey.withValues(alpha:0.2)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -174,7 +174,7 @@ class _ResultExpressionListState extends State<ResultExpressionList> {
                                     ),
                                     decoration: BoxDecoration(
                                       borderRadius: BorderRadius.circular(4),
-                                      color: Colors.orange.withOpacity(0.1),
+                                      color: Colors.orange.withValues(alpha:0.1),
                                     ),
                                     child: Text(
                                       sense.dial.join(', '),
@@ -191,7 +191,7 @@ class _ResultExpressionListState extends State<ResultExpressionList> {
                                     ),
                                     decoration: BoxDecoration(
                                       borderRadius: BorderRadius.circular(4),
-                                      color: Colors.purple.withOpacity(0.1),
+                                      color: Colors.purple.withValues(alpha:0.1),
                                     ),
                                     child: Text(
                                       sense.misc.join(', '),
