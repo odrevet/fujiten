@@ -13,32 +13,45 @@ class SearchCubit extends Cubit<Search> {
       isLoadingNextPage: false,
       totalResult: 0,
       page: 0,
+      hasMoreResults: true, // Reset this when starting a new search
     ),
   );
 
   void nextPage() {
-    emit(state.copyWith(page: ++state.page, isLoadingNextPage: true));
+    // Only increment page if there are more results to load
+    if (state.hasMoreResults && !state.isLoadingNextPage) {
+      emit(state.copyWith(page: state.page + 1, isLoadingNextPage: true));
+    }
   }
 
   void runSearch(
-    DatabaseInterface databaseInterface,
-    String formattedInput,
-    int resultsPerPage,
-    bool useRegexp,
-  ) {
-    emit(state.copyWith(isLoading: true));
+      DatabaseInterface databaseInterface,
+      String formattedInput,
+      int resultsPerPage,
+      bool useRegexp,
+      ) {
+    // Don't run search if we know there are no more results
+    if (state.page > 0 && !state.hasMoreResults) {
+      return;
+    }
+
+    emit(state.copyWith(isLoading: state.page == 0, isLoadingNextPage: state.page > 0));
 
     databaseInterface
         .search(formattedInput, resultsPerPage, state.page, useRegexp)
         .then((searchResults) {
-          emit(
-            state.copyWith(
-              isLoading: false,
-              isLoadingNextPage: false,
-              totalResult: searchResults.length,
-              searchResults: [...state.searchResults, ...searchResults],
-            ),
-          );
-        });
+      // Check if we got fewer results than requested, indicating end of results
+      final hasMoreResults = searchResults.length == resultsPerPage;
+
+      emit(
+        state.copyWith(
+          isLoading: false,
+          isLoadingNextPage: false,
+          totalResult: state.searchResults.length + searchResults.length,
+          searchResults: [...state.searchResults, ...searchResults],
+          hasMoreResults: hasMoreResults,
+        ),
+      );
+    });
   }
 }

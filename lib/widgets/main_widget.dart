@@ -153,6 +153,13 @@ class _MainWidgetState extends State<MainWidget> {
   }
 
   void onEndReached() {
+    final searchState = context.read<SearchCubit>().state;
+
+    // Only proceed if we have more results and aren't already loading
+    if (!searchState.hasMoreResults || searchState.isLoadingNextPage) {
+      return;
+    }
+
     final searchOptions = context.read<SearchOptionsCubit>().state;
     final searchType = searchOptions.searchType;
 

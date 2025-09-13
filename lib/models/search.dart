@@ -11,6 +11,7 @@ class Search {
   int? resultsPerPageKanji;
   int? resultsPerPageExpression;
   SearchType? searchType;
+  final bool hasMoreResults;
 
   Search({
     this.totalResult = 0,
@@ -20,6 +21,7 @@ class Search {
     this.resultsPerPageKanji,
     this.resultsPerPageExpression = 10,
     this.searchResults = const [],
+    this.hasMoreResults = true,
   });
 
   Search copyWith({
@@ -30,6 +32,7 @@ class Search {
     int? resultsPerPageKanji,
     int? resultsPerPageExpression,
     int? totalResult,
+    bool? hasMoreResults,
   }) {
     return Search(
       isLoading: isLoading ?? this.isLoading,
@@ -40,6 +43,7 @@ class Search {
       resultsPerPageExpression:
           resultsPerPageExpression ?? this.resultsPerPageExpression,
       searchResults: searchResults ?? this.searchResults,
+      hasMoreResults: hasMoreResults ?? this.hasMoreResults,
     );
   }
 }
