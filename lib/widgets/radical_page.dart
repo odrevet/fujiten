@@ -33,7 +33,7 @@ class RadicalPageState extends State<RadicalPage> {
           .getRadicalsForSelection(widget.selectedRadicals)
           .then(
             (validRadicals) => setState(() => _validRadicals = validRadicals),
-      );
+          );
     }
     super.initState();
   }
@@ -72,65 +72,89 @@ class RadicalPageState extends State<RadicalPage> {
               radicals = radicals
                   .where(
                     (radical) => radical.meanings == null
-                    ? false
-                    : radical.meanings!.any(
-                      (meaning) => meaning.contains(filter),
-                ),
-              )
+                        ? false
+                        : radical.meanings!.any(
+                            (meaning) => meaning.contains(filter),
+                          ),
+                  )
                   .toList();
             } else if (kanaKit.isHiragana(filter)) {
               radicals = radicals
                   .where(
                     (radical) => radical.kun == null
-                    ? false
-                    : radical.kun!.any((kun) => kun.contains(filter)),
-              )
+                        ? false
+                        : radical.kun!.any((kun) => kun.contains(filter)),
+                  )
                   .toList();
             } else if (kanaKit.isKatakana(filter)) {
               radicals = radicals
                   .where(
                     (radical) => radical.on == null
-                    ? false
-                    : radical.on!.any((on) => on.contains(filter)),
-              )
+                        ? false
+                        : radical.on!.any((on) => on.contains(filter)),
+                  )
                   .toList();
             }
           }
 
-          // Check if we're in landscape mode and adjust layout accordingly
-          final isLandscape = MediaQuery.of(context).orientation == Orientation.landscape;
-          final screenHeight = MediaQuery.of(context).size.height;
-          final isSmallScreen = screenHeight < 600;
-
           body = Column(
             children: [
-              // Matched Kanji List - Use fixed height in landscape mode
-              Container(
-                height: isLandscape && isSmallScreen ? 60 : null,
-                child: isLandscape && isSmallScreen
-                    ? _buildMatchedKanjiSection()
-                    : Expanded(
-                  flex: 1,
-                  child: _buildMatchedKanjiSection(),
-                ),
-              ),
-              // Search Field - Use fixed height in landscape mode
-              Container(
-                height: isLandscape && isSmallScreen ? 60 : null,
-                padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-                child: isLandscape && isSmallScreen
-                    ? _buildSearchField()
-                    : Expanded(
-                  flex: 1,
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                    child: _buildSearchField(),
-                  ),
-                ),
-              ),
-              // Radicals Grid/List - Take remaining space
               Expanded(
-                flex: isLandscape && isSmallScreen ? 1 : 8,
+                flex: 1,
+                child: FutureBuilder<List<String>>(
+                  future: context
+                      .read<KanjiCubit>()
+                      .databaseInterface
+                      .getCharactersFromRadicals(widget.selectedRadicals),
+                  builder:
+                      (
+                        BuildContext context,
+                        AsyncSnapshot<List<String>> snapshot,
+                      ) {
+                        if (snapshot.hasData) {
+                          var buttonList = snapshot.data!
+                              .map<Widget>((kanji) => kanjiButton(kanji))
+                              .toList();
+                          return ListView(
+                            scrollDirection: Axis.horizontal,
+                            children: buttonList,
+                          );
+                        } else {
+                          return const Center(
+                            child: Text("Matched Kanji will appears here"),
+                          );
+                        }
+                      },
+                ),
+              ),
+              Expanded(
+                flex: 1,
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: TextField(
+                        controller: filterController,
+                        decoration: InputDecoration(
+                          hintText: 'Filter by meaning, on yomi, kun yomi',
+                          suffix: Align(
+                            widthFactor: 1.0,
+                            heightFactor: 1.0,
+                            child: IconButton(
+                              icon: const Icon(Icons.translate),
+                              onPressed: convert,
+                            ),
+                          ),
+                        ),
+                        onChanged: (value) => setState(() {
+                          filter = value;
+                        }),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Expanded(
+                flex: 8,
                 child: listViewDisplay == true
                     ? radicalListView(radicals)
                     : radicalGridView(radicals),
@@ -175,64 +199,14 @@ class RadicalPageState extends State<RadicalPage> {
     );
   }
 
-  Widget _buildMatchedKanjiSection() {
-    return FutureBuilder<List<String>>(
-      future: context
-          .read<KanjiCubit>()
-          .databaseInterface
-          .getCharactersFromRadicals(widget.selectedRadicals),
-      builder: (BuildContext context, AsyncSnapshot<List<String>> snapshot) {
-        if (snapshot.hasData) {
-          var buttonList = snapshot.data!
-              .map<Widget>((kanji) => kanjiButton(kanji))
-              .toList();
-          return ListView(
-            scrollDirection: Axis.horizontal,
-            children: buttonList,
-          );
-        } else {
-          return const Center(
-            child: Text("Matched Kanji will appear here"),
-          );
-        }
-      },
-    );
-  }
-
-  Widget _buildSearchField() {
-    return Row(
-      children: [
-        Expanded(
-          child: TextField(
-            controller: filterController,
-            decoration: InputDecoration(
-              hintText: 'Filter by meaning, on yomi, kun yomi',
-              suffix: Align(
-                widthFactor: 1.0,
-                heightFactor: 1.0,
-                child: IconButton(
-                  icon: const Icon(Icons.translate),
-                  onPressed: convert,
-                ),
-              ),
-            ),
-            onChanged: (value) => setState(() {
-              filter = value;
-            }),
-          ),
-        ),
-      ],
-    );
-  }
-
   Widget radicalListView(List<Kanji> radicals) {
     // remove not selectable radicals
     radicals = radicals
         .where(
           (radical) =>
-      _validRadicals.isEmpty ||
-          _validRadicals.contains(radical.literal),
-    )
+              _validRadicals.isEmpty ||
+              _validRadicals.contains(radical.literal),
+        )
         .toList();
 
     return ListView.separated(
@@ -258,9 +232,9 @@ class RadicalPageState extends State<RadicalPage> {
     radicals = radicals
         .where(
           (radical) =>
-      _validRadicals.isEmpty ||
-          _validRadicals.contains(radical.literal),
-    )
+              _validRadicals.isEmpty ||
+              _validRadicals.contains(radical.literal),
+        )
         .toList();
 
     return LayoutBuilder(
