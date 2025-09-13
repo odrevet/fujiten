@@ -112,7 +112,12 @@ class DatabaseInterfaceKanji extends DatabaseInterface {
   }
 
   Future<List<String>> getCharactersFromRadicals(List<String> radicals) async {
-    String sql = ' SELECT id FROM character WHERE id IN (';
+    // Handle empty radical list
+    if (radicals.isEmpty) {
+      return <String>[];
+    }
+
+    String sql = 'SELECT id FROM character WHERE id IN (';
     radicals.asMap().forEach((i, radical) {
       sql +=
       "SELECT id_character FROM character_radical WHERE id_radical = '$radical'";
@@ -127,7 +132,7 @@ class DatabaseInterfaceKanji extends DatabaseInterface {
       return kanjiMaps[i]["id"];
     });
   }
-
+  
   Future<List<Kanji>> getRadicals() async {
     final List<Map<String, dynamic>> radicalMaps = await database!.rawQuery(
       '''SELECT radical.id, 
