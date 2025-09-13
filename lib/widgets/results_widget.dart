@@ -121,10 +121,7 @@ class _ResultsWidgetState extends State<ResultsWidget> {
               // Center the DatabaseStatusDisplay vertically
               child = Center(child: DatabaseStatusDisplay());
             } else {
-              child = ListView.separated(
-                separatorBuilder: (context, index) {
-                  return const Divider();
-                },
+              child = ListView.builder(
                 controller: _scrollController,
                 itemCount: search.searchResults.length,
                 itemBuilder: (BuildContext context, int index) {
