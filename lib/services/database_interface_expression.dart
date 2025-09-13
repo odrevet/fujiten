@@ -21,14 +21,20 @@ class DatabaseInterfaceExpression extends DatabaseInterface {
 
     if (kanaKit.isRomaji(input)) {
       sql =
-          "SELECT DISTINCT sense.id_entry FROM sense JOIN gloss ON gloss.id_sense = sense.id WHERE gloss.content $searchOperator '$input'";
+          '''SELECT DISTINCT sense.id_entry 
+             FROM sense JOIN gloss ON gloss.id_sense = sense.id 
+             WHERE gloss.content $searchOperator '$input' ''';
     } else {
       // if the input does not contains a kanji do not search in the reb
       var regExp = RegExp(regexKanji);
       var hasKanji = regExp.hasMatch(input);
       sql =
-          '''SELECT DISTINCT  entry_sub.id FROM entry entry_sub JOIN sense sense_sub ON entry_sub.id = sense_sub.id_entry JOIN r_ele on entry_sub.id = r_ele.id_entry
-         LEFT JOIN k_ele ON entry_sub.id = k_ele.id_entry WHERE (keb $searchOperator '$input' ${hasKanji ? "" : "OR reb $searchOperator '$input'"})''';
+          '''SELECT DISTINCT entry_sub.id 
+             FROM entry entry_sub
+             JOIN sense sense_sub ON entry_sub.id = sense_sub.id_entry 
+             JOIN r_ele on entry_sub.id = r_ele.id_entry
+             LEFT JOIN k_ele ON entry_sub.id = k_ele.id_entry 
+             WHERE (keb $searchOperator '$input' ${hasKanji ? "" : "OR reb $searchOperator '$input'"})''';
     }
 
     if (resultsPerPage != null) {
@@ -62,19 +68,19 @@ class DatabaseInterfaceExpression extends DatabaseInterface {
                   GROUP_CONCAT(DISTINCT dial.name) dial_group,
                   GROUP_CONCAT(DISTINCT field.name) field_group,
                   GROUP_CONCAT(DISTINCT misc.name) misc_group
-                  FROM entry
-                  JOIN sense ON sense.id_entry = entry.id
-                  JOIN gloss ON gloss.id_sense = sense.id
-                  LEFT JOIN sense_pos on sense.id = sense_pos.id_sense 
-                  LEFT JOIN pos on sense_pos.id_pos = pos.id
-                  LEFT JOIN sense_dial on sense.id = sense_dial.id_sense 
-                  LEFT JOIN dial on sense_dial.id_dial = dial.id
-                  LEFT JOIN sense_field on sense.id = sense_field.id_sense 
-                  LEFT JOIN field on sense_field.id_field = field.id
-                  LEFT JOIN sense_misc on sense.id = sense_misc.id_sense 
-                  LEFT JOIN misc on sense_misc.id_misc = misc.id
-                  WHERE entry.id IN (${subQuery(input, resultsPerPage, currentPage, useRegexp)})
-                  GROUP BY sense.id''';
+           FROM entry
+           JOIN sense ON sense.id_entry = entry.id
+           JOIN gloss ON gloss.id_sense = sense.id
+           LEFT JOIN sense_pos on sense.id = sense_pos.id_sense 
+           LEFT JOIN pos on sense_pos.id_pos = pos.id
+           LEFT JOIN sense_dial on sense.id = sense_dial.id_sense 
+           LEFT JOIN dial on sense_dial.id_dial = dial.id
+           LEFT JOIN sense_field on sense.id = sense_field.id_sense 
+           LEFT JOIN field on sense_field.id_field = field.id
+           LEFT JOIN sense_misc on sense.id = sense_misc.id_sense 
+           LEFT JOIN misc on sense_misc.id_misc = misc.id
+           WHERE entry.id IN (${subQuery(input, resultsPerPage, currentPage, useRegexp)})
+           GROUP BY sense.id''';
 
     log(sql);
     List<Map<String, dynamic>> queryResults;

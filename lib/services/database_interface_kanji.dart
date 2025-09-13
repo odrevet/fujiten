@@ -26,42 +26,42 @@ class DatabaseInterfaceKanji extends DatabaseInterface {
     } else if (kanaKit.isHiragana(input)) {
       where =
           '''WHERE character.id IN (SELECT character.id
-        FROM character 
-        INNER JOIN kun_yomi ON kun_yomi.id_character = character.id 
-        WHERE REPLACE(REPLACE(kun_yomi.reading,'-',''),'.','') = '$input'
-        GROUP BY character.id)''';
+             FROM character 
+             INNER JOIN kun_yomi ON kun_yomi.id_character = character.id 
+             WHERE REPLACE(REPLACE(kun_yomi.reading,'-',''),'.','') = '$input'
+             GROUP BY character.id)''';
     } else if (kanaKit.isKatakana(input)) {
       where =
           '''WHERE character.id IN (SELECT character.id
-        FROM character 
-        INNER JOIN on_yomi ON on_yomi.id_character = character.id 
-        WHERE on_yomi.reading = '$input'
-        GROUP BY character.id)''';
+             FROM character 
+             INNER JOIN on_yomi ON on_yomi.id_character = character.id 
+             WHERE on_yomi.reading = '$input'
+             GROUP BY character.id)''';
     } else if (kanaKit.isRomaji(input)) {
       where =
           '''WHERE character.id IN (SELECT character.id
-        FROM character 
-        LEFT JOIN meaning ON meaning.id_character = character.id
-        WHERE meaning.content $searchOperator '$input'
-        GROUP BY character.id)''';
+             FROM character 
+             LEFT JOIN meaning ON meaning.id_character = character.id
+             WHERE meaning.content $searchOperator '$input'
+             GROUP BY character.id)''';
     } else {
       where = "WHERE character.id $searchOperator '$input'";
     }
 
     String sql =
         '''SELECT character.*,
-        GROUP_CONCAT(DISTINCT character_radical.id_radical) as radicals,
-        GROUP_CONCAT(DISTINCT on_yomi.reading) AS on_reading,
-        GROUP_CONCAT(DISTINCT kun_yomi.reading) AS kun_reading,
-        GROUP_CONCAT(DISTINCT meaning.content) AS meanings
-        FROM character
-        LEFT JOIN character_radical ON character.id = character_radical.id_character
-        LEFT JOIN on_yomi ON character.id = on_yomi.id_character
-        LEFT JOIN kun_yomi ON kun_yomi.id_character = character.id
-        LEFT JOIN meaning ON meaning.id_character = character.id
-        $where
-        GROUP BY character.id
-        ORDER BY character.freq NULLS LAST, character.stroke_count''';
+           GROUP_CONCAT(DISTINCT character_radical.id_radical) as radicals,
+           GROUP_CONCAT(DISTINCT on_yomi.reading) AS on_reading,
+           GROUP_CONCAT(DISTINCT kun_yomi.reading) AS kun_reading,
+           GROUP_CONCAT(DISTINCT meaning.content) AS meanings
+           FROM character
+           LEFT JOIN character_radical ON character.id = character_radical.id_character
+           LEFT JOIN on_yomi ON character.id = on_yomi.id_character
+           LEFT JOIN kun_yomi ON kun_yomi.id_character = character.id
+           LEFT JOIN meaning ON meaning.id_character = character.id
+           $where
+           GROUP BY character.id
+           ORDER BY character.freq NULLS LAST, character.stroke_count''';
 
     if (resultsPerPage != null) {
       sql += " LIMIT $resultsPerPage OFFSET ${currentPage * resultsPerPage}";
