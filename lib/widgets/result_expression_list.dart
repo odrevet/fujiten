@@ -18,7 +18,6 @@ class ResultExpressionList extends StatefulWidget {
 class _ResultExpressionListState extends State<ResultExpressionList> {
   late TextStyle _styleFieldInformation;
   late TextStyle _posStyle;
-  late TextStyle _referenceStyle;
 
   @override
   initState() {
@@ -32,11 +31,6 @@ class _ResultExpressionListState extends State<ResultExpressionList> {
       fontSize: 12,
       fontWeight: FontWeight.w600,
       color: Colors.blueGrey,
-    );
-    _referenceStyle = const TextStyle(
-      fontSize: 12,
-      fontWeight: FontWeight.w500,
-      color: Colors.indigo,
     );
   }
 
