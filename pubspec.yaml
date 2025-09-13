@@ -1,10 +1,10 @@
 name: fujiten
 description: Offline Japanese dictionary made with flutter
 
-version: 1.0.9+10
+version: 2.0.0+11
 
 environment:
-  sdk: ^3.8.1
+  sdk: ^3.9.0
 
 dependencies:
   flutter:
