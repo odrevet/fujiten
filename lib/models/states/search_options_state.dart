@@ -1,6 +1,5 @@
 import 'package:equatable/equatable.dart';
 
-
 enum SearchType { expression, kanji }
 
 // SearchOptions state class
@@ -19,10 +18,10 @@ class SearchOptionsState extends Equatable {
 
   // Default constructor with initial values
   const SearchOptionsState.initial()
-      : useRegexp = false,
-        resultsPerPageKanji = 20,
-        resultsPerPageExpression = 20,
-        searchType = SearchType.expression;
+    : useRegexp = false,
+      resultsPerPageKanji = 20,
+      resultsPerPageExpression = 20,
+      searchType = SearchType.expression;
 
   // CopyWith method for immutable state updates
   SearchOptionsState copyWith({
@@ -34,7 +33,8 @@ class SearchOptionsState extends Equatable {
     return SearchOptionsState(
       useRegexp: useRegexp ?? this.useRegexp,
       resultsPerPageKanji: resultsPerPageKanji ?? this.resultsPerPageKanji,
-      resultsPerPageExpression: resultsPerPageExpression ?? this.resultsPerPageExpression,
+      resultsPerPageExpression:
+          resultsPerPageExpression ?? this.resultsPerPageExpression,
       searchType: searchType ?? this.searchType,
     );
   }

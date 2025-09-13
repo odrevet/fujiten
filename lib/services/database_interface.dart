@@ -1,11 +1,8 @@
-import 'package:sqflite/sqflite.dart';
-import 'package:sqflite_common/sqlite_api.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 
 import '../models/entry.dart';
 
 enum DatabaseStatus { ok, pathNotSet, noResults }
-
 
 abstract class DatabaseInterface {
   Database? database;
@@ -37,7 +34,7 @@ abstract class DatabaseInterface {
     String input,
     int resultsPerPage,
     int currentPage,
-    bool useRegexp
+    bool useRegexp,
   );
 
   Future<int> count();

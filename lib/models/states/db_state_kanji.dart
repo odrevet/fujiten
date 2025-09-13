@@ -1,8 +1,8 @@
 import 'package:equatable/equatable.dart';
 
+import '../../services/database_interface.dart';
 import '../entry.dart';
 import '../kanji.dart';
-import '../../services/database_interface.dart';
 
 // States
 abstract class KanjiState extends Equatable {

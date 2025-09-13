@@ -226,7 +226,7 @@ class _DatabaseSettingsWidgetState extends State<DatabaseSettingsWidget> {
                                             await databaseInterface.setStatus();
 
                                             // Refresh the cubit state
-                                            if(context.mounted) {
+                                            if (context.mounted) {
                                               _refreshDatabaseStatus(context);
                                             }
                                           } catch (e) {
@@ -260,7 +260,7 @@ class _DatabaseSettingsWidgetState extends State<DatabaseSettingsWidget> {
                                       await databaseInterface.setStatus();
 
                                       // Refresh the cubit state
-                                      if(context.mounted) {
+                                      if (context.mounted) {
                                         _refreshDatabaseStatus(context);
                                       }
                                     }
@@ -288,7 +288,7 @@ class _DatabaseSettingsWidgetState extends State<DatabaseSettingsWidget> {
                                         DatabaseStatus.pathNotSet;
 
                                     // Refresh the cubit state
-                                    if(context.mounted) {
+                                    if (context.mounted) {
                                       _refreshDatabaseStatus(context);
                                     }
                                   },

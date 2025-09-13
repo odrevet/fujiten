@@ -80,10 +80,7 @@ class _ResultExpressionListState extends State<ResultExpressionList> {
         onLongPress: () => _copyToClipboard(mainReading),
         child: Text(
           mainReading,
-          style: const TextStyle(
-            fontSize: 24.0,
-            fontWeight: FontWeight.w500,
-          ),
+          style: const TextStyle(fontSize: 24.0, fontWeight: FontWeight.w500),
           textAlign: TextAlign.center,
         ),
       ),
@@ -106,14 +103,13 @@ class _ResultExpressionListState extends State<ResultExpressionList> {
           return GestureDetector(
             onTap: () => _showKanjiDialog(literals),
             onLongPress: () => _copyToClipboard(reading),
-            child: Text(
-              reading,
-            ),
+            child: Text(reading),
           );
         }).toList(),
       ),
     );
   }
+
   Widget _buildSenseGroup(String? pos, List<Sense> senses) {
     return Container(
       margin: const EdgeInsets.only(bottom: 16.0),
@@ -129,10 +125,7 @@ class _ResultExpressionListState extends State<ResultExpressionList> {
           if (pos != null && pos.isNotEmpty)
             Container(
               padding: const EdgeInsets.only(bottom: 8.0),
-              child: Text(
-                pos,
-                style: _posStyle,
-              ),
+              child: Text(pos, style: _posStyle),
             ),
           ...senses.asMap().entries.map((entry) {
             final index = entry.key;
@@ -163,9 +156,9 @@ class _ResultExpressionListState extends State<ResultExpressionList> {
                       children: [
                         Text(
                           sense.glosses.join(', '),
-                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                            height: 1.3,
-                          ),
+                          style: Theme.of(
+                            context,
+                          ).textTheme.bodyMedium?.copyWith(height: 1.3),
                         ),
                         if (sense.dial.isNotEmpty || sense.misc.isNotEmpty)
                           Padding(
@@ -216,7 +209,7 @@ class _ResultExpressionListState extends State<ResultExpressionList> {
                 ],
               ),
             );
-          })
+          }),
         ],
       ),
     );

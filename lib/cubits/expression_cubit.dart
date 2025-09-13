@@ -79,7 +79,6 @@ class ExpressionCubit extends Cubit<ExpressionState> {
     }
   }
 
-
   void clearSearch() {
     emit(ExpressionInitial());
   }

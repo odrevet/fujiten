@@ -49,9 +49,7 @@ class KanjiListTile extends StatelessWidget {
                 const SizedBox(width: 16.0),
 
                 // Kanji details
-                Expanded(
-                  child: _buildKanjiDetails(context),
-                ),
+                Expanded(child: _buildKanjiDetails(context)),
               ],
             ),
           ),
@@ -126,13 +124,17 @@ class KanjiListTile extends StatelessWidget {
         const SizedBox(height: 8.0),
 
         // Meanings section
-        if (_getMeaning().isNotEmpty)
-          _buildMeaningSection(context),
+        if (_getMeaning().isNotEmpty) _buildMeaningSection(context),
       ],
     );
   }
 
-  Widget _buildInfoChip(BuildContext context, String text, IconData icon, Color color) {
+  Widget _buildInfoChip(
+    BuildContext context,
+    String text,
+    IconData icon,
+    Color color,
+  ) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
       decoration: BoxDecoration(
@@ -184,7 +186,12 @@ class KanjiListTile extends StatelessWidget {
     );
   }
 
-  Widget _buildReadingRow(BuildContext context, String label, String reading, Color color) {
+  Widget _buildReadingRow(
+    BuildContext context,
+    String label,
+    String reading,
+    Color color,
+  ) {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [

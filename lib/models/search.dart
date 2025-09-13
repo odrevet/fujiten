@@ -2,7 +2,6 @@ import 'package:fujiten/models/states/search_options_state.dart';
 
 import 'entry.dart';
 
-
 class Search {
   int totalResult;
   List<Entry> searchResults;

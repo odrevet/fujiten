@@ -1,7 +1,7 @@
 import 'package:equatable/equatable.dart';
 
-import '../entry.dart';
 import '../../services/database_interface.dart';
+import '../entry.dart';
 
 // States
 abstract class ExpressionState extends Equatable {

@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../../cubits/search_options_cubit.dart';
 import '../../cubits/expression_cubit.dart';
+import '../../cubits/search_options_cubit.dart';
 import '../../models/states/search_options_state.dart';
 
 class SearchOptionsWidget extends StatefulWidget {
@@ -26,8 +26,12 @@ class _SearchOptionsWidgetState extends State<SearchOptionsWidget> {
     super.initState();
     // Initialize controllers
     final state = context.read<SearchOptionsCubit>().state;
-    _kanjiController = TextEditingController(text: state.resultsPerPageKanji.toString());
-    _expressionController = TextEditingController(text: state.resultsPerPageExpression.toString());
+    _kanjiController = TextEditingController(
+      text: state.resultsPerPageKanji.toString(),
+    );
+    _expressionController = TextEditingController(
+      text: state.resultsPerPageExpression.toString(),
+    );
 
     // Automatically test regexp availability when widget initializes
     _testRegexpAvailability();
@@ -46,8 +50,13 @@ class _SearchOptionsWidgetState extends State<SearchOptionsWidget> {
     });
 
     try {
-      final database = context.read<ExpressionCubit>().databaseInterface.database;
-      await database!.rawQuery("SELECT id FROM gloss WHERE content REGEXP '.*' LIMIT 1");
+      final database = context
+          .read<ExpressionCubit>()
+          .databaseInterface
+          .database;
+      await database!.rawQuery(
+        "SELECT id FROM gloss WHERE content REGEXP '.*' LIMIT 1",
+      );
 
       setState(() {
         _isRegexpAvailable = true;
@@ -121,7 +130,10 @@ class _SearchOptionsWidgetState extends State<SearchOptionsWidget> {
     );
   }
 
-  Widget _buildSearchTypeSelector(BuildContext context, SearchOptionsState state) {
+  Widget _buildSearchTypeSelector(
+    BuildContext context,
+    SearchOptionsState state,
+  ) {
     return Card(
       elevation: 0,
       color: Theme.of(context).colorScheme.surfaceContainerLow,
@@ -152,9 +164,18 @@ class _SearchOptionsWidgetState extends State<SearchOptionsWidget> {
               label: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Text('言', style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
+                  Text(
+                    '言',
+                    style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                  ),
                   SizedBox(height: 2),
-                  Text('Expression', style: TextStyle(fontSize: 10, fontWeight: FontWeight.normal)),
+                  Text(
+                    'Expression',
+                    style: TextStyle(
+                      fontSize: 10,
+                      fontWeight: FontWeight.normal,
+                    ),
+                  ),
                 ],
               ),
             ),
@@ -163,18 +184,25 @@ class _SearchOptionsWidgetState extends State<SearchOptionsWidget> {
               label: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Text('漢', style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
+                  Text(
+                    '漢',
+                    style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                  ),
                   SizedBox(height: 2),
-                  Text('Kanji', style: TextStyle(fontSize: 10, fontWeight: FontWeight.normal)),
+                  Text(
+                    'Kanji',
+                    style: TextStyle(
+                      fontSize: 10,
+                      fontWeight: FontWeight.normal,
+                    ),
+                  ),
                 ],
               ),
             ),
           ],
           selected: {state.searchType},
           onSelectionChanged: (Set<SearchType> selected) {
-            context.read<SearchOptionsCubit>().setSearchType(
-              selected.first,
-            );
+            context.read<SearchOptionsCubit>().setSearchType(selected.first);
           },
         ),
       ),
@@ -207,16 +235,16 @@ class _SearchOptionsWidgetState extends State<SearchOptionsWidget> {
         onChanged: _isTestingRegexp
             ? null
             : (bool value) {
-          context.read<SearchOptionsCubit>().setUseRegexp(value);
-        },
+                context.read<SearchOptionsCubit>().setUseRegexp(value);
+              },
       ),
     );
   }
 
   Widget _buildResultsPerPageKanji(
-      BuildContext context,
-      SearchOptionsState state,
-      ) {
+    BuildContext context,
+    SearchOptionsState state,
+  ) {
     return _buildResultsPerPageCard(
       context: context,
       title: 'Kanji Results',
@@ -230,9 +258,9 @@ class _SearchOptionsWidgetState extends State<SearchOptionsWidget> {
   }
 
   Widget _buildResultsPerPageExpression(
-      BuildContext context,
-      SearchOptionsState state,
-      ) {
+    BuildContext context,
+    SearchOptionsState state,
+  ) {
     return _buildResultsPerPageCard(
       context: context,
       title: 'Expression Results',
@@ -265,9 +293,9 @@ class _SearchOptionsWidgetState extends State<SearchOptionsWidget> {
         ),
         title: Text(
           title,
-          style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-            fontWeight: FontWeight.w500,
-          ),
+          style: Theme.of(
+            context,
+          ).textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.w500),
         ),
         trailing: _buildIntegerInput(
           context: context,
@@ -294,9 +322,7 @@ class _SearchOptionsWidgetState extends State<SearchOptionsWidget> {
       height: 40,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(6),
-        border: Border.all(
-          color: Theme.of(context).colorScheme.outline,
-        ),
+        border: Border.all(color: Theme.of(context).colorScheme.outline),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -311,10 +337,10 @@ class _SearchOptionsWidgetState extends State<SearchOptionsWidget> {
               ),
               onTap: currentValue > min
                   ? () {
-                final newValue = currentValue - 1;
-                controller.text = newValue.toString();
-                onChanged(newValue);
-              }
+                      final newValue = currentValue - 1;
+                      controller.text = newValue.toString();
+                      onChanged(newValue);
+                    }
                   : null,
               child: Container(
                 width: 32,
@@ -325,7 +351,9 @@ class _SearchOptionsWidgetState extends State<SearchOptionsWidget> {
                   size: 16,
                   color: currentValue > min
                       ? Theme.of(context).colorScheme.primary
-                      : Theme.of(context).colorScheme.onSurface.withOpacity(0.3),
+                      : Theme.of(
+                          context,
+                        ).colorScheme.onSurface.withOpacity(0.3),
                 ),
               ),
             ),
@@ -337,9 +365,9 @@ class _SearchOptionsWidgetState extends State<SearchOptionsWidget> {
               controller: controller,
               keyboardType: TextInputType.number,
               textAlign: TextAlign.center,
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                fontWeight: FontWeight.w500,
-              ),
+              style: Theme.of(
+                context,
+              ).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w500),
               inputFormatters: [
                 FilteringTextInputFormatter.digitsOnly,
                 LengthLimitingTextInputFormatter(3),
@@ -387,10 +415,10 @@ class _SearchOptionsWidgetState extends State<SearchOptionsWidget> {
               ),
               onTap: currentValue < max
                   ? () {
-                final newValue = currentValue + 1;
-                controller.text = newValue.toString();
-                onChanged(newValue);
-              }
+                      final newValue = currentValue + 1;
+                      controller.text = newValue.toString();
+                      onChanged(newValue);
+                    }
                   : null,
               child: Container(
                 width: 32,
@@ -401,7 +429,9 @@ class _SearchOptionsWidgetState extends State<SearchOptionsWidget> {
                   size: 16,
                   color: currentValue < max
                       ? Theme.of(context).colorScheme.primary
-                      : Theme.of(context).colorScheme.onSurface.withOpacity(0.3),
+                      : Theme.of(
+                          context,
+                        ).colorScheme.onSurface.withOpacity(0.3),
                 ),
               ),
             ),
@@ -425,7 +455,8 @@ class _SearchOptionsWidgetState extends State<SearchOptionsWidget> {
               // Update controllers with reset values
               final state = context.read<SearchOptionsCubit>().state;
               _kanjiController.text = state.resultsPerPageKanji.toString();
-              _expressionController.text = state.resultsPerPageExpression.toString();
+              _expressionController.text = state.resultsPerPageExpression
+                  .toString();
             },
             icon: const Icon(Icons.refresh, size: 16),
             label: const Text('Reset to Defaults'),
@@ -445,9 +476,9 @@ class _RangeTextInputFormatter extends TextInputFormatter {
 
   @override
   TextEditingValue formatEditUpdate(
-      TextEditingValue oldValue,
-      TextEditingValue newValue,
-      ) {
+    TextEditingValue oldValue,
+    TextEditingValue newValue,
+  ) {
     if (newValue.text.isEmpty) {
       return newValue;
     }

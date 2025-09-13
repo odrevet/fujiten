@@ -87,10 +87,14 @@ class _FujitenMenuBarState extends State<FujitenMenuBar> {
                 addStringInController(charKana);
                 break;
               case 3:
-                addStringInController(searchOptionsState.useRegexp ? '.*' : '%');
+                addStringInController(
+                  searchOptionsState.useRegexp ? '.*' : '%',
+                );
                 break;
             }
-            context.read<InputCubit>().setInput(widget.textEditingController!.text);
+            context.read<InputCubit>().setInput(
+              widget.textEditingController!.text,
+            );
           },
           itemBuilder: (context) => [
             const PopupMenuItem(value: 0, child: Text('<> Radicals')),
@@ -98,7 +102,9 @@ class _FujitenMenuBarState extends State<FujitenMenuBar> {
             const PopupMenuItem(value: 2, child: Text('$charKana Kana')),
             PopupMenuItem(
               value: 3,
-              child: Text('${searchOptionsState.useRegexp ? ".*" : "%"} Anything'),
+              child: Text(
+                '${searchOptionsState.useRegexp ? ".*" : "%"} Anything',
+              ),
             ),
           ],
         );
@@ -108,7 +114,8 @@ class _FujitenMenuBarState extends State<FujitenMenuBar> {
           onSelected: (dynamic result) {
             if (result == "add") {
               context.read<InputCubit>().addInput();
-              int searchIndex = context.read<InputCubit>().state.inputs.length - 1;
+              int searchIndex =
+                  context.read<InputCubit>().state.inputs.length - 1;
               context.read<InputCubit>().setSearchIndex(searchIndex);
               widget.textEditingController!.text = context
                   .read<InputCubit>()
@@ -123,10 +130,10 @@ class _FujitenMenuBarState extends State<FujitenMenuBar> {
             } else if (result == "clear") {
               widget.textEditingController!.clear();
               context.read<InputCubit>().state.inputs[context
-                  .read<InputCubit>()
-                  .state
-                  .searchIndex] =
-              "";
+                      .read<InputCubit>()
+                      .state
+                      .searchIndex] =
+                  "";
               widget.focusNode.requestFocus();
             } else {
               context.read<InputCubit>().setSearchIndex(result);
@@ -137,53 +144,57 @@ class _FujitenMenuBarState extends State<FujitenMenuBar> {
             }
           },
           itemBuilder: (itemBuilderContext) =>
-          context
-              .read<InputCubit>()
-              .state
-              .inputs
-              .asMap()
-              .entries
-              .map<PopupMenuEntry<dynamic>>(
-                (entry) => PopupMenuItem(
-              value: entry.key,
-              child: ListTile(
-                leading: Text(entry.key.toString()),
-                title: Text(entry.value),
-                selected:
-                entry.key ==
-                    context.read<InputCubit>().state.searchIndex,
-              ),
-            ),
-          )
-              .toList()
-            ..add(
-              const PopupMenuItem(
-                value: "add",
-                child: ListTile(leading: Icon(Icons.add), title: Text('Add')),
-              ),
-            )
-            ..add(
-              PopupMenuItem(
-                value: "remove",
-                enabled: context.read<InputCubit>().state.inputs.length > 1,
-                child: ListTile(
-                  enabled: context.read<InputCubit>().state.inputs.length > 1,
-                  leading: const Icon(Icons.remove),
-                  title: const Text('Remove'),
+              context
+                  .read<InputCubit>()
+                  .state
+                  .inputs
+                  .asMap()
+                  .entries
+                  .map<PopupMenuEntry<dynamic>>(
+                    (entry) => PopupMenuItem(
+                      value: entry.key,
+                      child: ListTile(
+                        leading: Text(entry.key.toString()),
+                        title: Text(entry.value),
+                        selected:
+                            entry.key ==
+                            context.read<InputCubit>().state.searchIndex,
+                      ),
+                    ),
+                  )
+                  .toList()
+                ..add(
+                  const PopupMenuItem(
+                    value: "add",
+                    child: ListTile(
+                      leading: Icon(Icons.add),
+                      title: Text('Add'),
+                    ),
+                  ),
+                )
+                ..add(
+                  PopupMenuItem(
+                    value: "remove",
+                    enabled: context.read<InputCubit>().state.inputs.length > 1,
+                    child: ListTile(
+                      enabled:
+                          context.read<InputCubit>().state.inputs.length > 1,
+                      leading: const Icon(Icons.remove),
+                      title: const Text('Remove'),
+                    ),
+                  ),
+                )
+                ..add(
+                  PopupMenuItem(
+                    value: "clear",
+                    enabled: widget.textEditingController!.text != "",
+                    child: ListTile(
+                      enabled: widget.textEditingController!.text != "",
+                      leading: const Icon(Icons.clear),
+                      title: const Text('Clear'),
+                    ),
+                  ),
                 ),
-              ),
-            )
-            ..add(
-              PopupMenuItem(
-                value: "clear",
-                enabled: widget.textEditingController!.text != "",
-                child: ListTile(
-                  enabled: widget.textEditingController!.text != "",
-                  leading: const Icon(Icons.clear),
-                  title: const Text('Clear'),
-                ),
-              ),
-            ),
         );
 
         return AppBar(
@@ -206,7 +217,10 @@ class _FujitenMenuBarState extends State<FujitenMenuBar> {
               Row(
                 children: <Widget>[
                   popupMenuButtonInsert,
-                  IconButton(icon: const Icon(Icons.translate), onPressed: convert),
+                  IconButton(
+                    icon: const Icon(Icons.translate),
+                    onPressed: convert,
+                  ),
                   //const ToggleSearchTypeButton(),
                   popupMenuButtonInputs,
                   // Optional: Add search options button
@@ -233,6 +247,7 @@ class _FujitenMenuBarState extends State<FujitenMenuBar> {
       },
     );
   }
+
   Future<void> displayRadicalWidget(BuildContext context) async {
     //send the radicals inside < > to the radical page
     var exp = RegExp(r'<(.*?)>');
