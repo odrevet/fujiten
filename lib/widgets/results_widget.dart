@@ -79,7 +79,6 @@ class _ResultsWidgetState extends State<ResultsWidget> {
                   .state
                   .inputs[context.read<InputCubit>().state.searchIndex]
                   .isNotEmpty) {
-            // Enhanced no results display
             child = Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
@@ -131,7 +130,8 @@ class _ResultsWidgetState extends State<ResultsWidget> {
             }
           }
         }
-        return Expanded(child: Center(child: child));
+        
+        return Center(child: child);
       },
     );
   }
