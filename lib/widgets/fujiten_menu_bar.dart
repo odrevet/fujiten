@@ -88,7 +88,7 @@ class _FujitenMenuBarState extends State<FujitenMenuBar> {
                 break;
               case 3:
                 addStringInController(
-                  searchOptionsState.useRegexp ? '.*' : '%',
+                  searchOptionsState.useRegexp ? '.*' : '*',
                 );
                 break;
             }
@@ -103,7 +103,7 @@ class _FujitenMenuBarState extends State<FujitenMenuBar> {
             PopupMenuItem(
               value: 3,
               child: Text(
-                '${searchOptionsState.useRegexp ? ".*" : "%"} Anything',
+                '${searchOptionsState.useRegexp ? ".*" : "*"} Anything',
               ),
             ),
           ],

@@ -16,9 +16,9 @@ class DatabaseInterfaceKanji extends DatabaseInterface {
     bool useRegexp = false,
   ]) async {
     String where;
-    String searchOperator = useRegexp ? 'REGEXP' : 'LIKE';
+    String searchOperator = useRegexp ? 'REGEXP' : 'GLOB';
 
-    Iterable<RegExpMatch> matchesKanji = RegExp(regexKanji).allMatches(input);
+    Iterable<RegExpMatch> matchesKanji = RegExp(matchKanji).allMatches(input);
 
     if (matchesKanji.isNotEmpty) {
       where =

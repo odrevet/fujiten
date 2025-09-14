@@ -17,7 +17,7 @@ class DatabaseInterfaceExpression extends DatabaseInterface {
     bool useRegexp,
   ) {
     String sql;
-    String searchOperator = useRegexp ? 'REGEXP' : 'LIKE';
+    String searchOperator = useRegexp ? 'REGEXP' : 'GLOB';
 
     if (kanaKit.isRomaji(input)) {
       sql =
@@ -26,7 +26,7 @@ class DatabaseInterfaceExpression extends DatabaseInterface {
              WHERE gloss.content $searchOperator '$input' ''';
     } else {
       // if the input does not contains a kanji do not search in the reb
-      var regExp = RegExp(regexKanji);
+      var regExp = RegExp(matchKanji);
       var hasKanji = regExp.hasMatch(input);
       sql =
           '''SELECT DISTINCT entry_sub.id 

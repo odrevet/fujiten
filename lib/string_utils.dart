@@ -3,8 +3,9 @@ import 'package:kana_kit/kana_kit.dart';
 
 const kanaKit = KanaKit();
 
-const String regexKanji = '[一-龯]';
-const String regexKana = '[ぁ-んァ-ン]';
+const String matchKanji = '[一-龯]';
+const String matchKana = '[ぁ-んァ-ン]';
+
 const String charKanji = 'Ⓚ';
 const String charKanjiJp = 'ⓚ';
 const String charKana = '㋐';
@@ -61,10 +62,10 @@ Future<String> formatInput(
   input = input.replaceAll('［', '[');
   input = input.replaceAll('］', ']');
 
-  input = input.replaceAll(charKanji, regexKanji);
-  input = input.replaceAll(charKanjiJp, regexKanji);
-  input = input.replaceAll(charKana, regexKana);
-  input = input.replaceAll(charKanaJp, regexKana);
+  input = input.replaceAll(charKanji, matchKanji);
+  input = input.replaceAll(charKanjiJp, matchKanji);
+  input = input.replaceAll(charKana, matchKana);
+  input = input.replaceAll(charKanaJp, matchKana);
 
   return input;
 }
