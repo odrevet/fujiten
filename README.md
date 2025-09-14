@@ -100,4 +100,4 @@ Desktop build must use FFI
 # Regexp support
 
 Some build of sqlite do not include the regexp extension, in this case matches must be made using 
-the sql LIKE operator.  
+the GLOB operator.  
