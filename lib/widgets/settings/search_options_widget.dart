@@ -82,12 +82,6 @@ class _SearchOptionsWidgetState extends State<SearchOptionsWidget> {
         return ListView(
           padding: const EdgeInsets.all(16),
           children: [
-            // Search Type Section
-            _buildSectionHeader(context, 'Search For'),
-            const SizedBox(height: 8),
-            _buildSearchTypeSelector(context, state),
-            const SizedBox(height: 24),
-
             // Regular Expressions Section
             if (_isTestingRegexp || _isRegexpAvailable) ...[
               _buildSectionHeader(context, 'Advanced Options'),
@@ -99,9 +93,9 @@ class _SearchOptionsWidgetState extends State<SearchOptionsWidget> {
             // Results Per Page Section
             _buildSectionHeader(context, 'Results Per Page'),
             const SizedBox(height: 8),
-            _buildResultsPerPageKanji(context, state),
-            const SizedBox(height: 8),
             _buildResultsPerPageExpression(context, state),
+            const SizedBox(height: 8),
+            _buildResultsPerPageKanji(context, state),
             const SizedBox(height: 24),
 
             // Actions Section
@@ -125,85 +119,6 @@ class _SearchOptionsWidgetState extends State<SearchOptionsWidget> {
         style: Theme.of(context).textTheme.titleMedium?.copyWith(
           color: Theme.of(context).colorScheme.primary,
           fontWeight: FontWeight.w600,
-        ),
-      ),
-    );
-  }
-
-  Widget _buildSearchTypeSelector(
-    BuildContext context,
-    SearchOptionsState state,
-  ) {
-    return Card(
-      elevation: 0,
-      color: Theme.of(context).colorScheme.surfaceContainerLow,
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: SegmentedButton<SearchType>(
-          showSelectedIcon: false,
-          style: ButtonStyle(
-            padding: WidgetStateProperty.all(
-              const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-            ),
-            backgroundColor: WidgetStateProperty.resolveWith((states) {
-              if (states.contains(WidgetState.selected)) {
-                return Theme.of(context).colorScheme.primary;
-              }
-              return null;
-            }),
-            foregroundColor: WidgetStateProperty.resolveWith((states) {
-              if (states.contains(WidgetState.selected)) {
-                return Theme.of(context).colorScheme.onPrimary;
-              }
-              return Theme.of(context).colorScheme.onSurface;
-            }),
-          ),
-          segments: const [
-            ButtonSegment<SearchType>(
-              value: SearchType.expression,
-              label: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(
-                    '言',
-                    style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-                  ),
-                  SizedBox(height: 2),
-                  Text(
-                    'Expression',
-                    style: TextStyle(
-                      fontSize: 10,
-                      fontWeight: FontWeight.normal,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            ButtonSegment<SearchType>(
-              value: SearchType.kanji,
-              label: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(
-                    '漢',
-                    style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-                  ),
-                  SizedBox(height: 2),
-                  Text(
-                    'Kanji',
-                    style: TextStyle(
-                      fontSize: 10,
-                      fontWeight: FontWeight.normal,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ],
-          selected: {state.searchType},
-          onSelectionChanged: (Set<SearchType> selected) {
-            context.read<SearchOptionsCubit>().setSearchType(selected.first);
-          },
         ),
       ),
     );
@@ -235,32 +150,16 @@ class _SearchOptionsWidgetState extends State<SearchOptionsWidget> {
         onChanged: _isTestingRegexp
             ? null
             : (bool value) {
-                context.read<SearchOptionsCubit>().setUseRegexp(value);
-              },
+          context.read<SearchOptionsCubit>().setUseRegexp(value);
+        },
       ),
     );
   }
 
-  Widget _buildResultsPerPageKanji(
-    BuildContext context,
-    SearchOptionsState state,
-  ) {
-    return _buildResultsPerPageCard(
-      context: context,
-      title: 'Kanji Results',
-      value: state.resultsPerPageKanji,
-      icon: Icons.translate,
-      controller: _kanjiController,
-      onChanged: (value) {
-        context.read<SearchOptionsCubit>().setResultsPerPageKanji(value);
-      },
-    );
-  }
-
   Widget _buildResultsPerPageExpression(
-    BuildContext context,
-    SearchOptionsState state,
-  ) {
+      BuildContext context,
+      SearchOptionsState state,
+      ) {
     return _buildResultsPerPageCard(
       context: context,
       title: 'Expression Results',
@@ -269,6 +168,22 @@ class _SearchOptionsWidgetState extends State<SearchOptionsWidget> {
       controller: _expressionController,
       onChanged: (value) {
         context.read<SearchOptionsCubit>().setResultsPerPageExpression(value);
+      },
+    );
+  }
+
+  Widget _buildResultsPerPageKanji(
+      BuildContext context,
+      SearchOptionsState state,
+      ) {
+    return _buildResultsPerPageCard(
+      context: context,
+      title: 'Kanji Results',
+      value: state.resultsPerPageKanji,
+      icon: Icons.translate,
+      controller: _kanjiController,
+      onChanged: (value) {
+        context.read<SearchOptionsCubit>().setResultsPerPageKanji(value);
       },
     );
   }
@@ -337,10 +252,10 @@ class _SearchOptionsWidgetState extends State<SearchOptionsWidget> {
               ),
               onTap: currentValue > min
                   ? () {
-                      final newValue = currentValue - 1;
-                      controller.text = newValue.toString();
-                      onChanged(newValue);
-                    }
+                final newValue = currentValue - 1;
+                controller.text = newValue.toString();
+                onChanged(newValue);
+              }
                   : null,
               child: Container(
                 width: 32,
@@ -352,8 +267,8 @@ class _SearchOptionsWidgetState extends State<SearchOptionsWidget> {
                   color: currentValue > min
                       ? Theme.of(context).colorScheme.primary
                       : Theme.of(
-                          context,
-                        ).colorScheme.onSurface.withValues(alpha:0.3),
+                    context,
+                  ).colorScheme.onSurface.withValues(alpha:0.3),
                 ),
               ),
             ),
@@ -415,10 +330,10 @@ class _SearchOptionsWidgetState extends State<SearchOptionsWidget> {
               ),
               onTap: currentValue < max
                   ? () {
-                      final newValue = currentValue + 1;
-                      controller.text = newValue.toString();
-                      onChanged(newValue);
-                    }
+                final newValue = currentValue + 1;
+                controller.text = newValue.toString();
+                onChanged(newValue);
+              }
                   : null,
               child: Container(
                 width: 32,
@@ -430,8 +345,8 @@ class _SearchOptionsWidgetState extends State<SearchOptionsWidget> {
                   color: currentValue < max
                       ? Theme.of(context).colorScheme.primary
                       : Theme.of(
-                          context,
-                        ).colorScheme.onSurface.withValues(alpha:0.3),
+                    context,
+                  ).colorScheme.onSurface.withValues(alpha:0.3),
                 ),
               ),
             ),
@@ -476,9 +391,9 @@ class _RangeTextInputFormatter extends TextInputFormatter {
 
   @override
   TextEditingValue formatEditUpdate(
-    TextEditingValue oldValue,
-    TextEditingValue newValue,
-  ) {
+      TextEditingValue oldValue,
+      TextEditingValue newValue,
+      ) {
     if (newValue.text.isEmpty) {
       return newValue;
     }

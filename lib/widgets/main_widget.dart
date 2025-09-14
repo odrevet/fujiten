@@ -27,10 +27,11 @@ class MainWidget extends StatefulWidget {
   State<MainWidget> createState() => _MainWidgetState();
 }
 
-class _MainWidgetState extends State<MainWidget> {
+class _MainWidgetState extends State<MainWidget> with TickerProviderStateMixin {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   int cursorPosition = -1;
   FocusNode focusNode = FocusNode();
+  late TabController _tabController;
 
   final Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
 
@@ -42,6 +43,31 @@ class _MainWidgetState extends State<MainWidget> {
     initDb();
     loadSearchOptions();
 
+    // Initialize tab controller
+    final searchOptions = context.read<SearchOptionsCubit>().state;
+    final initialIndex = searchOptions.searchType == SearchType.expression ? 0 : 1;
+    _tabController = TabController(
+      length: 2,
+      vsync: this,
+      initialIndex: initialIndex,
+    );
+
+    // Listen to tab changes and update search type
+    _tabController.addListener(() {
+      if (!_tabController.indexIsChanging) return;
+
+      final newSearchType = _tabController.index == 0
+          ? SearchType.expression
+          : SearchType.kanji;
+
+      context.read<SearchOptionsCubit>().setSearchType(newSearchType);
+
+      // If there's text in the search field, trigger a new search
+      if (widget._textEditingController.text.isNotEmpty) {
+        onSearch();
+      }
+    });
+
     _prefs.then((SharedPreferences prefs) {
       if (!mounted) return;
       bool? isLight = prefs.getBool("darkTheme");
@@ -51,6 +77,12 @@ class _MainWidgetState extends State<MainWidget> {
         );
       }
     });
+  }
+
+  @override
+  void dispose() {
+    _tabController.dispose();
+    super.dispose();
   }
 
   void initDb() async {
@@ -90,6 +122,11 @@ class _MainWidgetState extends State<MainWidget> {
       resultsPerPageExpression: resultsPerPageExpression,
       searchType: searchType,
     );
+
+    // Update tab controller to match loaded search type
+    if (mounted) {
+      _tabController.animateTo(searchType == SearchType.expression ? 0 : 1);
+    }
   }
 
   void saveSearchOptions(SearchOptionsState searchOptions) async {
@@ -193,21 +230,26 @@ class _MainWidgetState extends State<MainWidget> {
                 return BlocListener<SearchOptionsCubit, SearchOptionsState>(
                   listener: (context, searchOptionsState) {
                     saveSearchOptions(searchOptionsState);
+                    // Update tab controller when search type changes externally
+                    final newIndex = searchOptionsState.searchType == SearchType.expression ? 0 : 1;
+                    if (_tabController.index != newIndex) {
+                      _tabController.animateTo(newIndex);
+                    }
                   },
                   child: Scaffold(
                     key: _scaffoldKey,
                     floatingActionButton:
-                        context.read<SearchCubit>().state.isLoadingNextPage
+                    context.read<SearchCubit>().state.isLoadingNextPage
                         ? const FloatingActionButton(
-                            onPressed: null,
-                            backgroundColor: Colors.white,
-                            mini: true,
-                            child: SizedBox(
-                              height: 10,
-                              width: 10,
-                              child: CircularProgressIndicator(),
-                            ),
-                          )
+                      onPressed: null,
+                      backgroundColor: Colors.white,
+                      mini: true,
+                      child: SizedBox(
+                        height: 10,
+                        width: 10,
+                        child: CircularProgressIndicator(),
+                      ),
+                    )
                         : null,
                     appBar: PreferredSize(
                       preferredSize: const Size.fromHeight(56),
@@ -229,7 +271,59 @@ class _MainWidgetState extends State<MainWidget> {
                           onFocusChanged,
                           focusNode,
                         ),
-                        ResultsWidget(onEndReached),
+                        // Tab bar
+                        Container(
+                          color: Theme.of(context).colorScheme.surface,
+                          child: TabBar(
+                            controller: _tabController,
+                            labelColor: Theme.of(context).colorScheme.primary,
+                            unselectedLabelColor: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
+                            indicatorColor: Theme.of(context).colorScheme.primary,
+                            tabs: const [
+                              Tab(
+                                child: Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Text(
+                                      '言',
+                                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                                    ),
+                                    Text(
+                                      'Expression',
+                                      style: TextStyle(fontSize: 10),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              Tab(
+                                child: Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Text(
+                                      '漢',
+                                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                                    ),
+                                    Text(
+                                      'Kanji',
+                                      style: TextStyle(fontSize: 10),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        Expanded(
+                          child: TabBarView(
+                            controller: _tabController,
+                            children: [
+                              // Expression tab content
+                              ResultsWidget(onEndReached),
+                              // Kanji tab content
+                              ResultsWidget(onEndReached),
+                            ],
+                          ),
+                        ),
                       ],
                     ),
                   ),
