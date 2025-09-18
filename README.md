@@ -83,7 +83,7 @@ be used
 flutter run --dart-define=FFI=true
 ```
 
-Desktop build must use FFI
+Desktop build must use FFI. The libsqlite3.so must be installed on the host.  
 
 * Android studio configuration: 
 
