@@ -135,10 +135,12 @@ class _KanjiListTileState extends State<KanjiListTile>
           // Header with close button
           Row(
             children: [
-              Icon(
-                Icons.brush,
-                color: theme.colorScheme.primary,
-                size: 20.0,
+              IconButton(
+                onPressed: _toggleAnimationView,
+                icon: const Icon(Icons.close),
+                iconSize: 20.0,
+                constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
+                padding: EdgeInsets.zero,
               ),
               const SizedBox(width: 8.0),
               Text(
@@ -148,14 +150,6 @@ class _KanjiListTileState extends State<KanjiListTile>
                   fontWeight: FontWeight.w600,
                   color: theme.colorScheme.primary,
                 ),
-              ),
-              const Spacer(),
-              IconButton(
-                onPressed: _toggleAnimationView,
-                icon: const Icon(Icons.close),
-                iconSize: 20.0,
-                constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
-                padding: EdgeInsets.zero,
               ),
             ],
           ),
@@ -177,54 +171,7 @@ class _KanjiListTileState extends State<KanjiListTile>
               child: KanjiDrawingAnimation(widget.kanji.literal),
             ),
           ),
-
-          const SizedBox(height: 12.0),
-
-          // Action buttons
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: [
-              _buildActionButton(
-                context,
-                'Copy',
-                Icons.copy,
-                _copyToClipboard,
-                theme.colorScheme.secondary,
-              ),
-              _buildActionButton(
-                context,
-                'Details',
-                Icons.info_outline,
-                _toggleAnimationView,
-                theme.colorScheme.tertiary,
-              ),
-            ],
-          ),
         ],
-      ),
-    );
-  }
-
-  Widget _buildActionButton(
-      BuildContext context,
-      String label,
-      IconData icon,
-      VoidCallback onPressed,
-      Color color,
-      ) {
-    return ElevatedButton.icon(
-      onPressed: onPressed,
-      icon: Icon(icon, size: 18.0),
-      label: Text(label),
-      style: ElevatedButton.styleFrom(
-        foregroundColor: color,
-        backgroundColor: color.withValues(alpha: 0.1),
-        elevation: 0,
-        padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(20.0),
-          side: BorderSide(color: color.withValues(alpha: 0.3)),
-        ),
       ),
     );
   }
@@ -260,24 +207,6 @@ class _KanjiListTileState extends State<KanjiListTile>
                   color: widget.selected
                       ? theme.colorScheme.primary
                       : theme.colorScheme.onSurface,
-                ),
-              ),
-            ),
-            // Subtle animation indicator
-            Positioned(
-              right: 2,
-              bottom: 2,
-              child: Container(
-                width: 12,
-                height: 12,
-                decoration: BoxDecoration(
-                  color: theme.colorScheme.primary.withValues(alpha: 0.7),
-                  shape: BoxShape.circle,
-                ),
-                child: Icon(
-                  Icons.play_arrow,
-                  size: 8.0,
-                  color: theme.colorScheme.onPrimary,
                 ),
               ),
             ),
