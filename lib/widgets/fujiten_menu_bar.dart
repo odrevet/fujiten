@@ -18,6 +18,8 @@ class FujitenMenuBar extends StatefulWidget {
   final VoidCallback onSearch;
   final int insertPosition;
   final FocusNode focusNode;
+  final VoidCallback onToggleSearchType;
+  final SearchType currentSearchType;
 
   const FujitenMenuBar({
     required this.search,
@@ -25,6 +27,8 @@ class FujitenMenuBar extends StatefulWidget {
     required this.onSearch,
     required this.focusNode,
     required this.insertPosition,
+    required this.onToggleSearchType,
+    required this.currentSearchType,
     super.key,
   });
 
@@ -63,9 +67,9 @@ class _FujitenMenuBarState extends State<FujitenMenuBar> {
 
     widget.textEditingController?.text = convertedInput;
     context.read<InputCubit>().state.inputs[context
-            .read<InputCubit>()
-            .state
-            .searchIndex] =
+        .read<InputCubit>()
+        .state
+        .searchIndex] =
         convertedInput;
   }
 
@@ -130,10 +134,10 @@ class _FujitenMenuBarState extends State<FujitenMenuBar> {
             } else if (result == "clear") {
               widget.textEditingController!.clear();
               context.read<InputCubit>().state.inputs[context
-                      .read<InputCubit>()
-                      .state
-                      .searchIndex] =
-                  "";
+                  .read<InputCubit>()
+                  .state
+                  .searchIndex] =
+              "";
               widget.focusNode.requestFocus();
             } else {
               context.read<InputCubit>().setSearchIndex(result);
@@ -144,57 +148,154 @@ class _FujitenMenuBarState extends State<FujitenMenuBar> {
             }
           },
           itemBuilder: (itemBuilderContext) =>
-              context
-                  .read<InputCubit>()
-                  .state
-                  .inputs
-                  .asMap()
-                  .entries
-                  .map<PopupMenuEntry<dynamic>>(
-                    (entry) => PopupMenuItem(
-                      value: entry.key,
-                      child: ListTile(
-                        leading: Text(entry.key.toString()),
-                        title: Text(entry.value),
-                        selected:
-                            entry.key ==
-                            context.read<InputCubit>().state.searchIndex,
+          context
+              .read<InputCubit>()
+              .state
+              .inputs
+              .asMap()
+              .entries
+              .map<PopupMenuEntry<dynamic>>(
+                (entry) => PopupMenuItem(
+              value: entry.key,
+              child: ListTile(
+                leading: Text(entry.key.toString()),
+                title: Text(entry.value),
+                selected:
+                entry.key ==
+                    context.read<InputCubit>().state.searchIndex,
+              ),
+            ),
+          )
+              .toList()
+            ..add(
+              const PopupMenuItem(
+                value: "add",
+                child: ListTile(
+                  leading: Icon(Icons.add),
+                  title: Text('Add'),
+                ),
+              ),
+            )
+            ..add(
+              PopupMenuItem(
+                value: "remove",
+                enabled: context.read<InputCubit>().state.inputs.length > 1,
+                child: ListTile(
+                  enabled:
+                  context.read<InputCubit>().state.inputs.length > 1,
+                  leading: const Icon(Icons.remove),
+                  title: const Text('Remove'),
+                ),
+              ),
+            )
+            ..add(
+              PopupMenuItem(
+                value: "clear",
+                enabled: widget.textEditingController!.text != "",
+                child: ListTile(
+                  enabled: widget.textEditingController!.text != "",
+                  leading: const Icon(Icons.clear),
+                  title: const Text('Clear'),
+                ),
+              ),
+            ),
+        );
+
+        // Create the toggle button for Expression/Kanji
+        Widget searchTypeToggle = Container(
+          decoration: BoxDecoration(
+            border: Border.all(
+              color: Theme.of(context).colorScheme.outline,
+              width: 1,
+            ),
+            borderRadius: BorderRadius.circular(4),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              GestureDetector(
+                onTap: () {
+                  context.read<SearchOptionsCubit>().setSearchType(SearchType.expression);
+                },
+                child: Container(
+                  width: 60, // Fixed width for consistent sizing
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: widget.currentSearchType == SearchType.expression
+                        ? Theme.of(context).colorScheme.primary
+                        : Colors.transparent,
+                  ),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        '言',
+                        style: TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.bold,
+                          color: widget.currentSearchType == SearchType.expression
+                              ? Theme.of(context).colorScheme.onPrimary
+                              : Theme.of(context).colorScheme.onSurface,
+                        ),
                       ),
-                    ),
-                  )
-                  .toList()
-                ..add(
-                  const PopupMenuItem(
-                    value: "add",
-                    child: ListTile(
-                      leading: Icon(Icons.add),
-                      title: Text('Add'),
-                    ),
-                  ),
-                )
-                ..add(
-                  PopupMenuItem(
-                    value: "remove",
-                    enabled: context.read<InputCubit>().state.inputs.length > 1,
-                    child: ListTile(
-                      enabled:
-                          context.read<InputCubit>().state.inputs.length > 1,
-                      leading: const Icon(Icons.remove),
-                      title: const Text('Remove'),
-                    ),
-                  ),
-                )
-                ..add(
-                  PopupMenuItem(
-                    value: "clear",
-                    enabled: widget.textEditingController!.text != "",
-                    child: ListTile(
-                      enabled: widget.textEditingController!.text != "",
-                      leading: const Icon(Icons.clear),
-                      title: const Text('Clear'),
-                    ),
+                      Text(
+                        'Expression',
+                        style: TextStyle(
+                          fontSize: 8,
+                          color: widget.currentSearchType == SearchType.expression
+                              ? Theme.of(context).colorScheme.onPrimary
+                              : Theme.of(context).colorScheme.onSurface,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
+              ),
+              Container(
+                width: 1,
+                height: 30,
+                color: Theme.of(context).colorScheme.outline,
+              ),
+              GestureDetector(
+                onTap: () {
+                  context.read<SearchOptionsCubit>().setSearchType(SearchType.kanji);
+                },
+                child: Container(
+                  width: 60, // Fixed width for consistent sizing
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: widget.currentSearchType == SearchType.kanji
+                        ? Theme.of(context).colorScheme.primary
+                        : Colors.transparent,
+                  ),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        '漢',
+                        style: TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.bold,
+                          color: widget.currentSearchType == SearchType.kanji
+                              ? Theme.of(context).colorScheme.onPrimary
+                              : Theme.of(context).colorScheme.onSurface,
+                        ),
+                      ),
+                      Text(
+                        'Kanji',
+                        style: TextStyle(
+                          fontSize: 8,
+                          color: widget.currentSearchType == SearchType.kanji
+                              ? Theme.of(context).colorScheme.onPrimary
+                              : Theme.of(context).colorScheme.onSurface,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
         );
 
         return AppBar(
@@ -216,12 +317,12 @@ class _FujitenMenuBarState extends State<FujitenMenuBar> {
               ),
               Row(
                 children: <Widget>[
+                  searchTypeToggle,
                   popupMenuButtonInsert,
                   IconButton(
                     icon: const Icon(Icons.translate),
                     onPressed: convert,
                   ),
-                  //const ToggleSearchTypeButton(),
                   popupMenuButtonInputs,
                   // Optional: Add search options button
                   IconButton(
@@ -296,10 +397,10 @@ class _FujitenMenuBarState extends State<FujitenMenuBar> {
                 .textEditingController!
                 .text
                 .replaceRange(
-                  matchAtCursor.start,
-                  matchAtCursor.end,
-                  '<${selectedRadicalsOrKanji.join()}>',
-                );
+              matchAtCursor.start,
+              matchAtCursor.end,
+              '<${selectedRadicalsOrKanji.join()}>',
+            );
           }
         }
       } else {
@@ -314,10 +415,10 @@ class _FujitenMenuBarState extends State<FujitenMenuBar> {
               .textEditingController!
               .text
               .replaceRange(
-                matchAtCursor.start,
-                matchAtCursor.end,
-                selectedRadicalsOrKanji,
-              );
+            matchAtCursor.start,
+            matchAtCursor.end,
+            selectedRadicalsOrKanji,
+          );
         }
       }
 

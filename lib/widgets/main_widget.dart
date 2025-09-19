@@ -241,6 +241,17 @@ class _MainWidgetState extends State<MainWidget> with TickerProviderStateMixin {
     );
   }
 
+  // Toggle between Expression and Kanji search types
+  void _toggleSearchType() {
+    final currentSearchType = context.read<SearchOptionsCubit>().state.searchType;
+    final newSearchType = currentSearchType == SearchType.expression
+        ? SearchType.kanji
+        : SearchType.expression;
+
+    context.read<SearchOptionsCubit>().setSearchType(newSearchType);
+    _tabController.animateTo(newSearchType == SearchType.expression ? 0 : 1);
+  }
+
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<ExpressionCubit, ExpressionState>(
@@ -286,6 +297,9 @@ class _MainWidgetState extends State<MainWidget> with TickerProviderStateMixin {
                               onSearch: onSearch,
                               focusNode: focusNode,
                               insertPosition: cursorPosition,
+                              // Pass the toggle function and current search type
+                              onToggleSearchType: _toggleSearchType,
+                              currentSearchType: searchOptionsState.searchType,
                             ),
                           ),
                         ),
@@ -297,48 +311,7 @@ class _MainWidgetState extends State<MainWidget> with TickerProviderStateMixin {
                               onFocusChanged,
                               focusNode,
                             ),
-                            // Tab bar
-                            Container(
-                              color: Theme.of(context).colorScheme.surface,
-                              child: TabBar(
-                                controller: _tabController,
-                                labelColor: Theme.of(context).colorScheme.primary,
-                                unselectedLabelColor: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
-                                indicatorColor: Theme.of(context).colorScheme.primary,
-                                tabs: const [
-                                  Tab(
-                                    child: Column(
-                                      mainAxisSize: MainAxisSize.min,
-                                      children: [
-                                        Text(
-                                          '言',
-                                          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                                        ),
-                                        Text(
-                                          'Expression',
-                                          style: TextStyle(fontSize: 10),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                  Tab(
-                                    child: Column(
-                                      mainAxisSize: MainAxisSize.min,
-                                      children: [
-                                        Text(
-                                          '漢',
-                                          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                                        ),
-                                        Text(
-                                          'Kanji',
-                                          style: TextStyle(fontSize: 10),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
+                            // Remove the TabBar - it's now in the AppBar
                             Expanded(
                               child: TabBarView(
                                 controller: _tabController,
