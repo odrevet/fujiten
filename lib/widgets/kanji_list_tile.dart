@@ -23,41 +23,13 @@ class KanjiListTile extends StatefulWidget {
   State<KanjiListTile> createState() => _KanjiListTileState();
 }
 
-class _KanjiListTileState extends State<KanjiListTile>
-    with TickerProviderStateMixin {
+class _KanjiListTileState extends State<KanjiListTile> {
   bool _showAnimation = false;
-  late AnimationController _slideController;
-  late Animation<double> _slideAnimation;
-
-  @override
-  void initState() {
-    super.initState();
-    _slideController = AnimationController(
-      duration: const Duration(milliseconds: 300),
-      vsync: this,
-    );
-    _slideAnimation = CurvedAnimation(
-      parent: _slideController,
-      curve: Curves.easeInOut,
-    );
-  }
-
-  @override
-  void dispose() {
-    _slideController.dispose();
-    super.dispose();
-  }
 
   void _toggleAnimationView() {
     setState(() {
       _showAnimation = !_showAnimation;
     });
-
-    if (_showAnimation) {
-      _slideController.forward();
-    } else {
-      _slideController.reverse();
-    }
   }
 
   void _copyToClipboard() async {
@@ -96,8 +68,7 @@ class _KanjiListTileState extends State<KanjiListTile>
         child: InkWell(
           onTap: widget.onTap,
           borderRadius: BorderRadius.circular(12.0),
-          child: AnimatedContainer(
-            duration: const Duration(milliseconds: 300),
+          child: Container(
             padding: const EdgeInsets.all(16.0),
             child: _showAnimation
                 ? _buildAnimationView(context)
@@ -125,54 +96,48 @@ class _KanjiListTileState extends State<KanjiListTile>
   Widget _buildAnimationView(BuildContext context) {
     final theme = Theme.of(context);
 
-    return SlideTransition(
-      position: Tween<Offset>(
-        begin: const Offset(1.0, 0.0),
-        end: Offset.zero,
-      ).animate(_slideAnimation),
-      child: Column(
-        children: [
-          // Header with close button
-          Row(
-            children: [
-              IconButton(
-                onPressed: _toggleAnimationView,
-                icon: const Icon(Icons.close),
-                iconSize: 20.0,
-                constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
-                padding: EdgeInsets.zero,
+    return Column(
+      children: [
+        // Header with close button
+        Row(
+          children: [
+            IconButton(
+              onPressed: _toggleAnimationView,
+              icon: const Icon(Icons.close),
+              iconSize: 20.0,
+              constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
+              padding: EdgeInsets.zero,
+            ),
+            const SizedBox(width: 8.0),
+            Text(
+              'Drawing Animation',
+              style: TextStyle(
+                fontSize: 16.0,
+                fontWeight: FontWeight.w600,
+                color: theme.colorScheme.primary,
               ),
-              const SizedBox(width: 8.0),
-              Text(
-                'Drawing Animation',
-                style: TextStyle(
-                  fontSize: 16.0,
-                  fontWeight: FontWeight.w600,
-                  color: theme.colorScheme.primary,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 12.0),
+            ),
+          ],
+        ),
+        const SizedBox(height: 12.0),
 
-          // Animation container
-          Container(
-            height: 150,
-            width: double.infinity,
-            decoration: BoxDecoration(
-              color: theme.colorScheme.surface,
-              borderRadius: BorderRadius.circular(12.0),
-              border: Border.all(
-                color: theme.colorScheme.outline.withValues(alpha: 0.3),
-              ),
-            ),
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(12.0),
-              child: KanjiDrawingAnimation(widget.kanji.literal),
+        // Animation container
+        Container(
+          height: 150,
+          width: double.infinity,
+          decoration: BoxDecoration(
+            color: theme.colorScheme.surface,
+            borderRadius: BorderRadius.circular(12.0),
+            border: Border.all(
+              color: theme.colorScheme.outline.withValues(alpha: 0.3),
             ),
           ),
-        ],
-      ),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(12.0),
+            child: KanjiDrawingAnimation(widget.kanji.literal),
+          ),
+        ),
+      ],
     );
   }
 
