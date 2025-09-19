@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:fujiten/cubits/search_cubit.dart';
 import 'package:fujiten/widgets/database_status_display.dart';
 import 'package:fujiten/widgets/result_expression_list.dart';
+import 'package:flutter/material.dart';
 
 import '../cubits/input_cubit.dart';
 import '../models/entry.dart';
@@ -19,15 +20,18 @@ class ResultsWidget extends StatefulWidget {
   State<ResultsWidget> createState() => _ResultsWidgetState();
 }
 
-class _ResultsWidgetState extends State<ResultsWidget> {
+class _ResultsWidgetState extends State<ResultsWidget> with AutomaticKeepAliveClientMixin {
   ScrollController? _scrollController;
+
+  // This keeps the widget state alive when switching tabs
+  @override
+  bool get wantKeepAlive => true;
 
   @override
   initState() {
+    super.initState();
     _scrollController = ScrollController();
     _scrollController!.addListener(scrollListener);
-
-    super.initState();
   }
 
   @override
@@ -38,7 +42,7 @@ class _ResultsWidgetState extends State<ResultsWidget> {
 
   void scrollListener() {
     if (_scrollController!.offset >=
-            _scrollController!.position.maxScrollExtent &&
+        _scrollController!.position.maxScrollExtent &&
         !_scrollController!.position.outOfRange &&
         !context.read<SearchCubit>().state.isLoading &&
         !context.read<SearchCubit>().state.isLoadingNextPage) {
@@ -66,6 +70,9 @@ class _ResultsWidgetState extends State<ResultsWidget> {
 
   @override
   Widget build(BuildContext context) {
+    // Call super.build to maintain the keep alive state
+    super.build(context);
+
     return BlocBuilder<SearchCubit, Search>(
       builder: (context, search) {
         late Widget child;
@@ -130,7 +137,7 @@ class _ResultsWidgetState extends State<ResultsWidget> {
             }
           }
         }
-        
+
         return Center(child: child);
       },
     );

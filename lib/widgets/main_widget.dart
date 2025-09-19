@@ -33,11 +33,19 @@ class _MainWidgetState extends State<MainWidget> with TickerProviderStateMixin {
   FocusNode focusNode = FocusNode();
   late TabController _tabController;
 
+  // Separate search cubits for each tab
+  late SearchCubit _expressionSearchCubit;
+  late SearchCubit _kanjiSearchCubit;
+
   final Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
 
   @override
   initState() {
     super.initState();
+
+    // Initialize separate search cubits
+    _expressionSearchCubit = SearchCubit();
+    _kanjiSearchCubit = SearchCubit();
 
     context.read<InputCubit>().addInput();
     initDb();
@@ -62,10 +70,7 @@ class _MainWidgetState extends State<MainWidget> with TickerProviderStateMixin {
 
       context.read<SearchOptionsCubit>().setSearchType(newSearchType);
 
-      // If there's text in the search field, trigger a new search
-      if (widget._textEditingController.text.isNotEmpty) {
-        onSearch();
-      }
+      // Don't trigger search on tab change - let each tab maintain its state
     });
 
     _prefs.then((SharedPreferences prefs) {
@@ -82,6 +87,8 @@ class _MainWidgetState extends State<MainWidget> with TickerProviderStateMixin {
   @override
   void dispose() {
     _tabController.dispose();
+    _expressionSearchCubit.close();
+    _kanjiSearchCubit.close();
     super.dispose();
   }
 
@@ -145,6 +152,13 @@ class _MainWidgetState extends State<MainWidget> with TickerProviderStateMixin {
     await prefs.setInt("search_type", searchOptions.searchType.index);
   }
 
+  // Get the appropriate search cubit based on search type
+  SearchCubit _getCurrentSearchCubit(SearchType searchType) {
+    return searchType == SearchType.expression
+        ? _expressionSearchCubit
+        : _kanjiSearchCubit;
+  }
+
   void onSearch() async {
     if (widget._textEditingController.text != "") {
       final searchOptions = context.read<SearchOptionsCubit>().state;
@@ -159,28 +173,37 @@ class _MainWidgetState extends State<MainWidget> with TickerProviderStateMixin {
       if (!mounted) return;
 
       context.read<InputCubit>().setFormattedInput(formattedInput);
-      context.read<SearchCubit>().reset();
 
-      // Use search type from SearchOptionsCubit
-      final searchType = searchOptions.searchType;
-      final databaseInterface = searchType == SearchType.kanji
-          ? context.read<KanjiCubit>().databaseInterface
-          : context.read<ExpressionCubit>().databaseInterface;
+      // Reset both search cubits when input changes
+      _expressionSearchCubit.reset();
+      _kanjiSearchCubit.reset();
 
-      // Use results per page from SearchOptionsCubit
-      final resultsPerPage = searchType == SearchType.kanji
-          ? searchOptions.resultsPerPageKanji
-          : searchOptions.resultsPerPageExpression;
-
-      context.read<SearchCubit>().runSearch(
-        databaseInterface,
-        formattedInput,
-        resultsPerPage,
-        searchOptions.useRegexp,
-      );
+      // Run search for both types to keep them in sync with new input
+      await _runSearchForType(SearchType.expression, formattedInput);
+      await _runSearchForType(SearchType.kanji, formattedInput);
     }
 
     focusNode.unfocus();
+  }
+
+  Future<void> _runSearchForType(SearchType searchType, String formattedInput) async {
+    final searchOptions = context.read<SearchOptionsCubit>().state;
+    final searchCubit = _getCurrentSearchCubit(searchType);
+
+    final databaseInterface = searchType == SearchType.kanji
+        ? context.read<KanjiCubit>().databaseInterface
+        : context.read<ExpressionCubit>().databaseInterface;
+
+    final resultsPerPage = searchType == SearchType.kanji
+        ? searchOptions.resultsPerPageKanji
+        : searchOptions.resultsPerPageExpression;
+
+    searchCubit.runSearch(
+      databaseInterface,
+      formattedInput,
+      resultsPerPage,
+      searchOptions.useRegexp,
+    );
   }
 
   void onFocusChanged(bool hasFocus) async {
@@ -190,28 +213,27 @@ class _MainWidgetState extends State<MainWidget> with TickerProviderStateMixin {
   }
 
   void onEndReached() {
-    final searchState = context.read<SearchCubit>().state;
+    final searchOptions = context.read<SearchOptionsCubit>().state;
+    final searchCubit = _getCurrentSearchCubit(searchOptions.searchType);
+    final searchState = searchCubit.state;
 
     // Only proceed if we have more results and aren't already loading
     if (!searchState.hasMoreResults || searchState.isLoadingNextPage) {
       return;
     }
 
-    final searchOptions = context.read<SearchOptionsCubit>().state;
-    final searchType = searchOptions.searchType;
+    searchCubit.nextPage();
 
-    context.read<SearchCubit>().nextPage();
-
-    final databaseInterface = searchType == SearchType.kanji
+    final databaseInterface = searchOptions.searchType == SearchType.kanji
         ? context.read<KanjiCubit>().databaseInterface
         : context.read<ExpressionCubit>().databaseInterface;
 
     // Use results per page from SearchOptionsCubit
-    final resultsPerPage = searchType == SearchType.kanji
+    final resultsPerPage = searchOptions.searchType == SearchType.kanji
         ? searchOptions.resultsPerPageKanji
         : searchOptions.resultsPerPageExpression;
 
-    context.read<SearchCubit>().runSearch(
+    searchCubit.runSearch(
       databaseInterface,
       context.read<InputCubit>().state.formattedInput,
       resultsPerPage,
@@ -225,108 +247,120 @@ class _MainWidgetState extends State<MainWidget> with TickerProviderStateMixin {
       builder: (context, expressionState) {
         return BlocBuilder<KanjiCubit, KanjiState>(
           builder: (context, kanjiState) {
-            return BlocBuilder<SearchCubit, Search>(
-              builder: (context, search) {
-                return BlocListener<SearchOptionsCubit, SearchOptionsState>(
-                  listener: (context, searchOptionsState) {
-                    saveSearchOptions(searchOptionsState);
-                    // Update tab controller when search type changes externally
-                    final newIndex = searchOptionsState.searchType == SearchType.expression ? 0 : 1;
-                    if (_tabController.index != newIndex) {
-                      _tabController.animateTo(newIndex);
-                    }
+            return BlocBuilder<SearchOptionsCubit, SearchOptionsState>(
+              builder: (context, searchOptionsState) {
+                final currentSearchCubit = _getCurrentSearchCubit(searchOptionsState.searchType);
+
+                return BlocBuilder<SearchCubit, Search>(
+                  bloc: currentSearchCubit,
+                  builder: (context, search) {
+                    return BlocListener<SearchOptionsCubit, SearchOptionsState>(
+                      listener: (context, searchOptionsState) {
+                        saveSearchOptions(searchOptionsState);
+                        // Update tab controller when search type changes externally
+                        final newIndex = searchOptionsState.searchType == SearchType.expression ? 0 : 1;
+                        if (_tabController.index != newIndex) {
+                          _tabController.animateTo(newIndex);
+                        }
+                      },
+                      child: Scaffold(
+                        key: _scaffoldKey,
+                        floatingActionButton: search.isLoadingNextPage
+                            ? const FloatingActionButton(
+                          onPressed: null,
+                          backgroundColor: Colors.white,
+                          mini: true,
+                          child: SizedBox(
+                            height: 10,
+                            width: 10,
+                            child: CircularProgressIndicator(),
+                          ),
+                        )
+                            : null,
+                        appBar: PreferredSize(
+                          preferredSize: const Size.fromHeight(56),
+                          child: Builder(
+                            builder: (context) => FujitenMenuBar(
+                              search: search,
+                              textEditingController: widget._textEditingController,
+                              onSearch: onSearch,
+                              focusNode: focusNode,
+                              insertPosition: cursorPosition,
+                            ),
+                          ),
+                        ),
+                        body: Column(
+                          children: <Widget>[
+                            SearchInput(
+                              widget._textEditingController,
+                              onSearch,
+                              onFocusChanged,
+                              focusNode,
+                            ),
+                            // Tab bar
+                            Container(
+                              color: Theme.of(context).colorScheme.surface,
+                              child: TabBar(
+                                controller: _tabController,
+                                labelColor: Theme.of(context).colorScheme.primary,
+                                unselectedLabelColor: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
+                                indicatorColor: Theme.of(context).colorScheme.primary,
+                                tabs: const [
+                                  Tab(
+                                    child: Column(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        Text(
+                                          '言',
+                                          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                                        ),
+                                        Text(
+                                          'Expression',
+                                          style: TextStyle(fontSize: 10),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                  Tab(
+                                    child: Column(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        Text(
+                                          '漢',
+                                          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                                        ),
+                                        Text(
+                                          'Kanji',
+                                          style: TextStyle(fontSize: 10),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            Expanded(
+                              child: TabBarView(
+                                controller: _tabController,
+                                children: [
+                                  // Expression tab content
+                                  BlocProvider.value(
+                                    value: _expressionSearchCubit,
+                                    child: ResultsWidget(onEndReached),
+                                  ),
+                                  // Kanji tab content
+                                  BlocProvider.value(
+                                    value: _kanjiSearchCubit,
+                                    child: ResultsWidget(onEndReached),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    );
                   },
-                  child: Scaffold(
-                    key: _scaffoldKey,
-                    floatingActionButton:
-                    context.read<SearchCubit>().state.isLoadingNextPage
-                        ? const FloatingActionButton(
-                      onPressed: null,
-                      backgroundColor: Colors.white,
-                      mini: true,
-                      child: SizedBox(
-                        height: 10,
-                        width: 10,
-                        child: CircularProgressIndicator(),
-                      ),
-                    )
-                        : null,
-                    appBar: PreferredSize(
-                      preferredSize: const Size.fromHeight(56),
-                      child: Builder(
-                        builder: (context) => FujitenMenuBar(
-                          search: search,
-                          textEditingController: widget._textEditingController,
-                          onSearch: onSearch,
-                          focusNode: focusNode,
-                          insertPosition: cursorPosition,
-                        ),
-                      ),
-                    ),
-                    body: Column(
-                      children: <Widget>[
-                        SearchInput(
-                          widget._textEditingController,
-                          onSearch,
-                          onFocusChanged,
-                          focusNode,
-                        ),
-                        // Tab bar
-                        Container(
-                          color: Theme.of(context).colorScheme.surface,
-                          child: TabBar(
-                            controller: _tabController,
-                            labelColor: Theme.of(context).colorScheme.primary,
-                            unselectedLabelColor: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
-                            indicatorColor: Theme.of(context).colorScheme.primary,
-                            tabs: const [
-                              Tab(
-                                child: Column(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    Text(
-                                      '言',
-                                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                                    ),
-                                    Text(
-                                      'Expression',
-                                      style: TextStyle(fontSize: 10),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                              Tab(
-                                child: Column(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    Text(
-                                      '漢',
-                                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                                    ),
-                                    Text(
-                                      'Kanji',
-                                      style: TextStyle(fontSize: 10),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        Expanded(
-                          child: TabBarView(
-                            controller: _tabController,
-                            children: [
-                              // Expression tab content
-                              ResultsWidget(onEndReached),
-                              // Kanji tab content
-                              ResultsWidget(onEndReached),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
                 );
               },
             );
