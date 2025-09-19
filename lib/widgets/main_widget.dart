@@ -328,6 +328,7 @@ class _MainWidgetState extends State<MainWidget> with TickerProviderStateMixin {
                             // Remove the TabBar - it's now in the AppBar
                             Expanded(
                               child: TabBarView(
+                                physics: const NeverScrollableScrollPhysics(),
                                 controller: _tabController,
                                 children: [
                                   // Expression tab content

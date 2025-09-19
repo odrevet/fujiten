@@ -1,3 +1,4 @@
+import 'dart:developer';
 import 'package:sqflite/sqflite.dart';
 
 import '../models/entry.dart';
@@ -62,6 +63,8 @@ class DatabaseInterfaceKanji extends DatabaseInterface {
            $where
            GROUP BY character.id
            ORDER BY character.freq NULLS LAST, character.stroke_count''';
+
+    log(sql);
 
     if (resultsPerPage != null) {
       sql += " LIMIT $resultsPerPage OFFSET ${currentPage * resultsPerPage}";

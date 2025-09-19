@@ -201,101 +201,22 @@ class _FujitenMenuBarState extends State<FujitenMenuBar> {
             ),
         );
 
-        // Create the toggle button for Expression/Kanji
-        Widget searchTypeToggle = Container(
-          decoration: BoxDecoration(
-            border: Border.all(
-              color: Theme.of(context).colorScheme.outline,
-              width: 1,
+        // Create the toggle button for Expression/Kanji - shows only current mode
+        Widget searchTypeToggle = IconButton(
+          icon: Text(
+            widget.currentSearchType == SearchType.expression ? '言' : '漢',
+            style: const TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
             ),
-            borderRadius: BorderRadius.circular(4),
           ),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              GestureDetector(
-                onTap: () {
-                  context.read<SearchOptionsCubit>().setSearchType(SearchType.expression);
-                },
-                child: Container(
-                  width: 60, // Fixed width for consistent sizing
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                  decoration: BoxDecoration(
-                    color: widget.currentSearchType == SearchType.expression
-                        ? Theme.of(context).colorScheme.primary
-                        : Colors.transparent,
-                  ),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text(
-                        '言',
-                        style: TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.bold,
-                          color: widget.currentSearchType == SearchType.expression
-                              ? Theme.of(context).colorScheme.onPrimary
-                              : Theme.of(context).colorScheme.onSurface,
-                        ),
-                      ),
-                      Text(
-                        'Expression',
-                        style: TextStyle(
-                          fontSize: 8,
-                          color: widget.currentSearchType == SearchType.expression
-                              ? Theme.of(context).colorScheme.onPrimary
-                              : Theme.of(context).colorScheme.onSurface,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-              Container(
-                width: 1,
-                height: 30,
-                color: Theme.of(context).colorScheme.outline,
-              ),
-              GestureDetector(
-                onTap: () {
-                  context.read<SearchOptionsCubit>().setSearchType(SearchType.kanji);
-                },
-                child: Container(
-                  width: 60, // Fixed width for consistent sizing
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                  decoration: BoxDecoration(
-                    color: widget.currentSearchType == SearchType.kanji
-                        ? Theme.of(context).colorScheme.primary
-                        : Colors.transparent,
-                  ),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text(
-                        '漢',
-                        style: TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.bold,
-                          color: widget.currentSearchType == SearchType.kanji
-                              ? Theme.of(context).colorScheme.onPrimary
-                              : Theme.of(context).colorScheme.onSurface,
-                        ),
-                      ),
-                      Text(
-                        'Kanji',
-                        style: TextStyle(
-                          fontSize: 8,
-                          color: widget.currentSearchType == SearchType.kanji
-                              ? Theme.of(context).colorScheme.onPrimary
-                              : Theme.of(context).colorScheme.onSurface,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ],
-          ),
+          onPressed: () {
+            // Toggle between Expression and Kanji
+            final newSearchType = widget.currentSearchType == SearchType.expression
+                ? SearchType.kanji
+                : SearchType.expression;
+            context.read<SearchOptionsCubit>().setSearchType(newSearchType);
+          },
         );
 
         return AppBar(
