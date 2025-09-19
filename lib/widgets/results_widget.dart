@@ -4,17 +4,18 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:fujiten/cubits/search_cubit.dart';
 import 'package:fujiten/widgets/database_status_display.dart';
 import 'package:fujiten/widgets/result_expression_list.dart';
-import 'package:flutter/material.dart';
 
-import '../cubits/input_cubit.dart';
+import '../cubits/search_options_cubit.dart';
 import '../models/entry.dart';
 import '../models/search.dart';
 import 'kanji_list_tile.dart';
 
 class ResultsWidget extends StatefulWidget {
   final Function onEndReached;
+  final TextEditingController? textEditingController;
+  final VoidCallback? onSearch;
 
-  const ResultsWidget(this.onEndReached, {super.key});
+  const ResultsWidget(this.onEndReached, {super.key, this.textEditingController, this.onSearch});
 
   @override
   State<ResultsWidget> createState() => _ResultsWidgetState();
@@ -68,6 +69,92 @@ class _ResultsWidgetState extends State<ResultsWidget> with AutomaticKeepAliveCl
     }
   }
 
+  String _getWildcardSequence() {
+    // Access searchOptionsState from context
+    final searchOptions = context.read<SearchOptionsCubit>().state;
+    return searchOptions.useRegexp ? ".*" : "*";
+  }
+
+  List<Widget> _buildResearchOptions(String currentInput) {
+    final wildcard = _getWildcardSequence();
+    List<Widget> options = [];
+
+    // Check if input doesn't already start with wildcard
+    bool startsWithWildcard = currentInput.startsWith(wildcard);
+    bool endsWithWildcard = currentInput.endsWith(wildcard);
+
+    if (!startsWithWildcard) {
+      options.add(
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 4.0),
+          child: ElevatedButton.icon(
+            onPressed: () {
+              final newInput = '$wildcard$currentInput';
+              if (widget.textEditingController != null) {
+                widget.textEditingController!.text = newInput;
+              }
+              widget.onSearch?.call();
+            },
+            icon: const Icon(Icons.keyboard_arrow_left, size: 16),
+            label: const Text('Starts with'),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Theme.of(context).colorScheme.secondaryContainer,
+              foregroundColor: Theme.of(context).colorScheme.onSecondaryContainer,
+            ),
+          ),
+        ),
+      );
+    }
+
+    if (!endsWithWildcard) {
+      options.add(
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 4.0),
+          child: ElevatedButton.icon(
+            onPressed: () {
+              final newInput = '$currentInput$wildcard';
+              if (widget.textEditingController != null) {
+                widget.textEditingController!.text = newInput;
+              }
+              widget.onSearch?.call();
+            },
+            icon: const Icon(Icons.keyboard_arrow_right, size: 16),
+            label: const Text('Ends with'),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Theme.of(context).colorScheme.secondaryContainer,
+              foregroundColor: Theme.of(context).colorScheme.onSecondaryContainer,
+            ),
+          ),
+        ),
+      );
+    }
+
+    if (!startsWithWildcard && !endsWithWildcard) {
+      options.add(
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 4.0),
+          child: ElevatedButton.icon(
+            onPressed: () {
+              final newInput = '$wildcard$currentInput$wildcard';
+              if (widget.textEditingController != null) {
+                widget.textEditingController!.text = newInput;
+              }
+              widget.onSearch?.call();
+            },
+            icon: const Icon(Icons.search, size: 16),
+            label: const Text('Contains'),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Theme.of(context).colorScheme.tertiaryContainer,
+              foregroundColor: Theme.of(context).colorScheme.onTertiaryContainer,
+            ),
+          ),
+        ),
+      );
+    }
+
+    return options;
+  }
+
   @override
   Widget build(BuildContext context) {
     // Call super.build to maintain the keep alive state
@@ -80,12 +167,11 @@ class _ResultsWidgetState extends State<ResultsWidget> with AutomaticKeepAliveCl
         if (search.isLoading && !search.isLoadingNextPage) {
           child = const CircularProgressIndicator();
         } else {
-          if (search.searchResults.isEmpty &&
-              context
-                  .read<InputCubit>()
-                  .state
-                  .inputs[context.read<InputCubit>().state.searchIndex]
-                  .isNotEmpty) {
+          final currentInput = search.searchInput;
+
+          if (search.searchResults.isEmpty && currentInput.isNotEmpty) {
+            final researchOptions = _buildResearchOptions(currentInput);
+
             child = Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
@@ -108,7 +194,7 @@ class _ResultsWidgetState extends State<ResultsWidget> with AutomaticKeepAliveCl
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  "for '${context.read<InputCubit>().state.inputs[context.read<InputCubit>().state.searchIndex]}'",
+                  "for '$currentInput'",
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                     color: Theme.of(
                       context,
@@ -116,14 +202,25 @@ class _ResultsWidgetState extends State<ResultsWidget> with AutomaticKeepAliveCl
                   ),
                   textAlign: TextAlign.center,
                 ),
+                if (researchOptions.isNotEmpty) ...[
+                  const SizedBox(height: 24),
+                  Text(
+                    "Try searching with:",
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7),
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  Wrap(
+                    alignment: WrapAlignment.center,
+                    children: researchOptions,
+                  ),
+                ],
               ],
             );
           } else {
-            if (context
-                .read<InputCubit>()
-                .state
-                .inputs[context.read<InputCubit>().state.searchIndex]
-                .isEmpty) {
+            if (currentInput.isEmpty) {
               // Center the DatabaseStatusDisplay vertically
               child = Center(child: DatabaseStatusDisplay());
             } else {

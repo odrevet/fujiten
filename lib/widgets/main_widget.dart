@@ -53,7 +53,9 @@ class _MainWidgetState extends State<MainWidget> with TickerProviderStateMixin {
 
     // Initialize tab controller
     final searchOptions = context.read<SearchOptionsCubit>().state;
-    final initialIndex = searchOptions.searchType == SearchType.expression ? 0 : 1;
+    final initialIndex = searchOptions.searchType == SearchType.expression
+        ? 0
+        : 1;
     _tabController = TabController(
       length: 2,
       vsync: this,
@@ -161,7 +163,6 @@ class _MainWidgetState extends State<MainWidget> with TickerProviderStateMixin {
 
   void onSearch() async {
     if (widget._textEditingController.text != "") {
-      final searchOptions = context.read<SearchOptionsCubit>().state;
       final kanjiCubit = context.read<KanjiCubit>();
 
       final formattedInput = await formatInput(
@@ -186,7 +187,10 @@ class _MainWidgetState extends State<MainWidget> with TickerProviderStateMixin {
     focusNode.unfocus();
   }
 
-  Future<void> _runSearchForType(SearchType searchType, String formattedInput) async {
+  Future<void> _runSearchForType(
+    SearchType searchType,
+    String formattedInput,
+  ) async {
     final searchOptions = context.read<SearchOptionsCubit>().state;
     final searchCubit = _getCurrentSearchCubit(searchType);
 
@@ -243,7 +247,10 @@ class _MainWidgetState extends State<MainWidget> with TickerProviderStateMixin {
 
   // Toggle between Expression and Kanji search types
   void _toggleSearchType() {
-    final currentSearchType = context.read<SearchOptionsCubit>().state.searchType;
+    final currentSearchType = context
+        .read<SearchOptionsCubit>()
+        .state
+        .searchType;
     final newSearchType = currentSearchType == SearchType.expression
         ? SearchType.kanji
         : SearchType.expression;
@@ -260,7 +267,9 @@ class _MainWidgetState extends State<MainWidget> with TickerProviderStateMixin {
           builder: (context, kanjiState) {
             return BlocBuilder<SearchOptionsCubit, SearchOptionsState>(
               builder: (context, searchOptionsState) {
-                final currentSearchCubit = _getCurrentSearchCubit(searchOptionsState.searchType);
+                final currentSearchCubit = _getCurrentSearchCubit(
+                  searchOptionsState.searchType,
+                );
 
                 return BlocBuilder<SearchCubit, Search>(
                   bloc: currentSearchCubit,
@@ -269,7 +278,11 @@ class _MainWidgetState extends State<MainWidget> with TickerProviderStateMixin {
                       listener: (context, searchOptionsState) {
                         saveSearchOptions(searchOptionsState);
                         // Update tab controller when search type changes externally
-                        final newIndex = searchOptionsState.searchType == SearchType.expression ? 0 : 1;
+                        final newIndex =
+                            searchOptionsState.searchType ==
+                                SearchType.expression
+                            ? 0
+                            : 1;
                         if (_tabController.index != newIndex) {
                           _tabController.animateTo(newIndex);
                         }
@@ -278,22 +291,23 @@ class _MainWidgetState extends State<MainWidget> with TickerProviderStateMixin {
                         key: _scaffoldKey,
                         floatingActionButton: search.isLoadingNextPage
                             ? const FloatingActionButton(
-                          onPressed: null,
-                          backgroundColor: Colors.white,
-                          mini: true,
-                          child: SizedBox(
-                            height: 10,
-                            width: 10,
-                            child: CircularProgressIndicator(),
-                          ),
-                        )
+                                onPressed: null,
+                                backgroundColor: Colors.white,
+                                mini: true,
+                                child: SizedBox(
+                                  height: 10,
+                                  width: 10,
+                                  child: CircularProgressIndicator(),
+                                ),
+                              )
                             : null,
                         appBar: PreferredSize(
                           preferredSize: const Size.fromHeight(56),
                           child: Builder(
                             builder: (context) => FujitenMenuBar(
                               search: search,
-                              textEditingController: widget._textEditingController,
+                              textEditingController:
+                                  widget._textEditingController,
                               onSearch: onSearch,
                               focusNode: focusNode,
                               insertPosition: cursorPosition,
@@ -319,12 +333,22 @@ class _MainWidgetState extends State<MainWidget> with TickerProviderStateMixin {
                                   // Expression tab content
                                   BlocProvider.value(
                                     value: _expressionSearchCubit,
-                                    child: ResultsWidget(onEndReached),
+                                    child: ResultsWidget(
+                                      onEndReached,
+                                      textEditingController:
+                                          widget._textEditingController,
+                                      onSearch: onSearch,
+                                    ),
                                   ),
                                   // Kanji tab content
                                   BlocProvider.value(
                                     value: _kanjiSearchCubit,
-                                    child: ResultsWidget(onEndReached),
+                                    child: ResultsWidget(
+                                      onEndReached,
+                                      textEditingController:
+                                          widget._textEditingController,
+                                      onSearch: onSearch,
+                                    ),
                                   ),
                                 ],
                               ),

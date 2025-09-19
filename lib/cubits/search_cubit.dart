@@ -14,6 +14,7 @@ class SearchCubit extends Cubit<Search> {
       totalResult: 0,
       page: 0,
       hasMoreResults: true, // Reset this when starting a new search
+      searchInput: '', // Reset search input
     ),
   );
 
@@ -35,7 +36,11 @@ class SearchCubit extends Cubit<Search> {
       return;
     }
 
-    emit(state.copyWith(isLoading: state.page == 0, isLoadingNextPage: state.page > 0));
+    emit(state.copyWith(
+      isLoading: state.page == 0,
+      isLoadingNextPage: state.page > 0,
+      searchInput: formattedInput, // Update search input
+    ));
 
     databaseInterface
         .search(formattedInput, resultsPerPage, state.page, useRegexp)

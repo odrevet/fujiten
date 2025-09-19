@@ -1,5 +1,5 @@
+// search.dart
 import 'package:fujiten/models/states/search_options_state.dart';
-
 import 'entry.dart';
 
 class Search {
@@ -12,6 +12,7 @@ class Search {
   int? resultsPerPageExpression;
   SearchType? searchType;
   final bool hasMoreResults;
+  final String searchInput; // Added search input tracking
 
   Search({
     this.totalResult = 0,
@@ -22,6 +23,7 @@ class Search {
     this.resultsPerPageExpression = 10,
     this.searchResults = const [],
     this.hasMoreResults = true,
+    this.searchInput = '', // Default empty string
   });
 
   Search copyWith({
@@ -33,6 +35,7 @@ class Search {
     int? resultsPerPageExpression,
     int? totalResult,
     bool? hasMoreResults,
+    String? searchInput, // Added to copyWith
   }) {
     return Search(
       isLoading: isLoading ?? this.isLoading,
@@ -41,9 +44,10 @@ class Search {
       page: page ?? this.page,
       resultsPerPageKanji: resultsPerPageKanji ?? this.resultsPerPageKanji,
       resultsPerPageExpression:
-          resultsPerPageExpression ?? this.resultsPerPageExpression,
+      resultsPerPageExpression ?? this.resultsPerPageExpression,
       searchResults: searchResults ?? this.searchResults,
       hasMoreResults: hasMoreResults ?? this.hasMoreResults,
+      searchInput: searchInput ?? this.searchInput,
     );
   }
 }
