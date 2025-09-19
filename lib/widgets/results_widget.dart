@@ -8,6 +8,7 @@ import 'package:fujiten/widgets/result_expression_list.dart';
 import '../cubits/search_options_cubit.dart';
 import '../models/entry.dart';
 import '../models/search.dart';
+import '../models/states/search_options_state.dart';
 import 'kanji_list_tile.dart';
 
 class ResultsWidget extends StatefulWidget {
@@ -15,13 +16,19 @@ class ResultsWidget extends StatefulWidget {
   final TextEditingController? textEditingController;
   final VoidCallback? onSearch;
 
-  const ResultsWidget(this.onEndReached, {super.key, this.textEditingController, this.onSearch});
+  const ResultsWidget(
+    this.onEndReached, {
+    super.key,
+    this.textEditingController,
+    this.onSearch,
+  });
 
   @override
   State<ResultsWidget> createState() => _ResultsWidgetState();
 }
 
-class _ResultsWidgetState extends State<ResultsWidget> with AutomaticKeepAliveClientMixin {
+class _ResultsWidgetState extends State<ResultsWidget>
+    with AutomaticKeepAliveClientMixin {
   ScrollController? _scrollController;
 
   // This keeps the widget state alive when switching tabs
@@ -43,7 +50,7 @@ class _ResultsWidgetState extends State<ResultsWidget> with AutomaticKeepAliveCl
 
   void scrollListener() {
     if (_scrollController!.offset >=
-        _scrollController!.position.maxScrollExtent &&
+            _scrollController!.position.maxScrollExtent &&
         !_scrollController!.position.outOfRange &&
         !context.read<SearchCubit>().state.isLoading &&
         !context.read<SearchCubit>().state.isLoadingNextPage) {
@@ -79,17 +86,40 @@ class _ResultsWidgetState extends State<ResultsWidget> with AutomaticKeepAliveCl
     final wildcard = _getWildcardSequence();
     List<Widget> options = [];
 
-    // Check if input doesn't already start with wildcard
+    // Parse current input to understand its wildcard structure
     bool startsWithWildcard = currentInput.startsWith(wildcard);
     bool endsWithWildcard = currentInput.endsWith(wildcard);
 
+    // Get the core text without wildcards
+    String coreText = currentInput;
+    if (startsWithWildcard) {
+      coreText = coreText.substring(wildcard.length);
+    }
+    if (endsWithWildcard) {
+      coreText = coreText.substring(0, coreText.length - wildcard.length);
+    }
+
+    // If core text is empty after removing wildcards, don't show options
+    if (coreText.isEmpty) {
+      return options;
+    }
+
+    // "Starts with" option - only show if not already starts with wildcard
     if (!startsWithWildcard) {
+      String newInput;
+      if (endsWithWildcard) {
+        // If currently ends with wildcard, remove it and add at beginning
+        newInput = '$wildcard$coreText';
+      } else {
+        // Simple case: add wildcard at beginning
+        newInput = '$wildcard$currentInput';
+      }
+
       options.add(
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 4.0),
           child: ElevatedButton.icon(
             onPressed: () {
-              final newInput = '$wildcard$currentInput';
               if (widget.textEditingController != null) {
                 widget.textEditingController!.text = newInput;
               }
@@ -99,20 +129,31 @@ class _ResultsWidgetState extends State<ResultsWidget> with AutomaticKeepAliveCl
             label: const Text('Starts with'),
             style: ElevatedButton.styleFrom(
               backgroundColor: Theme.of(context).colorScheme.secondaryContainer,
-              foregroundColor: Theme.of(context).colorScheme.onSecondaryContainer,
+              foregroundColor: Theme.of(
+                context,
+              ).colorScheme.onSecondaryContainer,
             ),
           ),
         ),
       );
     }
 
+    // "Ends with" option - only show if not already ends with wildcard
     if (!endsWithWildcard) {
+      String newInput;
+      if (startsWithWildcard) {
+        // If currently starts with wildcard, remove it and add at end
+        newInput = '$coreText$wildcard';
+      } else {
+        // Simple case: add wildcard at end
+        newInput = '$currentInput$wildcard';
+      }
+
       options.add(
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 4.0),
           child: ElevatedButton.icon(
             onPressed: () {
-              final newInput = '$currentInput$wildcard';
               if (widget.textEditingController != null) {
                 widget.textEditingController!.text = newInput;
               }
@@ -122,20 +163,24 @@ class _ResultsWidgetState extends State<ResultsWidget> with AutomaticKeepAliveCl
             label: const Text('Ends with'),
             style: ElevatedButton.styleFrom(
               backgroundColor: Theme.of(context).colorScheme.secondaryContainer,
-              foregroundColor: Theme.of(context).colorScheme.onSecondaryContainer,
+              foregroundColor: Theme.of(
+                context,
+              ).colorScheme.onSecondaryContainer,
             ),
           ),
         ),
       );
     }
 
-    if (!startsWithWildcard && !endsWithWildcard) {
+    // "Contains" option - only show if not already both starts and ends with wildcard
+    if (!startsWithWildcard || !endsWithWildcard) {
+      String newInput = '$wildcard$coreText$wildcard';
+
       options.add(
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 4.0),
           child: ElevatedButton.icon(
             onPressed: () {
-              final newInput = '$wildcard$currentInput$wildcard';
               if (widget.textEditingController != null) {
                 widget.textEditingController!.text = newInput;
               }
@@ -145,7 +190,9 @@ class _ResultsWidgetState extends State<ResultsWidget> with AutomaticKeepAliveCl
             label: const Text('Contains'),
             style: ElevatedButton.styleFrom(
               backgroundColor: Theme.of(context).colorScheme.tertiaryContainer,
-              foregroundColor: Theme.of(context).colorScheme.onTertiaryContainer,
+              foregroundColor: Theme.of(
+                context,
+              ).colorScheme.onTertiaryContainer,
             ),
           ),
         ),
@@ -172,6 +219,17 @@ class _ResultsWidgetState extends State<ResultsWidget> with AutomaticKeepAliveCl
           if (search.searchResults.isEmpty && currentInput.isNotEmpty) {
             final researchOptions = _buildResearchOptions(currentInput);
 
+            // Determine search type from search options
+            final searchOptions = context.read<SearchOptionsCubit>().state;
+            final isKanjiSearch = searchOptions.searchType == SearchType.kanji;
+
+            String noResultsText;
+            if (isKanjiSearch) {
+              noResultsText = "No kanji found";
+            } else {
+              noResultsText = "No expressions found";
+            }
+
             child = Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
@@ -184,7 +242,7 @@ class _ResultsWidgetState extends State<ResultsWidget> with AutomaticKeepAliveCl
                 ),
                 const SizedBox(height: 16),
                 Text(
-                  "No results found",
+                  noResultsText,
                   style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                     color: Theme.of(
                       context,
@@ -207,7 +265,9 @@ class _ResultsWidgetState extends State<ResultsWidget> with AutomaticKeepAliveCl
                   Text(
                     "Try searching with:",
                     style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7),
+                      color: Theme.of(
+                        context,
+                      ).colorScheme.onSurface.withValues(alpha: 0.7),
                       fontWeight: FontWeight.w500,
                     ),
                   ),
