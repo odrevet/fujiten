@@ -134,7 +134,7 @@ class _KanjiListTileState extends State<KanjiListTile> {
           ),
           child: ClipRRect(
             borderRadius: BorderRadius.circular(12.0),
-            child: KanjiDrawingAnimation(widget.kanji.literal),
+            child: KanjiDrawingAnimation(widget.kanji.literal, speed: 50),
           ),
         ),
       ],
