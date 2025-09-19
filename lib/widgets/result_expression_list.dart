@@ -78,7 +78,7 @@ class _ResultExpressionListState extends State<ResultExpressionList> {
       child: GestureDetector(
         onTap: () => _showKanjiDialog(literals),
         onLongPress: () => _copyToClipboard(mainReading),
-        child: Text(
+        child: SelectableText(
           mainReading,
           style: const TextStyle(fontSize: 24.0, fontWeight: FontWeight.w500),
           textAlign: TextAlign.center,
@@ -103,7 +103,7 @@ class _ResultExpressionListState extends State<ResultExpressionList> {
           return GestureDetector(
             onTap: () => _showKanjiDialog(literals),
             onLongPress: () => _copyToClipboard(reading),
-            child: Text(reading),
+            child: SelectableText(reading),
           );
         }).toList(),
       ),
@@ -130,7 +130,7 @@ class _ResultExpressionListState extends State<ResultExpressionList> {
             return GestureDetector(
               onTap: () => _showKanjiDialog(literals),
               onLongPress: () => _copyToClipboard(reference),
-              child: Text(
+              child: SelectableText(
                 reference,
                 style: TextStyle(
                   color: Colors.blue,
@@ -145,7 +145,7 @@ class _ResultExpressionListState extends State<ResultExpressionList> {
             return GestureDetector(
               onTap: () => _showKanjiDialog(literals),
               onLongPress: () => _copyToClipboard(reference),
-              child: Text(
+              child: SelectableText(
                 reference,
                 style: TextStyle(
                   color: Colors.red,
@@ -174,7 +174,7 @@ class _ResultExpressionListState extends State<ResultExpressionList> {
           if (pos != null && pos.isNotEmpty)
             Container(
               padding: const EdgeInsets.only(bottom: 8.0),
-              child: Text(pos, style: _posStyle),
+              child: SelectableText(pos, style: _posStyle),
             ),
           ...senses.asMap().entries.map((entry) {
             final index = entry.key;
@@ -204,14 +204,12 @@ class _ResultExpressionListState extends State<ResultExpressionList> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(
+                        SelectableText(
                           sense.glosses.join(', '),
                           style: Theme.of(context)
                               .textTheme
                               .bodyMedium
                               ?.copyWith(height: 1.3),
-                          softWrap: true,
-                          overflow: TextOverflow.visible,
                         ),
                         if (sense.dial.isNotEmpty ||
                             sense.misc.isNotEmpty ||
@@ -232,13 +230,11 @@ class _ResultExpressionListState extends State<ResultExpressionList> {
                                       borderRadius: BorderRadius.circular(4),
                                       color: Colors.orange.withValues(alpha: 0.1),
                                     ),
-                                    child: Text(
+                                    child: SelectableText(
                                       sense.dial.join(', '),
                                       style: _styleFieldInformation.copyWith(
                                         color: Colors.orange[700],
                                       ),
-                                      softWrap: true,
-                                      overflow: TextOverflow.visible,
                                     ),
                                   ),
                                 if (sense.misc.isNotEmpty)
@@ -251,13 +247,11 @@ class _ResultExpressionListState extends State<ResultExpressionList> {
                                       borderRadius: BorderRadius.circular(4),
                                       color: Colors.purple.withValues(alpha: 0.1),
                                     ),
-                                    child: Text(
+                                    child: SelectableText(
                                       sense.misc.join(', '),
                                       style: _styleFieldInformation.copyWith(
                                         color: Colors.purple[700],
                                       ),
-                                      softWrap: true,
-                                      overflow: TextOverflow.visible,
                                     ),
                                   ),
                                 if (sense.fields.isNotEmpty)
@@ -270,13 +264,11 @@ class _ResultExpressionListState extends State<ResultExpressionList> {
                                       borderRadius: BorderRadius.circular(4),
                                       color: Colors.green.withValues(alpha: 0.1),
                                     ),
-                                    child: Text(
+                                    child: SelectableText(
                                       sense.fields.join(', '),
                                       style: _styleFieldInformation.copyWith(
                                         color: Colors.green[700],
                                       ),
-                                      softWrap: true,
-                                      overflow: TextOverflow.visible,
                                     ),
                                   ),
                               ],
@@ -293,7 +285,7 @@ class _ResultExpressionListState extends State<ResultExpressionList> {
       ),
     );
   }
-  
+
   @override
   Widget build(BuildContext context) {
     // Group senses by part of speech
