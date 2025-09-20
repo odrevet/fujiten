@@ -84,11 +84,9 @@ class _KanjiListTileState extends State<KanjiListTile> {
     await Clipboard.setData(ClipboardData(text: widget.kanji.literal));
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Copied "${widget.kanji.literal}" to clipboard'),
-          duration: const Duration(seconds: 2),
-          behavior: SnackBarBehavior.floating,
-          margin: const EdgeInsets.all(16.0),
+        const SnackBar(
+          content: Text('Copied to clipboard'),
+          duration: Duration(seconds: 1),
         ),
       );
     }
@@ -100,11 +98,9 @@ class _KanjiListTileState extends State<KanjiListTile> {
       await Clipboard.setData(ClipboardData(text: radicals));
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Copied radicals "$radicals" to clipboard'),
-            duration: const Duration(seconds: 2),
-            behavior: SnackBarBehavior.floating,
-            margin: const EdgeInsets.all(16.0),
+          const SnackBar(
+            content: Text('Copied to clipboard'),
+            duration: Duration(seconds: 1),
           ),
         );
       }
@@ -113,25 +109,28 @@ class _KanjiListTileState extends State<KanjiListTile> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
-
-    return Container(
+    return Card(
       margin: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(12.0),
-        color: widget.selected
-            ? colorScheme.primaryContainer.withValues(alpha: 0.3)
-            : Colors.transparent,
-        border: widget.selected
-            ? Border.all(color: colorScheme.primary, width: 2.0)
-            : null,
+      elevation: 2,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+        side: widget.selected
+            ? BorderSide(color: Theme.of(context).colorScheme.primary, width: 2.0)
+            : BorderSide.none,
       ),
       child: Container(
-        padding: const EdgeInsets.all(16.0),
-        child: _showAnimation
-            ? _buildAnimationView(context)
-            : _buildNormalView(context),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(12),
+          color: widget.selected
+              ? Theme.of(context).colorScheme.primaryContainer.withValues(alpha: 0.3)
+              : null,
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: _showAnimation
+              ? _buildAnimationView(context)
+              : _buildNormalView(context),
+        ),
       ),
     );
   }
@@ -143,7 +142,7 @@ class _KanjiListTileState extends State<KanjiListTile> {
 
         if (isWideScreen) {
           return Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               // Kanji character with enhanced interaction
               _buildInteractiveKanjiCharacter(context),
@@ -159,7 +158,7 @@ class _KanjiListTileState extends State<KanjiListTile> {
           );
         } else {
           return Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               // Kanji character with enhanced interaction
               _buildInteractiveKanjiCharacter(context),
@@ -226,79 +225,45 @@ class _KanjiListTileState extends State<KanjiListTile> {
     final theme = Theme.of(context);
 
     return GestureDetector(
-      onTap: _copyKanjiToClipboard,
-      child: Container(
-        width: 60,
-        height: 60,
-        decoration: BoxDecoration(
-          color: widget.selected
-              ? theme.colorScheme.primary.withValues(alpha: 0.1)
-              : theme.colorScheme.surface,
-          borderRadius: BorderRadius.circular(8.0),
-          border: Border.all(
-            color: theme.colorScheme.outline.withValues(alpha: 0.3),
-            width: 1.0,
+      onTap: _toggleAnimationView,
+      onLongPress: _copyKanjiToClipboard,
+      child: MouseRegion(
+        cursor: SystemMouseCursors.click,
+        child: Container(
+          width: 60,
+          height: 60,
+          decoration: BoxDecoration(
+            color: theme.colorScheme.surface,
+            borderRadius: BorderRadius.circular(8.0),
+            border: Border.all(
+              color: theme.colorScheme.outline.withValues(alpha: 0.3),
+              width: 1.0,
+            ),
           ),
-        ),
-        child: Stack(
-          children: [
-            Center(
-              child: KanjiCharacterWidget(
-                kanji: widget.kanji,
-                onTap: widget.onTapLeading,
-                style: TextStyle(
-                  fontSize: 32.0,
-                  fontWeight: FontWeight.bold,
-                  color: widget.selected
-                      ? theme.colorScheme.primary
-                      : theme.colorScheme.onSurface,
-                ),
+          child: Center(
+            child: KanjiCharacterWidget(
+              kanji: widget.kanji,
+              onTap: widget.onTapLeading,
+              style: TextStyle(
+                fontSize: 32.0,
+                fontWeight: FontWeight.bold,
+                color: widget.selected
+                    ? theme.colorScheme.primary
+                    : theme.colorScheme.onSurface,
               ),
             ),
-          ],
+          ),
         ),
       ),
     );
   }
 
   Widget _buildKanjiDetails(BuildContext context, {required bool showCompactExamples}) {
-    final theme = Theme.of(context);
-
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Stroke count and radicals row
-        Row(
-          children: [
-            _buildInfoChip(
-              context,
-              _getStrokeText(),
-              Icons.edit,
-              theme.colorScheme.secondary,
-              onTap: _toggleAnimationView,
-              onLongPress: null,
-            ),
-            const SizedBox(width: 8.0),
-            if (_getRadicals().isNotEmpty)
-              _buildSelectableInfoChip(
-                context,
-                _getRadicals(),
-                Icons.category,
-                theme.colorScheme.tertiary,
-                onLongPress: _copyRadicalsToClipboard,
-              ),
-          ],
-        ),
-        const SizedBox(height: 12.0),
-
-        // Readings section
-        if (_getOnReading().isNotEmpty || _getKunReading().isNotEmpty)
-          _buildReadingsSection(context),
-
-        const SizedBox(height: 8.0),
-
-        // Meanings section
-        if (_getMeaning().isNotEmpty) _buildMeaningSection(context),
+        // Readings, meanings, stroke count, and radicals sections (grouped like senses)
+        _buildKanjiInfoGroup(context),
 
         // Expressions section for mobile/narrow screens only
         if (showCompactExamples) ...[
@@ -306,6 +271,95 @@ class _KanjiListTileState extends State<KanjiListTile> {
           _buildExpressionsSection(context),
         ],
       ],
+    );
+  }
+
+  Widget _buildKanjiInfoGroup(BuildContext context) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 16.0),
+      padding: const EdgeInsets.all(12.0),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(8),
+        color: Colors.grey.withValues(alpha: 0.05),
+        border: Border.all(color: Colors.grey.withValues(alpha: 0.2)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Readings section
+          if (_getOnReading().isNotEmpty || _getKunReading().isNotEmpty) ...[
+            if (_getOnReading().isNotEmpty)
+              _buildReadingRow(
+                context,
+                'On-yomi',
+                _getOnReading(),
+                Theme.of(context).colorScheme.primary,
+              ),
+            if (_getOnReading().isNotEmpty && _getKunReading().isNotEmpty)
+              const SizedBox(height: 8.0),
+            if (_getKunReading().isNotEmpty)
+              _buildReadingRow(
+                context,
+                'Kun-yomi',
+                _getKunReading(),
+                Theme.of(context).colorScheme.secondary,
+              ),
+          ],
+
+          // Stroke count section
+          if ((_getOnReading().isNotEmpty || _getKunReading().isNotEmpty))
+            const SizedBox(height: 8.0),
+          _buildReadingRow(
+            context,
+            'Strokes',
+            '${widget.kanji.strokeCount}',
+            Theme.of(context).colorScheme.tertiary,
+          ),
+
+          // Radicals section
+          if (_getRadicals().isNotEmpty) ...[
+            const SizedBox(height: 8.0),
+            _buildReadingRow(
+              context,
+              'Radicals',
+              _getRadicals(),
+              Theme.of(context).colorScheme.outline,
+              onLongPress: _copyRadicalsToClipboard,
+            ),
+          ],
+
+          // Meanings section
+          if (_getMeaning().isNotEmpty) ...[
+            const SizedBox(height: 12.0),
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Container(
+                  width: 60,
+                  margin: const EdgeInsets.only(right: 8.0),
+                  child: Text(
+                    'Meanings:',
+                    style: TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.blueGrey,
+                    ),
+                  ),
+                ),
+                Expanded(
+                  child: SelectableText(
+                    _getMeaning(),
+                    style: Theme.of(context)
+                        .textTheme
+                        .bodyMedium
+                        ?.copyWith(height: 1.3),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ],
+      ),
     );
   }
 
@@ -430,6 +484,8 @@ class _KanjiListTileState extends State<KanjiListTile> {
               fontWeight: FontWeight.w600,
               color: theme.colorScheme.primary,
             ),
+            softWrap: true,
+            overflow: TextOverflow.visible,
           ),
           if (meanings.isNotEmpty) ...[
             const SizedBox(height: 2.0),
@@ -440,6 +496,7 @@ class _KanjiListTileState extends State<KanjiListTile> {
                 color: theme.colorScheme.onSurface.withValues(alpha: 0.8),
               ),
               softWrap: true,
+              overflow: TextOverflow.visible,
             ),
           ],
         ],
@@ -584,124 +641,19 @@ class _KanjiListTileState extends State<KanjiListTile> {
     );
   }
 
-  Widget _buildSelectableInfoChip(
-      BuildContext context,
-      String text,
-      IconData icon,
-      Color color, {
-        VoidCallback? onLongPress,
-      }) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
-      decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.1),
-        borderRadius: BorderRadius.circular(16.0),
-        border: Border.all(color: color.withValues(alpha: 0.3)),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(icon, size: 14.0, color: color),
-          const SizedBox(width: 4.0),
-          GestureDetector(
-            onLongPress: onLongPress,
-            child: SelectableText(
-              text,
-              style: TextStyle(
-                fontSize: 12.0,
-                fontWeight: FontWeight.w500,
-                color: color,
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildInfoChip(
-      BuildContext context,
-      String text,
-      IconData icon,
-      Color color, {
-        VoidCallback? onTap,
-        VoidCallback? onLongPress,
-      }) {
-    Widget chip = Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
-      decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.1),
-        borderRadius: BorderRadius.circular(16.0),
-        border: Border.all(color: color.withValues(alpha: 0.3)),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(icon, size: 14.0, color: color),
-          const SizedBox(width: 4.0),
-          Text(
-            text,
-            style: TextStyle(
-              fontSize: 12.0,
-              fontWeight: FontWeight.w500,
-              color: color,
-            ),
-          ),
-        ],
-      ),
-    );
-
-    if (onTap != null || onLongPress != null) {
-      return MouseRegion(
-        cursor: SystemMouseCursors.click,
-        child: GestureDetector(
-          onTap: onTap,
-          onLongPress: onLongPress,
-          child: chip,
-        ),
-      );
-    }
-
-    return chip;
-  }
-
-  Widget _buildReadingsSection(BuildContext context) {
-    final theme = Theme.of(context);
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        if (_getOnReading().isNotEmpty)
-          _buildReadingRow(
-            context,
-            'On',
-            _getOnReading(),
-            theme.colorScheme.primary,
-          ),
-        if (_getOnReading().isNotEmpty && _getKunReading().isNotEmpty)
-          const SizedBox(height: 4.0),
-        if (_getKunReading().isNotEmpty)
-          _buildReadingRow(
-            context,
-            'Kun',
-            _getKunReading(),
-            theme.colorScheme.secondary,
-          ),
-      ],
-    );
-  }
-
   Widget _buildReadingRow(
       BuildContext context,
       String label,
       String reading,
-      Color color,
-      ) {
-    return Row(
+      Color color, {
+        VoidCallback? onLongPress,
+      }) {
+    Widget content = Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        SizedBox(
-          width: 35,
+        Container(
+          width: 60,
+          margin: const EdgeInsets.only(right: 8.0),
           child: Text(
             '$label:',
             style: TextStyle(
@@ -714,41 +666,23 @@ class _KanjiListTileState extends State<KanjiListTile> {
         Expanded(
           child: SelectableText(
             reading,
-            style: TextStyle(
-              fontSize: 13.0,
-              color: Theme.of(context).colorScheme.onSurface,
-            ),
+            style: Theme.of(context)
+                .textTheme
+                .bodyMedium
+                ?.copyWith(height: 1.3),
           ),
         ),
       ],
     );
-  }
 
-  Widget _buildMeaningSection(BuildContext context) {
-    final theme = Theme.of(context);
+    if (onLongPress != null) {
+      return GestureDetector(
+        onLongPress: onLongPress,
+        child: content,
+      );
+    }
 
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Icon(
-          Icons.translate,
-          size: 16.0,
-          color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
-        ),
-        const SizedBox(width: 8.0),
-        Expanded(
-          child: SelectableText(
-            _getMeaning(),
-            style: TextStyle(
-              fontSize: 14.0,
-              fontWeight: FontWeight.w500,
-              color: theme.colorScheme.onSurface,
-              height: 1.3,
-            ),
-          ),
-        ),
-      ],
-    );
+    return content;
   }
 
   // Helper methods for data formatting
