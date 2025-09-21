@@ -90,18 +90,26 @@ class _ResultExpressionListState extends State<ResultExpressionList> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: Center(child: Text('Details for ${literals.join()}')),
+        title: Row(
+          children: [
+            Expanded(
+              child: Center(
+                child: Text('Details for ${literals.join()}'),
+              ),
+            ),
+            IconButton(
+              onPressed: () => Navigator.of(context).pop(),
+              icon: const Icon(Icons.close),
+              iconSize: 20.0,
+              constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
+              padding: EdgeInsets.zero,
+            ),
+          ],
+        ),
         content: KanjiDialog(literals: literals),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Close'),
-          ),
-        ],
       ),
     );
   }
-
   void _copyToClipboard(String text) {
     Clipboard.setData(ClipboardData(text: text));
     ScaffoldMessenger.of(context).showSnackBar(

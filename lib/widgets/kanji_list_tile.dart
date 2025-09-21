@@ -51,7 +51,7 @@ class _KanjiListTileState extends State<KanjiListTile> {
       var wildcard = context.read<SearchOptionsCubit>().state.useRegexp ? '.*' : '*';
       final entries = await expressionCubit.databaseInterface.search(
         '$wildcard${widget.kanji.literal}$wildcard',
-        5,
+        3,
         0,
         context.read<SearchOptionsCubit>().state.useRegexp,
       );
@@ -141,6 +141,7 @@ class _KanjiListTileState extends State<KanjiListTile> {
         final isWideScreen = constraints.maxWidth > 600;
 
         if (isWideScreen) {
+          // Wide screen layout - kanji on left side
           return Row(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
@@ -157,19 +158,45 @@ class _KanjiListTileState extends State<KanjiListTile> {
             ],
           );
         } else {
-          return Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
+          // Small screen layout - kanji as title above content
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Kanji character with enhanced interaction
-              _buildInteractiveKanjiCharacter(context),
-              const SizedBox(width: 16.0),
+              // Kanji character as title
+              _buildKanjiTitle(context),
+              const SizedBox(height: 12.0),
 
               // Kanji details
-              Expanded(child: _buildKanjiDetails(context, showCompactExamples: true)),
+              _buildKanjiDetails(context, showCompactExamples: true),
             ],
           );
         }
       },
+    );
+  }
+
+  Widget _buildKanjiTitle(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return Center(
+      child: GestureDetector(
+        onTap: _toggleAnimationView,
+        onLongPress: _copyKanjiToClipboard,
+        child: MouseRegion(
+          cursor: SystemMouseCursors.click,
+          child: KanjiCharacterWidget(
+            kanji: widget.kanji,
+            onTap: widget.onTapLeading,
+            style: TextStyle(
+              fontSize: 28.0,
+              fontWeight: FontWeight.bold,
+              color: widget.selected
+                  ? theme.colorScheme.primary
+                  : theme.colorScheme.onSurface,
+            ),
+          ),
+        ),
+      ),
     );
   }
 
@@ -521,13 +548,16 @@ class _KanjiListTileState extends State<KanjiListTile> {
               const SizedBox(width: 8.0),
               Expanded(
                 child: Text(
-                  'Examples with "${widget.kanji.literal}"',
-                  style: TextStyle(
-                    fontSize: 18.0,
-                    color: theme.colorScheme.primary,
-                  ),
+                  widget.kanji.literal,
                   overflow: TextOverflow.ellipsis,
                 ),
+              ),
+              IconButton(
+                onPressed: () => Navigator.of(context).pop(),
+                icon: const Icon(Icons.close),
+                iconSize: 20.0,
+                constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
+                padding: EdgeInsets.zero,
               ),
             ],
           ),
@@ -551,12 +581,6 @@ class _KanjiListTileState extends State<KanjiListTile> {
               ),
             ),
           ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: const Text('Close'),
-            ),
-          ],
         );
       },
     );
