@@ -22,6 +22,7 @@ dependencies:
   archive: ^4.0.7
   equatable: ^2.0.7
   kanji_drawing_animation: ^0.5.0+1
+  ruby_text: ^3.0.3
 
 dev_dependencies:
   sqflite_common_ffi: ^2.3.6

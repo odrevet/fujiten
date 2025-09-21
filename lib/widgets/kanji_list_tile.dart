@@ -685,12 +685,6 @@ class _KanjiListTileState extends State<KanjiListTile> {
     return content;
   }
 
-  // Helper methods for data formatting
-  String _getStrokeText() {
-    final count = widget.kanji.strokeCount;
-    return '$count stroke${count > 1 ? 's' : ''}';
-  }
-
   String _getOnReading() {
     return widget.kanji.on?.join('・') ?? '';
   }

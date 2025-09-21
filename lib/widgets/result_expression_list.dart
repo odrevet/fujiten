@@ -1,10 +1,53 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:ruby_text/ruby_text.dart';
 
 import '../models/entry.dart';
 import '../models/sense.dart';
 import '../string_utils.dart' show kanaKit;
 import 'kanji_dialog.dart';
+
+import 'package:flutter/material.dart';
+import 'package:ruby_text/ruby_text.dart';
+
+Widget buildRubyText(String mainReading) {
+  // Split the string by spaces or other delimiters to handle multiple words/phrases
+  List<String> parts = mainReading.split(' ');
+  List<RubyTextData> rubyTextDataList = [];
+
+  for (String part in parts) {
+    if (part.contains(':')) {
+      // Split by colon - format is kanji:reading
+      List<String> kanjiReading = part.split(':');
+      if (kanjiReading.length == 2) {
+        rubyTextDataList.add(RubyTextData(
+          kanjiReading[0], // kanji
+          ruby: kanjiReading[1], // reading
+        ));
+      } else {
+        // If format is incorrect, treat as plain text
+        rubyTextDataList.add(RubyTextData(part));
+      }
+    } else {
+      // No colon, treat as plain text
+      rubyTextDataList.add(RubyTextData(part));
+    }
+
+    // Add space between parts (except for the last part)
+    if (part != parts.last) {
+      rubyTextDataList.add(RubyTextData(' '));
+    }
+  }
+
+  return SelectionArea(
+    child: RubyText(
+      rubyTextDataList,
+      style: const TextStyle(fontSize: 24.0, fontWeight: FontWeight.w500),
+      rubyStyle: const TextStyle(fontSize: 12.0), // Smaller font for ruby text
+      textAlign: TextAlign.center,
+    ),
+  );
+}
 
 class ResultExpressionList extends StatefulWidget {
   final ExpressionEntry searchResult;
@@ -86,11 +129,7 @@ class _ResultExpressionListState extends State<ResultExpressionList> {
           Center(
             child: GestureDetector(
               onLongPress: () => _copyToClipboard(mainReading),
-              child: SelectableText(
-                mainReading,
-                style: const TextStyle(fontSize: 24.0, fontWeight: FontWeight.w500),
-                textAlign: TextAlign.center,
-              ),
+              child: buildRubyText(mainReading),
             ),
           ),
           if (literals.isNotEmpty)
