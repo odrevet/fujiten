@@ -7,9 +7,6 @@ import '../models/sense.dart';
 import '../string_utils.dart' show kanaKit;
 import 'kanji_dialog.dart';
 
-import 'package:flutter/material.dart';
-import 'package:ruby_text/ruby_text.dart';
-
 Widget buildRubyText(String mainReading) {
   // Split the string by spaces or other delimiters to handle multiple words/phrases
   List<String> parts = mainReading.split(' ');

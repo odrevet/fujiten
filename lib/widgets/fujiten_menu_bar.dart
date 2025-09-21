@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:fujiten/widgets/settings/search_options_widget.dart';
 
 import '../cubits/expression_cubit.dart';
 import '../cubits/input_cubit.dart';
