@@ -49,9 +49,15 @@ class _ResultExpressionListState extends State<ResultExpressionList> {
 
     showDialog(
       context: context,
-      builder: (_) => AlertDialog(
-        title: const Center(child: Text('Kanji')),
+      builder: (context) => AlertDialog(
+        title: Center(child: Text('Details for ${literals.join()}')),
         content: KanjiDialog(literals: literals),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('Close'),
+          ),
+        ],
       ),
     );
   }
@@ -75,14 +81,29 @@ class _ResultExpressionListState extends State<ResultExpressionList> {
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.symmetric(vertical: 8.0),
-      child: GestureDetector(
-        onTap: () => _showKanjiDialog(literals),
-        onLongPress: () => _copyToClipboard(mainReading),
-        child: SelectableText(
-          mainReading,
-          style: const TextStyle(fontSize: 24.0, fontWeight: FontWeight.w500),
-          textAlign: TextAlign.center,
-        ),
+      child: Stack(
+        children: [
+          Center(
+            child: GestureDetector(
+              onLongPress: () => _copyToClipboard(mainReading),
+              child: SelectableText(
+                mainReading,
+                style: const TextStyle(fontSize: 24.0, fontWeight: FontWeight.w500),
+                textAlign: TextAlign.center,
+              ),
+            ),
+          ),
+          if (literals.isNotEmpty)
+            Positioned(
+              top: 0,
+              right: 0,
+              child: IconButton(
+                onPressed: () => _showKanjiDialog(literals),
+                icon: const Icon(Icons.info_outline),
+                tooltip: 'Show Kanji',
+              ),
+            ),
+        ],
       ),
     );
   }
