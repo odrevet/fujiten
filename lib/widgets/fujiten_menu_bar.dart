@@ -238,29 +238,13 @@ class _FujitenMenuBarState extends State<FujitenMenuBar> {
               ),
               Row(
                 children: <Widget>[
-                  searchTypeToggle,
                   popupMenuButtonInsert,
                   IconButton(
                     icon: const Icon(Icons.translate),
                     onPressed: convert,
                   ),
                   popupMenuButtonInputs,
-                  // Optional: Add search options button
-                  IconButton(
-                    icon: const Icon(Icons.tune),
-                    tooltip: 'Search Options',
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => Scaffold(
-                            appBar: AppBar(title: const Text('Search option')),
-                            body: SearchOptionsWidget(),
-                          ),
-                        ),
-                      );
-                    },
-                  ),
+                  searchTypeToggle,
                 ],
               ),
             ],
