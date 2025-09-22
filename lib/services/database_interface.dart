@@ -14,7 +14,7 @@ abstract class DatabaseInterface {
 
   Future<void> open(String path) async {
     try {
-      if (const bool.fromEnvironment('FFI', defaultValue: true)) {
+      if (const bool.fromEnvironment('FFI', defaultValue: false)) {
         database = await databaseFactoryFfi.openDatabase(path);
       } else {
         database = await openDatabase(path, readOnly: true);

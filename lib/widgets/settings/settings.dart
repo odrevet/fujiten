@@ -56,7 +56,7 @@ class SettingsPage extends StatelessWidget {
                 // Check FFI environment variable
                 const bool ffiEnabled = bool.fromEnvironment(
                   'FFI',
-                  defaultValue: true,
+                  defaultValue: false,
                 );
 
                 showAboutDialog(
