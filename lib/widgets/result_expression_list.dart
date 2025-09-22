@@ -178,11 +178,8 @@ class _ResultExpressionListState extends State<ResultExpressionList> {
   }
 
   void _showInflectionDialog(String reading) {
-    final parts = reading.split(':');
-    final hasKanji = parts.length == 2;
-
-    final stem = parts.last.substring(0, parts.last.length - 1);
-    final ending = parts.last.substring(parts.last.length - 1);
+    final stem = reading.substring(0, reading.length - 1);
+    final ending = reading.substring(reading.length - 1);
     final inflections = JapaneseVerbInflector.getAllInflections(stem, ending);
 
     showDialog(
@@ -216,8 +213,6 @@ class _ResultExpressionListState extends State<ResultExpressionList> {
                         defaultVerticalAlignment: TableCellVerticalAlignment.middle,
                         children: inflections.entries.map((e) {
                           final inflected = e.value;
-                          final display =
-                          hasKanji ? "${parts.first}:${inflected}" : inflected;
 
                           return TableRow(
                             children: [
@@ -232,7 +227,7 @@ class _ResultExpressionListState extends State<ResultExpressionList> {
                               ),
                               Padding(
                                 padding: const EdgeInsets.all(8.0),
-                                child: Text(display),
+                                child: Text(inflected),
                               ),
                             ],
                           );
