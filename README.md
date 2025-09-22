@@ -74,7 +74,7 @@ Run the search.
 
 # Platforms
 
-When fhe dart flag FFI is true, sqflite_common_ffi will be used otherwise the sqflite package will
+When the dart flag FFI is true, sqflite_common_ffi will be used otherwise the sqflite package will
 be used
 
 * Using command line:
