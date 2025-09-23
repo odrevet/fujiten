@@ -3,7 +3,6 @@ import 'package:flutter/services.dart';
 import 'package:ruby_text/ruby_text.dart';
 
 import '../models/entry.dart';
-import '../models/inflection.dart';
 import '../models/sense.dart';
 import '../string_utils.dart' show kanaKit;
 import 'kanji_dialog.dart';
@@ -18,12 +17,10 @@ Widget buildRubyText(String mainReading) {
       // Split by colon - format is kanji:reading
       List<String> kanjiReading = part.split(':');
       if (kanjiReading.length == 2) {
-        rubyTextDataList.add(
-          RubyTextData(
-            kanjiReading[0], // kanji
-            ruby: kanjiReading[1], // reading
-          ),
-        );
+        rubyTextDataList.add(RubyTextData(
+          kanjiReading[0], // kanji
+          ruby: kanjiReading[1], // reading
+        ));
       } else {
         // If format is incorrect, treat as plain text
         rubyTextDataList.add(RubyTextData(part));
@@ -96,7 +93,9 @@ class _ResultExpressionListState extends State<ResultExpressionList> {
         title: Row(
           children: [
             Expanded(
-              child: Center(child: Text('Details for ${literals.join()}')),
+              child: Center(
+                child: Text('Details for ${literals.join()}'),
+              ),
             ),
             IconButton(
               onPressed: () => Navigator.of(context).pop(),
@@ -111,7 +110,6 @@ class _ResultExpressionListState extends State<ResultExpressionList> {
       ),
     );
   }
-
   void _copyToClipboard(String text) {
     Clipboard.setData(ClipboardData(text: text));
     ScaffoldMessenger.of(context).showSnackBar(
@@ -128,14 +126,6 @@ class _ResultExpressionListState extends State<ResultExpressionList> {
     final mainReading = widget.searchResult.reading[0];
     final literals = _extractKanjiFromReading(mainReading);
 
-    final entry = widget.searchResult;
-    final isVerb = entry.senses.any(
-      (s) =>
-          s.posses.contains("v1") ||
-          s.posses.contains("vt") ||
-          s.posses.contains("v5s"),
-    );
-
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.symmetric(vertical: 8.0),
@@ -147,116 +137,19 @@ class _ResultExpressionListState extends State<ResultExpressionList> {
               child: buildRubyText(mainReading),
             ),
           ),
-          Positioned(
-            top: 0,
-            right: 0,
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                if (isVerb)
-                  IconButton(
-                    onPressed: () => _showInflectionDialog(
-                      mainReading.contains(':')
-                          ? mainReading.split(':').first
-                          : mainReading,
-                    ),
-                    icon: const Icon(Icons.list_alt_outlined),
-                    tooltip: 'Show Inflection',
-                  ),
-                if (literals.isNotEmpty)
-                  IconButton(
-                    onPressed: () => _showKanjiDialog(literals),
-                    icon: const Icon(Icons.info_outline),
-                    tooltip: 'Show Kanji',
-                  ),
-              ],
+          if (literals.isNotEmpty)
+            Positioned(
+              top: 0,
+              right: 0,
+              child: IconButton(
+                onPressed: () => _showKanjiDialog(literals),
+                icon: const Icon(Icons.info_outline),
+                tooltip: 'Show Kanji',
+              ),
             ),
-          ),
         ],
       ),
     );
-  }
-
-  void _showInflectionDialog(String reading) {
-    final parts = reading.split(':');
-    final hasKanji = parts.length == 2;
-
-    final stem = parts.last.substring(0, parts.last.length - 1);
-    final ending = parts.last.substring(parts.last.length - 1);
-    final inflections = JapaneseVerbInflector.getAllInflections(stem, ending);
-
-    showDialog(
-      context: context,
-      builder: (context) {
-        return Dialog(
-          insetPadding: const EdgeInsets.all(16),
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 700),
-            child: Padding(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(
-                    "Inflections for $reading",
-                    style: Theme.of(context).textTheme.titleLarge,
-                  ),
-                  const SizedBox(height: 16),
-                  Flexible(
-                    child: SingleChildScrollView(
-                      child: Table(
-                        border: TableBorder.all(
-                          color: Colors.grey.shade300,
-                          width: 1,
-                        ),
-                        columnWidths: const {
-                          0: IntrinsicColumnWidth(),
-                          1: FlexColumnWidth(),
-                        },
-                        defaultVerticalAlignment: TableCellVerticalAlignment.middle,
-                        children: inflections.entries.map((e) {
-                          final inflected = e.value;
-                          final display =
-                          hasKanji ? "${parts.first}:${inflected}" : inflected;
-
-                          return TableRow(
-                            children: [
-                              Padding(
-                                padding: const EdgeInsets.all(8.0),
-                                child: Text(
-                                  JapaneseVerbInflector.getInflectionLabel(e.key)!,
-                                  style: const TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                              ),
-                              Padding(
-                                padding: const EdgeInsets.all(8.0),
-                                child: Text(display),
-                              ),
-                            ],
-                          );
-                        }).toList(),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  Align(
-                    alignment: Alignment.centerRight,
-                    child: TextButton(
-                      onPressed: () => Navigator.pop(context),
-                      child: const Text("Close"),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        );
-      },
-    );
-
-
   }
 
   Widget buildAlternativeReadings() {
@@ -378,9 +271,10 @@ class _ResultExpressionListState extends State<ResultExpressionList> {
                       children: [
                         SelectableText(
                           sense.glosses.join(', '),
-                          style: Theme.of(
-                            context,
-                          ).textTheme.bodyMedium?.copyWith(height: 1.3),
+                          style: Theme.of(context)
+                              .textTheme
+                              .bodyMedium
+                              ?.copyWith(height: 1.3),
                         ),
                         if (sense.dial.isNotEmpty ||
                             sense.misc.isNotEmpty ||
@@ -389,8 +283,7 @@ class _ResultExpressionListState extends State<ResultExpressionList> {
                             padding: const EdgeInsets.only(top: 4.0),
                             child: Wrap(
                               spacing: 8.0,
-                              runSpacing: 4.0,
-                              // Added for better vertical spacing
+                              runSpacing: 4.0, // Added for better vertical spacing
                               children: [
                                 if (sense.dial.isNotEmpty)
                                   Container(
@@ -400,9 +293,7 @@ class _ResultExpressionListState extends State<ResultExpressionList> {
                                     ),
                                     decoration: BoxDecoration(
                                       borderRadius: BorderRadius.circular(4),
-                                      color: Colors.orange.withValues(
-                                        alpha: 0.1,
-                                      ),
+                                      color: Colors.orange.withValues(alpha: 0.1),
                                     ),
                                     child: SelectableText(
                                       sense.dial.join(', '),
@@ -419,9 +310,7 @@ class _ResultExpressionListState extends State<ResultExpressionList> {
                                     ),
                                     decoration: BoxDecoration(
                                       borderRadius: BorderRadius.circular(4),
-                                      color: Colors.purple.withValues(
-                                        alpha: 0.1,
-                                      ),
+                                      color: Colors.purple.withValues(alpha: 0.1),
                                     ),
                                     child: SelectableText(
                                       sense.misc.join(', '),
@@ -438,9 +327,7 @@ class _ResultExpressionListState extends State<ResultExpressionList> {
                                     ),
                                     decoration: BoxDecoration(
                                       borderRadius: BorderRadius.circular(4),
-                                      color: Colors.green.withValues(
-                                        alpha: 0.1,
-                                      ),
+                                      color: Colors.green.withValues(alpha: 0.1),
                                     ),
                                     child: SelectableText(
                                       sense.fields.join(', '),
