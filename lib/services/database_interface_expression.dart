@@ -3,6 +3,7 @@ import 'dart:developer';
 import 'package:sqflite/sqflite.dart';
 
 import '../models/entry.dart';
+import '../models/inflection.dart';
 import '../models/sense.dart';
 import '../string_utils.dart';
 import 'database_interface.dart';
@@ -10,35 +11,79 @@ import 'database_interface.dart';
 class DatabaseInterfaceExpression extends DatabaseInterface {
   DatabaseInterfaceExpression({super.database});
 
+  String buildSearchQuery(
+    String input,
+    String searchOperator,
+    String matchKanji,
+  ) {
+    var regExp = RegExp(matchKanji);
+    var hasKanji = regExp.hasMatch(input);
+    bool inflection = true; // Hard-coded for now
+
+    // Build list of search terms
+    List<String> searchTerms = [input]; // Original input
+
+    if (inflection) {
+      final allResults = JapaneseDeinflector.getAllPossibleDeinflections(input);
+      for (final result in allResults) {
+        if (result.dictionaryForm != input) {
+          searchTerms.add(result.dictionaryForm);
+        }
+      }
+
+      // Debug output
+      for (int i = 0; i < allResults.length; i++) {
+        print('Possibility ${i + 1}:');
+        print(allResults[i]);
+        print('');
+      }
+    }
+
+    // Build WHERE clause conditions
+    List<String> conditions = [];
+
+    for (String term in searchTerms) {
+      // For each term, check both kanji and reading
+      String termCondition = "keb $searchOperator '$term'";
+      if (!hasKanji) {
+        termCondition += " OR reb $searchOperator '$term'";
+      }
+      conditions.add("($termCondition)");
+    }
+
+    String whereClause = conditions.join(' OR ');
+
+    String sql = '''SELECT DISTINCT entry_sub.id 
+         FROM entry entry_sub
+         JOIN sense sense_sub ON entry_sub.id = sense_sub.id_entry 
+         JOIN r_ele on entry_sub.id = r_ele.id_entry
+         LEFT JOIN k_ele ON entry_sub.id = k_ele.id_entry 
+         WHERE ($whereClause)''';
+
+    return sql;
+  }
+
   String subQuery(
     String input,
     int? resultsPerPage,
     int currentPage,
     bool useRegexp,
   ) {
-    String sql;
+    String sql = '';
     String searchOperator = useRegexp ? 'REGEXP' : 'GLOB';
 
     if (kanaKit.isRomaji(input)) {
-      sql =
-          '''SELECT DISTINCT sense.id_entry 
+      sql = '''SELECT DISTINCT sense.id_entry 
              FROM sense JOIN gloss ON gloss.id_sense = sense.id 
              WHERE gloss.content $searchOperator '$input' ''';
     } else {
       // if the input does not contains a kanji do not search in the reb
-      var regExp = RegExp(matchKanji);
-      var hasKanji = regExp.hasMatch(input);
-      sql =
-          '''SELECT DISTINCT entry_sub.id 
-             FROM entry entry_sub
-             JOIN sense sense_sub ON entry_sub.id = sense_sub.id_entry 
-             JOIN r_ele on entry_sub.id = r_ele.id_entry
-             LEFT JOIN k_ele ON entry_sub.id = k_ele.id_entry 
-             WHERE (keb $searchOperator '$input' ${hasKanji ? "" : "OR reb $searchOperator '$input'"})''';
-    }
 
-    if (resultsPerPage != null) {
-      sql += " LIMIT $resultsPerPage OFFSET ${currentPage * resultsPerPage}";
+      sql = buildSearchQuery(input, searchOperator, matchKanji);
+
+      if (resultsPerPage != null) {
+        sql += " LIMIT $resultsPerPage OFFSET ${currentPage * resultsPerPage}";
+      }
     }
     return sql;
   }
@@ -50,7 +95,8 @@ class DatabaseInterfaceExpression extends DatabaseInterface {
     int currentPage,
     useRegexp,
   ) async {
-    String sql = '''SELECT
+    String sql =
+        '''SELECT
                     entry.id AS entry_id,
                     sense.id AS sense_id,
                     GROUP_CONCAT(DISTINCT COALESCE(k_ele.keb || ':', '') || r_ele.reb) keb_reb_group,
@@ -116,8 +162,12 @@ class DatabaseInterfaceExpression extends DatabaseInterface {
                 ? queryResult['keb_reb_group'].split(',')
                 : [],
             senses: senses,
-            xref:  queryResult['xref_group'] != null ? queryResult['xref_group'].split(',') : [],
-            ant:  queryResult['ant_group'] != null ? queryResult['ant_group'].split(',') : [],
+            xref: queryResult['xref_group'] != null
+                ? queryResult['xref_group'].split(',')
+                : [],
+            ant: queryResult['ant_group'] != null
+                ? queryResult['ant_group'].split(',')
+                : [],
           ),
         );
         entryId = queryResult['entry_id'];
