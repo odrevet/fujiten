@@ -1,7 +1,11 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:fujiten/cubits/search_cubit.dart';
 import 'package:fujiten/models/search.dart';
+import 'package:path/path.dart' as path;
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../cubits/expression_cubit.dart';
@@ -16,6 +20,8 @@ import '../string_utils.dart';
 import 'fujiten_menu_bar.dart';
 import 'results_widget.dart';
 import 'search_input.dart';
+
+import 'package:mecab_for_flutter/mecab_for_flutter.dart';
 
 class MainWidget extends StatefulWidget {
   final String? title;
@@ -32,6 +38,10 @@ class _MainWidgetState extends State<MainWidget> with TickerProviderStateMixin {
   int cursorPosition = -1;
   FocusNode focusNode = FocusNode();
   late TabController _tabController;
+
+  var tagger = Mecab();
+  List<TokenNode> tokens = [];
+  bool initDone = false;
 
   // Separate search cubits for each tab
   late SearchCubit _expressionSearchCubit;
@@ -50,6 +60,9 @@ class _MainWidgetState extends State<MainWidget> with TickerProviderStateMixin {
     context.read<InputCubit>().addInput();
     initDb();
     loadSearchOptions();
+
+    // Initialize MeCab
+    initPlatformState();
 
     // Initialize tab controller
     final searchOptions = context.read<SearchOptionsCubit>().state;
@@ -84,6 +97,55 @@ class _MainWidgetState extends State<MainWidget> with TickerProviderStateMixin {
         );
       }
     });
+  }
+
+  Future<void> initPlatformState() async {
+    try {
+      // this example ships a mecab dictionary in assets
+      // alternatively you can download it from somewhere
+      String ipadicPath;
+
+      if (Platform.isLinux || Platform.isWindows) {
+        final workDir = Directory.current.path;
+        ipadicPath = path.join(workDir, 'assets', 'ipadic');
+      } else {
+        ipadicPath = path.join('assets', 'ipadic');
+      }
+
+      // Initialize mecab tagger here
+      //   + 1st parameter : dictionary folder
+      //   + 2nd parameter : additional mecab options
+      await tagger.initFlutter(ipadicPath, true);
+
+      print("Connection to the C-side established: ${tagger.mecabDartFfi.nativeAddFunc(3, 3) == 6}");
+
+      // Parse initial text if any
+      if (widget._textEditingController.text.isNotEmpty) {
+        tokens = tagger.parse(widget._textEditingController.text);
+      }
+
+      initDone = true;
+
+    } on PlatformException {
+      print('Failed to initialize MeCab');
+    }
+
+    if (!mounted) return;
+
+    setState(() {});
+  }
+
+  // Update tokens when text changes
+  void _updateTokens() {
+    if (initDone && widget._textEditingController.text.isNotEmpty) {
+      setState(() {
+        tokens = tagger.parse(widget._textEditingController.text);
+      });
+    } else {
+      setState(() {
+        tokens = [];
+      });
+    }
   }
 
   @override
@@ -182,15 +244,18 @@ class _MainWidgetState extends State<MainWidget> with TickerProviderStateMixin {
       // Run search for both types to keep them in sync with new input
       await _runSearchForType(SearchType.expression, formattedInput);
       await _runSearchForType(SearchType.kanji, formattedInput);
+
+      // Update tokens when searching
+      _updateTokens();
     }
 
     focusNode.unfocus();
   }
 
   Future<void> _runSearchForType(
-    SearchType searchType,
-    String formattedInput,
-  ) async {
+      SearchType searchType,
+      String formattedInput,
+      ) async {
     final searchOptions = context.read<SearchOptionsCubit>().state;
     final searchCubit = _getCurrentSearchCubit(searchType);
 
@@ -214,6 +279,9 @@ class _MainWidgetState extends State<MainWidget> with TickerProviderStateMixin {
     setState(() {
       cursorPosition = widget._textEditingController.selection.start;
     });
+
+    // Update tokens when focus changes (in case text was modified)
+    _updateTokens();
   }
 
   void onEndReached() {
@@ -259,6 +327,121 @@ class _MainWidgetState extends State<MainWidget> with TickerProviderStateMixin {
     _tabController.animateTo(newSearchType == SearchType.expression ? 0 : 1);
   }
 
+  // Widget to display MeCab tokens
+  Widget _buildTokenDisplay() {
+    if (!initDone) {
+      return const Padding(
+        padding: EdgeInsets.all(8.0),
+        child: Center(
+          child: CircularProgressIndicator(),
+        ),
+      );
+    }
+
+    if (tokens.isEmpty) {
+      return const SizedBox.shrink();
+    }
+
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
+      padding: const EdgeInsets.all(8.0),
+      decoration: BoxDecoration(
+        border: Border.all(color: Colors.grey.shade300),
+        borderRadius: BorderRadius.circular(4.0),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Tokenization:',
+            style: Theme.of(context).textTheme.labelMedium?.copyWith(
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          const SizedBox(height: 4.0),
+          SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: Table(
+              defaultColumnWidth: const IntrinsicColumnWidth(),
+              border: TableBorder.all(color: Colors.grey.shade400, width: 0.5),
+              children: [
+                TableRow(
+                  decoration: BoxDecoration(
+                    color: Colors.grey.shade100,
+                  ),
+                  children: [
+                    'Surface',
+                    'POS',
+                    'Base',
+                    'Reading',
+                    'Pronunciation'
+                  ]
+                      .map((header) => Padding(
+                    padding: const EdgeInsets.all(4.0),
+                    child: Center(
+                      child: Text(
+                        header,
+                        style: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 12,
+                        ),
+                      ),
+                    ),
+                  ))
+                      .toList(),
+                ),
+                ...tokens
+                    .where((token) => token.features.length >= 9)
+                    .map((token) => TableRow(
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.all(4.0),
+                      child: SelectableText(
+                        token.surface,
+                        style: const TextStyle(fontSize: 12),
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.all(4.0),
+                      child: SelectableText(
+                        token.features.length >= 4
+                            ? token.features.sublist(0, 4).join(',')
+                            : '',
+                        style: const TextStyle(fontSize: 12),
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.all(4.0),
+                      child: SelectableText(
+                        token.features.length > 6 ? token.features[6] : '',
+                        style: const TextStyle(fontSize: 12),
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.all(4.0),
+                      child: SelectableText(
+                        token.features.length > 7 ? token.features[7] : '',
+                        style: const TextStyle(fontSize: 12),
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.all(4.0),
+                      child: SelectableText(
+                        token.features.length > 8 ? token.features[8] : '',
+                        style: const TextStyle(fontSize: 12),
+                      ),
+                    ),
+                  ],
+                ))
+                    .toList(),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<ExpressionCubit, ExpressionState>(
@@ -279,8 +462,8 @@ class _MainWidgetState extends State<MainWidget> with TickerProviderStateMixin {
                         saveSearchOptions(searchOptionsState);
                         // Update tab controller when search type changes externally
                         final newIndex =
-                            searchOptionsState.searchType ==
-                                SearchType.expression
+                        searchOptionsState.searchType ==
+                            SearchType.expression
                             ? 0
                             : 1;
                         if (_tabController.index != newIndex) {
@@ -291,15 +474,15 @@ class _MainWidgetState extends State<MainWidget> with TickerProviderStateMixin {
                         key: _scaffoldKey,
                         floatingActionButton: search.isLoadingNextPage
                             ? const FloatingActionButton(
-                                onPressed: null,
-                                backgroundColor: Colors.white,
-                                mini: true,
-                                child: SizedBox(
-                                  height: 10,
-                                  width: 10,
-                                  child: CircularProgressIndicator(),
-                                ),
-                              )
+                          onPressed: null,
+                          backgroundColor: Colors.white,
+                          mini: true,
+                          child: SizedBox(
+                            height: 10,
+                            width: 10,
+                            child: CircularProgressIndicator(),
+                          ),
+                        )
                             : null,
                         appBar: PreferredSize(
                           preferredSize: const Size.fromHeight(56),
@@ -307,7 +490,7 @@ class _MainWidgetState extends State<MainWidget> with TickerProviderStateMixin {
                             builder: (context) => FujitenMenuBar(
                               search: search,
                               textEditingController:
-                                  widget._textEditingController,
+                              widget._textEditingController,
                               onSearch: onSearch,
                               focusNode: focusNode,
                               insertPosition: cursorPosition,
@@ -325,6 +508,8 @@ class _MainWidgetState extends State<MainWidget> with TickerProviderStateMixin {
                               onFocusChanged,
                               focusNode,
                             ),
+                            // Display MeCab tokens under SearchInput
+                            _buildTokenDisplay(),
                             // Remove the TabBar - it's now in the AppBar
                             Expanded(
                               child: TabBarView(
@@ -337,7 +522,7 @@ class _MainWidgetState extends State<MainWidget> with TickerProviderStateMixin {
                                     child: ResultsWidget(
                                       onEndReached,
                                       textEditingController:
-                                          widget._textEditingController,
+                                      widget._textEditingController,
                                       onSearch: onSearch,
                                     ),
                                   ),
@@ -347,7 +532,7 @@ class _MainWidgetState extends State<MainWidget> with TickerProviderStateMixin {
                                     child: ResultsWidget(
                                       onEndReached,
                                       textEditingController:
-                                          widget._textEditingController,
+                                      widget._textEditingController,
                                       onSearch: onSearch,
                                     ),
                                   ),
