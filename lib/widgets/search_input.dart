@@ -32,7 +32,7 @@ class _SearchInputState extends State<SearchInput> {
 
   @override
   void dispose() {
-    widget.focusNode.dispose();
+    // Do not dispose the passed focusNode, it's owned by MainWidget
     super.dispose();
   }
 
@@ -49,13 +49,9 @@ class _SearchInputState extends State<SearchInput> {
         focusNode: widget.focusNode,
         decoration: InputDecoration(
           hintText: 'Enter a search term',
-          suffixIcon: Align(
-            widthFactor: 1.0,
-            heightFactor: 1.0,
-            child: IconButton(
-              icon: const Icon(Icons.search),
-              onPressed: () => widget.onSubmitted(),
-            ),
+          suffixIcon: IconButton(
+            icon: const Icon(Icons.search),
+            onPressed: () => widget.onSubmitted(),
           ),
         ),
       ),

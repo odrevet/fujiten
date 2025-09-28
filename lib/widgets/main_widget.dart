@@ -261,6 +261,8 @@ class _MainWidgetState extends State<MainWidget> with TickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
+    final isLandscape =
+        MediaQuery.of(context).orientation == Orientation.landscape;
     return BlocBuilder<ExpressionCubit, ExpressionState>(
       builder: (context, expressionState) {
         return BlocBuilder<KanjiCubit, KanjiState>(
@@ -319,13 +321,12 @@ class _MainWidgetState extends State<MainWidget> with TickerProviderStateMixin {
                         ),
                         body: Column(
                           children: <Widget>[
-                            SearchInput(
+                            if (!isLandscape)SearchInput(
                               widget._textEditingController,
                               onSearch,
                               onFocusChanged,
                               focusNode,
                             ),
-                            // Remove the TabBar - it's now in the AppBar
                             Expanded(
                               child: TabBarView(
                                 physics: const NeverScrollableScrollPhysics(),

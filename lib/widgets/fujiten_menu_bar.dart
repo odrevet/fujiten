@@ -9,6 +9,7 @@ import '../models/search.dart';
 import '../models/states/search_options_state.dart';
 import '../string_utils.dart';
 import 'radical_page.dart';
+import 'search_input.dart';
 import 'settings/settings.dart';
 
 class FujitenMenuBar extends StatefulWidget {
@@ -65,15 +66,16 @@ class _FujitenMenuBarState extends State<FujitenMenuBar> {
     }
 
     widget.textEditingController?.text = convertedInput;
-    context.read<InputCubit>().state.inputs[context
-        .read<InputCubit>()
-        .state
-        .searchIndex] =
-        convertedInput;
+    context.read<InputCubit>().state.inputs[
+    context.read<InputCubit>().state.searchIndex
+    ] = convertedInput;
   }
 
   @override
   Widget build(BuildContext context) {
+    final isLandscape =
+        MediaQuery.of(context).orientation == Orientation.landscape;
+
     return BlocBuilder<SearchOptionsCubit, SearchOptionsState>(
       builder: (context, searchOptionsState) {
         var popupMenuButtonInsert = PopupMenuButton(
@@ -132,11 +134,9 @@ class _FujitenMenuBarState extends State<FujitenMenuBar> {
                   .inputs[context.read<InputCubit>().state.searchIndex];
             } else if (result == "clear") {
               widget.textEditingController!.clear();
-              context.read<InputCubit>().state.inputs[context
-                  .read<InputCubit>()
-                  .state
-                  .searchIndex] =
-              "";
+              context.read<InputCubit>().state.inputs[
+              context.read<InputCubit>().state.searchIndex
+              ] = "";
               widget.focusNode.requestFocus();
             } else {
               context.read<InputCubit>().setSearchIndex(result);
@@ -147,12 +147,7 @@ class _FujitenMenuBarState extends State<FujitenMenuBar> {
             }
           },
           itemBuilder: (itemBuilderContext) =>
-          context
-              .read<InputCubit>()
-              .state
-              .inputs
-              .asMap()
-              .entries
+          context.read<InputCubit>().state.inputs.asMap().entries
               .map<PopupMenuEntry<dynamic>>(
                 (entry) => PopupMenuItem(
               value: entry.key,
@@ -178,7 +173,8 @@ class _FujitenMenuBarState extends State<FujitenMenuBar> {
             ..add(
               PopupMenuItem(
                 value: "remove",
-                enabled: context.read<InputCubit>().state.inputs.length > 1,
+                enabled:
+                context.read<InputCubit>().state.inputs.length > 1,
                 child: ListTile(
                   enabled:
                   context.read<InputCubit>().state.inputs.length > 1,
@@ -200,7 +196,6 @@ class _FujitenMenuBarState extends State<FujitenMenuBar> {
             ),
         );
 
-        // Create the toggle button for Expression/Kanji - shows only current mode
         Widget searchTypeToggle = IconButton(
           icon: Text(
             widget.currentSearchType == SearchType.expression ? '言' : '漢',
@@ -210,8 +205,8 @@ class _FujitenMenuBarState extends State<FujitenMenuBar> {
             ),
           ),
           onPressed: () {
-            // Toggle between Expression and Kanji
-            final newSearchType = widget.currentSearchType == SearchType.expression
+            final newSearchType = widget.currentSearchType ==
+                SearchType.expression
                 ? SearchType.kanji
                 : SearchType.expression;
             context.read<SearchOptionsCubit>().setSearchType(newSearchType);
@@ -220,7 +215,6 @@ class _FujitenMenuBarState extends State<FujitenMenuBar> {
 
         return AppBar(
           title: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               IconButton(
                 icon: const Icon(Icons.menu),
@@ -235,17 +229,24 @@ class _FujitenMenuBarState extends State<FujitenMenuBar> {
                       }
                     }),
               ),
-              Row(
-                children: <Widget>[
-                  popupMenuButtonInsert,
-                  IconButton(
-                    icon: const Icon(Icons.translate),
-                    onPressed: convert,
+              if (isLandscape)
+                Expanded(
+                  child: SearchInput(
+                    widget.textEditingController!,
+                    widget.onSearch,
+                        (_) {},
+                    widget.focusNode,
                   ),
-                  popupMenuButtonInputs,
-                  searchTypeToggle,
-                ],
+                )
+              else
+                const Spacer(), // keeps icons on the right in portrait
+              popupMenuButtonInsert,
+              IconButton(
+                icon: const Icon(Icons.translate),
+                onPressed: convert,
               ),
+              popupMenuButtonInputs,
+              searchTypeToggle,
             ],
           ),
         );
@@ -254,11 +255,9 @@ class _FujitenMenuBarState extends State<FujitenMenuBar> {
   }
 
   Future<void> displayRadicalWidget(BuildContext context) async {
-    //send the radicals inside < > to the radical page
     var exp = RegExp(r'<(.*?)>');
-    Iterable<RegExpMatch> matches = exp.allMatches(
-      widget.textEditingController!.text,
-    );
+    Iterable<RegExpMatch> matches =
+    exp.allMatches(widget.textEditingController!.text);
     Match? matchAtCursor;
     for (Match m in matches) {
       if (widget.insertPosition > m.start && widget.insertPosition < m.end) {
@@ -270,8 +269,6 @@ class _FujitenMenuBarState extends State<FujitenMenuBar> {
         ? []
         : List.from(matchAtCursor.group(1)!.split(''));
 
-    //remove every non-radical characters
-    //call to getRadicalsCharacter somehow move the cursor to the end of textinput, retain de current position now
     int insertPosition = 0;
     if (widget.insertPosition > 0) insertPosition = widget.insertPosition;
 
@@ -297,14 +294,12 @@ class _FujitenMenuBarState extends State<FujitenMenuBar> {
               insertPosition,
             );
           } else {
-            widget.textEditingController!.text = widget
-                .textEditingController!
-                .text
-                .replaceRange(
-              matchAtCursor.start,
-              matchAtCursor.end,
-              '<${selectedRadicalsOrKanji.join()}>',
-            );
+            widget.textEditingController!.text =
+                widget.textEditingController!.text.replaceRange(
+                  matchAtCursor.start,
+                  matchAtCursor.end,
+                  '<${selectedRadicalsOrKanji.join()}>',
+                );
           }
         }
       } else {
@@ -315,14 +310,12 @@ class _FujitenMenuBarState extends State<FujitenMenuBar> {
             insertPosition,
           );
         } else {
-          widget.textEditingController!.text = widget
-              .textEditingController!
-              .text
-              .replaceRange(
-            matchAtCursor.start,
-            matchAtCursor.end,
-            selectedRadicalsOrKanji,
-          );
+          widget.textEditingController!.text =
+              widget.textEditingController!.text.replaceRange(
+                matchAtCursor.start,
+                matchAtCursor.end,
+                selectedRadicalsOrKanji,
+              );
         }
       }
 
