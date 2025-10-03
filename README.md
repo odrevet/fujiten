@@ -109,7 +109,7 @@ Releases are built with:
 * Github release: 
 ```
 flutter build apk --split-per-abi --dart-define=FFI=false
-flutter build linux -dart-define=FFI=true --release
+flutter build linux --dart-define=FFI=true --release
 ```
 
 * Google play store: 
