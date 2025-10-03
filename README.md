@@ -101,3 +101,19 @@ Desktop build must use FFI. The libsqlite3.so must be installed on the host.
 
 Some build of sqlite do not include the regexp extension, in this case matches must be made using 
 the GLOB operator.  
+
+# releases
+
+Releases are built with: 
+
+* Github release: 
+```
+flutter build apk --split-per-abi --dart-define=FFI=false
+flutter build linux -dart-define=FFI=true --release
+```
+
+* Google play store: 
+
+```
+flutter build appbundle --dart-define=FFI=false
+```
