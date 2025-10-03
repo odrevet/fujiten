@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:kanji_drawing_animation/kanji_drawing_animation.dart';
+import 'package:flutter_kanjivg/flutter_kanjivg.dart';
 
 import '../models/kanji.dart';
 import '../cubits/expression_cubit.dart';
@@ -27,16 +27,93 @@ class KanjiListTile extends StatefulWidget {
   State<KanjiListTile> createState() => _KanjiListTileState();
 }
 
-class _KanjiListTileState extends State<KanjiListTile> {
+class _KanjiListTileState extends State<KanjiListTile> with TickerProviderStateMixin  {
   bool _showAnimation = false;
   List<ExpressionEntry>? _expressions; // Store the fetched expressions
   bool _loadingExpressions = false;
   bool _expressionsLoaded = false;
 
+  late KanjiController _controller;
+  KvgData? _data;
+
   @override
   void initState() {
     super.initState();
+    _loadKanjiSvg();
     _loadExpressions();
+  }
+
+
+  Future<void> _loadKanjiSvg() async {
+    final parser = const KanjiParser();
+    final codepoint = widget.kanji.literal.codeUnitAt(0).toRadixString(16).padLeft(5, '0');
+    final source = await rootBundle.loadString('assets/kanji/$codepoint.svg');
+    final data = parser.parse(source);
+
+    setState(() {
+      _data = data;
+      _controller = KanjiController(
+        vsync: this,
+        duration: const Duration(seconds: 5),
+      )..load(data)
+        ..repeat();
+    });
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  Widget _buildAnimationView(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return Column(
+      children: [
+        Row(
+          children: [
+            IconButton(
+              onPressed: _toggleAnimationView,
+              icon: const Icon(Icons.close),
+              iconSize: 20,
+            ),
+            const SizedBox(width: 8),
+            Text(
+              'How to write ${widget.kanji.literal}',
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w600,
+                color: theme.colorScheme.primary,
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 12),
+        Container(
+          padding: const EdgeInsets.all(12),
+          decoration: BoxDecoration(
+            color: theme.colorScheme.surface,
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(
+              color: theme.colorScheme.outline.withOpacity(0.3),
+            ),
+          ),
+          child: SizedBox.square(
+            dimension: 150,
+            child: _data == null
+                ? const Center(child: CircularProgressIndicator())
+                : KanjiCanvas(
+              controller: _controller,
+              size: 150,
+              thickness: 4,
+              color: theme.colorScheme.primary,
+              hintColor: theme.colorScheme.primary.withOpacity(0.3),
+            ),
+          ),
+        ),
+      ],
+    );
   }
 
   Future<void> _loadExpressions() async {
@@ -197,54 +274,6 @@ class _KanjiListTileState extends State<KanjiListTile> {
           ),
         ),
       ),
-    );
-  }
-
-  Widget _buildAnimationView(BuildContext context) {
-    final theme = Theme.of(context);
-
-    return Column(
-      children: [
-        // Header with close button
-        Row(
-          children: [
-            IconButton(
-              onPressed: _toggleAnimationView,
-              icon: const Icon(Icons.close),
-              iconSize: 20.0,
-              constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
-              padding: EdgeInsets.zero,
-            ),
-            const SizedBox(width: 8.0),
-            Text(
-              'How to write ${widget.kanji.literal}',
-              style: TextStyle(
-                fontSize: 16.0,
-                fontWeight: FontWeight.w600,
-                color: theme.colorScheme.primary,
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 12.0),
-
-        // Animation container
-        Container(
-          height: 150,
-          width: double.infinity,
-          decoration: BoxDecoration(
-            color: theme.colorScheme.surface,
-            borderRadius: BorderRadius.circular(12.0),
-            border: Border.all(
-              color: theme.colorScheme.outline.withValues(alpha: 0.3),
-            ),
-          ),
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(12.0),
-            child: KanjiDrawingAnimation(widget.kanji.literal, speed: 50),
-          ),
-        ),
-      ],
     );
   }
 
