@@ -1,8 +1,12 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:fujiten/cubits/search_cubit.dart';
 import 'package:fujiten/models/search.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:mecab_dart/mecab_dart.dart';
+import 'package:flutter/services.dart';
 
 import '../cubits/expression_cubit.dart';
 import '../cubits/input_cubit.dart';
@@ -37,6 +41,11 @@ class _MainWidgetState extends State<MainWidget> with TickerProviderStateMixin {
   late SearchCubit _expressionSearchCubit;
   late SearchCubit _kanjiSearchCubit;
 
+  // MeCab integration
+  final Mecab _tagger = Mecab();
+  List<TokenNode> _tokens = [];
+  bool _mecabInitialized = false;
+
   final Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
 
   @override
@@ -50,6 +59,7 @@ class _MainWidgetState extends State<MainWidget> with TickerProviderStateMixin {
     context.read<InputCubit>().addInput();
     initDb();
     loadSearchOptions();
+    initMecab();
 
     // Initialize tab controller
     final searchOptions = context.read<SearchOptionsCubit>().state;
@@ -71,9 +81,10 @@ class _MainWidgetState extends State<MainWidget> with TickerProviderStateMixin {
           : SearchType.kanji;
 
       context.read<SearchOptionsCubit>().setSearchType(newSearchType);
-
-      // Don't trigger search on tab change - let each tab maintain its state
     });
+
+    // Listen to text changes for MeCab parsing
+    widget._textEditingController.addListener(_onTextChanged);
 
     _prefs.then((SharedPreferences prefs) {
       if (!mounted) return;
@@ -88,10 +99,66 @@ class _MainWidgetState extends State<MainWidget> with TickerProviderStateMixin {
 
   @override
   void dispose() {
+    widget._textEditingController.removeListener(_onTextChanged);
     _tabController.dispose();
     _expressionSearchCubit.close();
     _kanjiSearchCubit.close();
     super.dispose();
+  }
+
+  Future<void> initMecab() async {
+    try {
+      // Get the dictionary path based on platform
+      String dictionaryPath;
+      if (Platform.isLinux || Platform.isMacOS) {
+        // Get current working directory
+        final currentDir = Directory.current.path;
+        dictionaryPath = '$currentDir/assets/ipadic';
+      } else if (Platform.isWindows) {
+        final currentDir = Directory.current.path;
+        dictionaryPath = '$currentDir\\assets\\ipadic';
+      } else {
+        // For mobile platforms, use relative path
+        dictionaryPath = 'assets/ipadic';
+      }
+
+      print('Initializing MeCab with dictionary path: $dictionaryPath');
+      await _tagger.init(dictionaryPath, true);
+
+      setState(() {
+        _mecabInitialized = true;
+      });
+
+      // Parse initial text if any
+      if (widget._textEditingController.text.isNotEmpty) {
+        _parseText();
+      }
+    } on PlatformException catch (e) {
+      print('Failed to initialize MeCab: $e');
+    } catch (e) {
+      print('Failed to initialize MeCab: $e');
+    }
+  }
+
+  void _onTextChanged() {
+    if (_mecabInitialized && widget._textEditingController.text.isNotEmpty) {
+      _parseText();
+    } else if (widget._textEditingController.text.isEmpty) {
+      setState(() {
+        _tokens = [];
+      });
+    }
+  }
+
+  void _parseText() {
+    try {
+      final tokens = _tagger.parse(widget._textEditingController.text);
+      setState(() {
+        _tokens = tokens;
+      });
+    } catch (e) {
+      print('Failed to parse text: $e');
+    }
   }
 
   void initDb() async {
@@ -188,9 +255,9 @@ class _MainWidgetState extends State<MainWidget> with TickerProviderStateMixin {
   }
 
   Future<void> _runSearchForType(
-    SearchType searchType,
-    String formattedInput,
-  ) async {
+      SearchType searchType,
+      String formattedInput,
+      ) async {
     final searchOptions = context.read<SearchOptionsCubit>().state;
     final searchCubit = _getCurrentSearchCubit(searchType);
 
@@ -259,6 +326,69 @@ class _MainWidgetState extends State<MainWidget> with TickerProviderStateMixin {
     _tabController.animateTo(newSearchType == SearchType.expression ? 0 : 1);
   }
 
+  Widget _buildTokensTable() {
+    if (!_mecabInitialized) {
+      return const Center(
+        child: Padding(
+          padding: EdgeInsets.all(16.0),
+          child: Text('Initializing MeCab...'),
+        ),
+      );
+    }
+
+    if (_tokens.isEmpty) {
+      return const SizedBox.shrink();
+    }
+
+    final validTokens = _tokens.where((token) => token.features.length == 9).toList();
+
+    if (validTokens.isEmpty) {
+      return const SizedBox.shrink();
+    }
+
+    return Container(
+      margin: const EdgeInsets.all(8.0),
+      padding: const EdgeInsets.all(12.0),
+      decoration: BoxDecoration(
+        border: Border.all(color: Colors.grey.shade300),
+        borderRadius: BorderRadius.circular(8.0),
+        color: Colors.grey.shade50,
+      ),
+      child: SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+        child: SelectionArea(
+          child: Wrap(
+            spacing: 4.0,
+            runSpacing: 8.0,
+            crossAxisAlignment: WrapCrossAlignment.end,
+            children: validTokens.map((token) {
+              final pos = token.features[0]; // Main POS category
+              return Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    token.surface,
+                    style: const TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                  Text(
+                    pos,
+                    style: TextStyle(
+                      fontSize: 11,
+                      color: Colors.grey.shade600,
+                    ),
+                  ),
+                ],
+              );
+            }).toList(),
+          ),
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final isLandscape =
@@ -281,8 +411,8 @@ class _MainWidgetState extends State<MainWidget> with TickerProviderStateMixin {
                         saveSearchOptions(searchOptionsState);
                         // Update tab controller when search type changes externally
                         final newIndex =
-                            searchOptionsState.searchType ==
-                                SearchType.expression
+                        searchOptionsState.searchType ==
+                            SearchType.expression
                             ? 0
                             : 1;
                         if (_tabController.index != newIndex) {
@@ -293,15 +423,15 @@ class _MainWidgetState extends State<MainWidget> with TickerProviderStateMixin {
                         key: _scaffoldKey,
                         floatingActionButton: search.isLoadingNextPage
                             ? const FloatingActionButton(
-                                onPressed: null,
-                                backgroundColor: Colors.white,
-                                mini: true,
-                                child: SizedBox(
-                                  height: 10,
-                                  width: 10,
-                                  child: CircularProgressIndicator(),
-                                ),
-                              )
+                          onPressed: null,
+                          backgroundColor: Colors.white,
+                          mini: true,
+                          child: SizedBox(
+                            height: 10,
+                            width: 10,
+                            child: CircularProgressIndicator(),
+                          ),
+                        )
                             : null,
                         appBar: PreferredSize(
                           preferredSize: const Size.fromHeight(56),
@@ -309,7 +439,7 @@ class _MainWidgetState extends State<MainWidget> with TickerProviderStateMixin {
                             builder: (context) => FujitenMenuBar(
                               search: search,
                               textEditingController:
-                                  widget._textEditingController,
+                              widget._textEditingController,
                               onSearch: onSearch,
                               focusNode: focusNode,
                               insertPosition: cursorPosition,
@@ -321,12 +451,15 @@ class _MainWidgetState extends State<MainWidget> with TickerProviderStateMixin {
                         ),
                         body: Column(
                           children: <Widget>[
-                            if (!isLandscape)SearchInput(
-                              widget._textEditingController,
-                              onSearch,
-                              onFocusChanged,
-                              focusNode,
-                            ),
+                            if (!isLandscape)
+                              SearchInput(
+                                widget._textEditingController,
+                                onSearch,
+                                onFocusChanged,
+                                focusNode,
+                              ),
+                            // Display MeCab tokens table
+                            if (_tokens.isNotEmpty) _buildTokensTable(),
                             Expanded(
                               child: TabBarView(
                                 physics: const NeverScrollableScrollPhysics(),
@@ -338,7 +471,7 @@ class _MainWidgetState extends State<MainWidget> with TickerProviderStateMixin {
                                     child: ResultsWidget(
                                       onEndReached,
                                       textEditingController:
-                                          widget._textEditingController,
+                                      widget._textEditingController,
                                       onSearch: onSearch,
                                     ),
                                   ),
@@ -348,7 +481,7 @@ class _MainWidgetState extends State<MainWidget> with TickerProviderStateMixin {
                                     child: ResultsWidget(
                                       onEndReached,
                                       textEditingController:
-                                          widget._textEditingController,
+                                      widget._textEditingController,
                                       onSearch: onSearch,
                                     ),
                                   ),
