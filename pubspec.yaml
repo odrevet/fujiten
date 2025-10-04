@@ -23,6 +23,9 @@ dependencies:
   equatable: ^2.0.7
   ruby_text: ^3.0.3
   flutter_kanjivg: ^0.1.1
+  mecab_dart:
+    git:
+      url: https://github.com/dttvn0010/mecab_dart
 
 dev_dependencies:
   sqflite_common_ffi: ^2.3.6
