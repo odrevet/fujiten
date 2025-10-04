@@ -1,4 +1,4 @@
-Fujiten is an offline Japanese dictionary application made with the flutter framework.<br><br>
+Fujiten is an offline Japanese dictionary application made with the Flutter framework.<br><br>
 
 Definition and kanji comes from the EDICT dictionary, compiled as a database from the edict_database project.<br><br>
 
