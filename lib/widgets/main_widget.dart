@@ -5,7 +5,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:fujiten/cubits/search_cubit.dart';
 import 'package:fujiten/models/search.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:mecab_dart/mecab_dart.dart';
+import 'package:mecab_for_flutter/mecab_for_flutter.dart';
 import 'package:flutter/services.dart';
 
 import '../cubits/expression_cubit.dart';
@@ -83,9 +83,6 @@ class _MainWidgetState extends State<MainWidget> with TickerProviderStateMixin {
       context.read<SearchOptionsCubit>().setSearchType(newSearchType);
     });
 
-    // Listen to text changes for MeCab parsing
-    widget._textEditingController.addListener(_onTextChanged);
-
     _prefs.then((SharedPreferences prefs) {
       if (!mounted) return;
       bool? isLight = prefs.getBool("darkTheme");
@@ -99,7 +96,6 @@ class _MainWidgetState extends State<MainWidget> with TickerProviderStateMixin {
 
   @override
   void dispose() {
-    widget._textEditingController.removeListener(_onTextChanged);
     _tabController.dispose();
     _expressionSearchCubit.close();
     _kanjiSearchCubit.close();
@@ -123,7 +119,7 @@ class _MainWidgetState extends State<MainWidget> with TickerProviderStateMixin {
       }
 
       print('Initializing MeCab with dictionary path: $dictionaryPath');
-      await _tagger.init(dictionaryPath, true);
+      await _tagger.initFlutter(dictionaryPath, true);
 
       setState(() {
         _mecabInitialized = true;
@@ -140,7 +136,7 @@ class _MainWidgetState extends State<MainWidget> with TickerProviderStateMixin {
     }
   }
 
-  void _onTextChanged() {
+  void _mecabParse() {
     if (_mecabInitialized && widget._textEditingController.text.isNotEmpty) {
       _parseText();
     } else if (widget._textEditingController.text.isEmpty) {
@@ -229,6 +225,7 @@ class _MainWidgetState extends State<MainWidget> with TickerProviderStateMixin {
   }
 
   void onSearch() async {
+    _mecabParse();
     if (widget._textEditingController.text != "") {
       final kanjiCubit = context.read<KanjiCubit>();
 
