@@ -8,7 +8,6 @@ import '../cubits/expression_cubit.dart';
 import '../cubits/input_cubit.dart';
 import '../cubits/kanji_cubit.dart';
 import '../cubits/search_options_cubit.dart';
-import '../cubits/theme_cubit.dart';
 import '../models/states/db_state_expression.dart';
 import '../models/states/db_state_kanji.dart';
 import '../models/states/search_options_state.dart';
@@ -69,18 +68,7 @@ class _MainWidgetState extends State<MainWidget> with TickerProviderStateMixin {
       final newSearchType = _tabController.index == 0
           ? SearchType.expression
           : SearchType.kanji;
-
       context.read<SearchOptionsCubit>().setSearchType(newSearchType);
-    });
-
-    _prefs.then((SharedPreferences prefs) {
-      if (!mounted) return;
-      bool? isLight = prefs.getBool("darkTheme");
-      if (isLight == true) {
-        context.read<ThemeCubit>().updateTheme(
-          ThemeData(brightness: Brightness.dark),
-        );
-      }
     });
   }
 
