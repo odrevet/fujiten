@@ -259,6 +259,26 @@ class _MainWidgetState extends State<MainWidget> with TickerProviderStateMixin {
     _tabController.animateTo(newSearchType == SearchType.expression ? 0 : 1);
   }
 
+  void convert() {
+    String? input = widget._textEditingController.text;
+    String convertedInput;
+    if (kanaKit.isRomaji(input)) {
+      convertedInput = kanaKit.toKana(input);
+    } else if (kanaKit.isHiragana(input)) {
+      convertedInput = kanaKit.toKatakana(input);
+    } else if (kanaKit.isKatakana(input)) {
+      convertedInput = kanaKit.toRomaji(input);
+    } else {
+      convertedInput = kanaKit.toKana(input);
+    }
+
+    widget._textEditingController.text = convertedInput;
+    context.read<InputCubit>().state.inputs[
+    context.read<InputCubit>().state.searchIndex
+    ] = convertedInput;
+  }
+
+
   @override
   Widget build(BuildContext context) {
     final isLandscape =
@@ -313,9 +333,9 @@ class _MainWidgetState extends State<MainWidget> with TickerProviderStateMixin {
                               onSearch: onSearch,
                               focusNode: focusNode,
                               insertPosition: cursorPosition,
-                              // Pass the toggle function and current search type
                               onToggleSearchType: _toggleSearchType,
                               currentSearchType: searchOptionsState.searchType,
+                              onConvert: convert,
                             ),
                           ),
                         ),
@@ -327,6 +347,7 @@ class _MainWidgetState extends State<MainWidget> with TickerProviderStateMixin {
                                 onSearch,
                                 onFocusChanged,
                                 focusNode,
+                                onConvert: convert,
                               ),
                             Expanded(
                               child: TabBarView(

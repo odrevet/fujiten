@@ -20,6 +20,7 @@ class FujitenMenuBar extends StatefulWidget {
   final FocusNode focusNode;
   final VoidCallback onToggleSearchType;
   final SearchType currentSearchType;
+  final VoidCallback? onConvert;
 
   const FujitenMenuBar({
     required this.search,
@@ -29,6 +30,7 @@ class FujitenMenuBar extends StatefulWidget {
     required this.insertPosition,
     required this.onToggleSearchType,
     required this.currentSearchType,
+    required this.onConvert,
     super.key,
   });
 
@@ -50,25 +52,6 @@ class _FujitenMenuBarState extends State<FujitenMenuBar> {
     } else {
       widget.textEditingController!.text += input;
     }
-  }
-
-  void convert() {
-    String? input = widget.textEditingController?.text;
-    String convertedInput;
-    if (kanaKit.isRomaji(input!)) {
-      convertedInput = kanaKit.toKana(input);
-    } else if (kanaKit.isHiragana(input)) {
-      convertedInput = kanaKit.toKatakana(input);
-    } else if (kanaKit.isKatakana(input)) {
-      convertedInput = kanaKit.toRomaji(input);
-    } else {
-      convertedInput = kanaKit.toKana(input);
-    }
-
-    widget.textEditingController?.text = convertedInput;
-    context.read<InputCubit>().state.inputs[
-    context.read<InputCubit>().state.searchIndex
-    ] = convertedInput;
   }
 
   @override
@@ -236,6 +219,7 @@ class _FujitenMenuBarState extends State<FujitenMenuBar> {
                     widget.onSearch,
                         (_) {},
                     widget.focusNode,
+                    onConvert: widget.onConvert,
                   ),
                 )
               else
@@ -243,7 +227,7 @@ class _FujitenMenuBarState extends State<FujitenMenuBar> {
               popupMenuButtonInsert,
               IconButton(
                 icon: const Icon(Icons.translate),
-                onPressed: convert,
+                onPressed: widget.onConvert,
               ),
               popupMenuButtonInputs,
               searchTypeToggle,
