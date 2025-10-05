@@ -20,16 +20,14 @@ class DatabaseInterfaceExpression extends DatabaseInterface {
     String searchOperator = useRegexp ? 'REGEXP' : 'GLOB';
 
     if (kanaKit.isRomaji(input)) {
-      sql =
-          '''SELECT DISTINCT sense.id_entry 
+      sql = '''SELECT DISTINCT sense.id_entry 
              FROM sense JOIN gloss ON gloss.id_sense = sense.id 
              WHERE gloss.content $searchOperator '$input' ''';
     } else {
       // if the input does not contains a kanji do not search in the reb
       var regExp = RegExp(matchKanji);
       var hasKanji = regExp.hasMatch(input);
-      sql =
-          '''SELECT DISTINCT entry_sub.id 
+      sql = '''SELECT DISTINCT entry_sub.id 
              FROM entry entry_sub
              JOIN sense sense_sub ON entry_sub.id = sense_sub.id_entry 
              JOIN r_ele on entry_sub.id = r_ele.id_entry
@@ -50,7 +48,8 @@ class DatabaseInterfaceExpression extends DatabaseInterface {
     int currentPage,
     useRegexp,
   ) async {
-    String sql = '''SELECT
+    String sql =
+        '''SELECT
                     entry.id AS entry_id,
                     sense.id AS sense_id,
                     GROUP_CONCAT(DISTINCT COALESCE(k_ele.keb || ':', '') || r_ele.reb) keb_reb_group,
@@ -116,8 +115,12 @@ class DatabaseInterfaceExpression extends DatabaseInterface {
                 ? queryResult['keb_reb_group'].split(',')
                 : [],
             senses: senses,
-            xref:  queryResult['xref_group'] != null ? queryResult['xref_group'].split(',') : [],
-            ant:  queryResult['ant_group'] != null ? queryResult['ant_group'].split(',') : [],
+            xref: queryResult['xref_group'] != null
+                ? queryResult['xref_group'].split(',')
+                : [],
+            ant: queryResult['ant_group'] != null
+                ? queryResult['ant_group'].split(',')
+                : [],
           ),
         );
         entryId = queryResult['entry_id'];

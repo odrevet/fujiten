@@ -1,5 +1,6 @@
 // search.dart
 import 'package:fujiten/models/states/search_options_state.dart';
+
 import 'entry.dart';
 
 class Search {
@@ -44,7 +45,7 @@ class Search {
       page: page ?? this.page,
       resultsPerPageKanji: resultsPerPageKanji ?? this.resultsPerPageKanji,
       resultsPerPageExpression:
-      resultsPerPageExpression ?? this.resultsPerPageExpression,
+          resultsPerPageExpression ?? this.resultsPerPageExpression,
       searchResults: searchResults ?? this.searchResults,
       hasMoreResults: hasMoreResults ?? this.hasMoreResults,
       searchInput: searchInput ?? this.searchInput,

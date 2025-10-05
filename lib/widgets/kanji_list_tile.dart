@@ -3,10 +3,10 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_kanjivg/flutter_kanjivg.dart';
 
-import '../models/kanji.dart';
 import '../cubits/expression_cubit.dart';
 import '../cubits/search_options_cubit.dart';
 import '../models/entry.dart'; // Add your entry model import
+import '../models/kanji.dart';
 import 'kanji_widget.dart';
 
 class KanjiListTile extends StatefulWidget {
@@ -27,7 +27,8 @@ class KanjiListTile extends StatefulWidget {
   State<KanjiListTile> createState() => _KanjiListTileState();
 }
 
-class _KanjiListTileState extends State<KanjiListTile> with TickerProviderStateMixin  {
+class _KanjiListTileState extends State<KanjiListTile>
+    with TickerProviderStateMixin {
   bool _showAnimation = false;
   List<ExpressionEntry>? _expressions; // Store the fetched expressions
   bool _loadingExpressions = false;
@@ -43,20 +44,21 @@ class _KanjiListTileState extends State<KanjiListTile> with TickerProviderStateM
     _loadExpressions();
   }
 
-
   Future<void> _loadKanjiSvg() async {
     final parser = const KanjiParser();
-    final codepoint = widget.kanji.literal.codeUnitAt(0).toRadixString(16).padLeft(5, '0');
+    final codepoint = widget.kanji.literal
+        .codeUnitAt(0)
+        .toRadixString(16)
+        .padLeft(5, '0');
     final source = await rootBundle.loadString('assets/kanji/$codepoint.svg');
     final data = parser.parse(source);
 
     setState(() {
       _data = data;
-      _controller = KanjiController(
-        vsync: this,
-        duration: const Duration(seconds: 5),
-      )..load(data)
-        ..repeat();
+      _controller =
+          KanjiController(vsync: this, duration: const Duration(seconds: 5))
+            ..load(data)
+            ..repeat();
     });
   }
 
@@ -96,7 +98,7 @@ class _KanjiListTileState extends State<KanjiListTile> with TickerProviderStateM
             color: theme.colorScheme.surface,
             borderRadius: BorderRadius.circular(12),
             border: Border.all(
-              color: theme.colorScheme.outline.withValues(alpha:0.3),
+              color: theme.colorScheme.outline.withValues(alpha: 0.3),
             ),
           ),
           child: SizedBox.square(
@@ -104,12 +106,12 @@ class _KanjiListTileState extends State<KanjiListTile> with TickerProviderStateM
             child: _data == null
                 ? const Center(child: CircularProgressIndicator())
                 : KanjiCanvas(
-              controller: _controller,
-              size: 150,
-              thickness: 4,
-              color: theme.colorScheme.primary,
-              hintColor: theme.colorScheme.primary.withValues(alpha:0.3),
-            ),
+                    controller: _controller,
+                    size: 150,
+                    thickness: 4,
+                    color: theme.colorScheme.primary,
+                    hintColor: theme.colorScheme.primary.withValues(alpha: 0.3),
+                  ),
           ),
         ),
       ],
@@ -125,7 +127,9 @@ class _KanjiListTileState extends State<KanjiListTile> with TickerProviderStateM
 
     try {
       final expressionCubit = context.read<ExpressionCubit>();
-      var wildcard = context.read<SearchOptionsCubit>().state.useRegexp ? '.*' : '*';
+      var wildcard = context.read<SearchOptionsCubit>().state.useRegexp
+          ? '.*'
+          : '*';
       final entries = await expressionCubit.databaseInterface.search(
         '$wildcard${widget.kanji.literal}$wildcard',
         3,
@@ -192,14 +196,19 @@ class _KanjiListTileState extends State<KanjiListTile> with TickerProviderStateM
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
         side: widget.selected
-            ? BorderSide(color: Theme.of(context).colorScheme.primary, width: 2.0)
+            ? BorderSide(
+                color: Theme.of(context).colorScheme.primary,
+                width: 2.0,
+              )
             : BorderSide.none,
       ),
       child: Container(
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(12),
           color: widget.selected
-              ? Theme.of(context).colorScheme.primaryContainer.withValues(alpha: 0.3)
+              ? Theme.of(
+                  context,
+                ).colorScheme.primaryContainer.withValues(alpha: 0.3)
               : null,
         ),
         child: Padding(
@@ -227,11 +236,17 @@ class _KanjiListTileState extends State<KanjiListTile> with TickerProviderStateM
               const SizedBox(width: 16.0),
 
               // Kanji details
-              Expanded(flex: 2, child: _buildKanjiDetails(context, showCompactExamples: false)),
+              Expanded(
+                flex: 2,
+                child: _buildKanjiDetails(context, showCompactExamples: false),
+              ),
 
               // Expression examples for wide screen
               if (_expressions != null && _expressions!.isNotEmpty)
-                Expanded(flex: 1, child: _buildExpressionsDetailedView(context)),
+                Expanded(
+                  flex: 1,
+                  child: _buildExpressionsDetailedView(context),
+                ),
             ],
           );
         } else {
@@ -314,7 +329,10 @@ class _KanjiListTileState extends State<KanjiListTile> with TickerProviderStateM
     );
   }
 
-  Widget _buildKanjiDetails(BuildContext context, {required bool showCompactExamples}) {
+  Widget _buildKanjiDetails(
+    BuildContext context, {
+    required bool showCompactExamples,
+  }) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -405,10 +423,9 @@ class _KanjiListTileState extends State<KanjiListTile> with TickerProviderStateM
                 Expanded(
                   child: SelectableText(
                     _getMeaning(),
-                    style: Theme.of(context)
-                        .textTheme
-                        .bodyMedium
-                        ?.copyWith(height: 1.3),
+                    style: Theme.of(
+                      context,
+                    ).textTheme.bodyMedium?.copyWith(height: 1.3),
                   ),
                 ),
               ],
@@ -467,7 +484,10 @@ class _KanjiListTileState extends State<KanjiListTile> with TickerProviderStateM
         TextButton(
           onPressed: () => _showAllExpressionsDialog(context),
           style: TextButton.styleFrom(
-            padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 4.0),
+            padding: const EdgeInsets.symmetric(
+              horizontal: 12.0,
+              vertical: 4.0,
+            ),
             minimumSize: Size.zero,
             tapTargetSize: MaterialTapTargetSize.shrinkWrap,
           ),
@@ -512,9 +532,14 @@ class _KanjiListTileState extends State<KanjiListTile> with TickerProviderStateM
     );
   }
 
-  Widget _buildExpressionDetailedItem(BuildContext context, ExpressionEntry expression) {
+  Widget _buildExpressionDetailedItem(
+    BuildContext context,
+    ExpressionEntry expression,
+  ) {
     final theme = Theme.of(context);
-    final reading = expression.reading.isNotEmpty ? expression.reading.first : '';
+    final reading = expression.reading.isNotEmpty
+        ? expression.reading.first
+        : '';
     final meanings = expression.senses
         .expand((sense) => sense.glosses)
         .take(1)
@@ -602,7 +627,9 @@ class _KanjiListTileState extends State<KanjiListTile> with TickerProviderStateM
                     final expression = entry.value;
 
                     return Padding(
-                      padding: EdgeInsets.only(bottom: index < _expressions!.length - 1 ? 16.0 : 0.0),
+                      padding: EdgeInsets.only(
+                        bottom: index < _expressions!.length - 1 ? 16.0 : 0.0,
+                      ),
                       child: _buildDialogExpressionItem(context, expression),
                     );
                   }),
@@ -615,7 +642,10 @@ class _KanjiListTileState extends State<KanjiListTile> with TickerProviderStateM
     );
   }
 
-  Widget _buildDialogExpressionItem(BuildContext context, ExpressionEntry expression) {
+  Widget _buildDialogExpressionItem(
+    BuildContext context,
+    ExpressionEntry expression,
+  ) {
     final theme = Theme.of(context);
 
     return Container(
@@ -641,17 +671,19 @@ class _KanjiListTileState extends State<KanjiListTile> with TickerProviderStateM
               ),
             ),
             const SizedBox(height: 4.0),
-            ...expression.reading.map((reading) => Padding(
-              padding: const EdgeInsets.only(left: 8.0, bottom: 2.0),
-              child: Text(
-                reading,
-                style: TextStyle(
-                  fontSize: 16.0,
-                  fontWeight: FontWeight.w500,
-                  color: theme.colorScheme.onSurface,
+            ...expression.reading.map(
+              (reading) => Padding(
+                padding: const EdgeInsets.only(left: 8.0, bottom: 2.0),
+                child: Text(
+                  reading,
+                  style: TextStyle(
+                    fontSize: 16.0,
+                    fontWeight: FontWeight.w500,
+                    color: theme.colorScheme.onSurface,
+                  ),
                 ),
               ),
-            )),
+            ),
           ],
 
           // Spacing between readings and meanings
@@ -695,12 +727,12 @@ class _KanjiListTileState extends State<KanjiListTile> with TickerProviderStateM
   }
 
   Widget _buildReadingRow(
-      BuildContext context,
-      String label,
-      String reading,
-      Color color, {
-        VoidCallback? onLongPress,
-      }) {
+    BuildContext context,
+    String label,
+    String reading,
+    Color color, {
+    VoidCallback? onLongPress,
+  }) {
     Widget content = Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -719,20 +751,16 @@ class _KanjiListTileState extends State<KanjiListTile> with TickerProviderStateM
         Expanded(
           child: SelectableText(
             reading,
-            style: Theme.of(context)
-                .textTheme
-                .bodyMedium
-                ?.copyWith(height: 1.3),
+            style: Theme.of(
+              context,
+            ).textTheme.bodyMedium?.copyWith(height: 1.3),
           ),
         ),
       ],
     );
 
     if (onLongPress != null) {
-      return GestureDetector(
-        onLongPress: onLongPress,
-        child: content,
-      );
+      return GestureDetector(onLongPress: onLongPress, child: content);
     }
 
     return content;

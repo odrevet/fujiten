@@ -1,4 +1,5 @@
 import 'dart:developer';
+
 import 'package:sqflite/sqflite.dart';
 
 import '../models/entry.dart';

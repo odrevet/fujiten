@@ -22,10 +22,7 @@ class ThemeTile extends StatelessWidget {
 
   Future<void> _saveThemePreference() async {
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setBool(
-      'darkTheme',
-      themeData.brightness == Brightness.dark,
-    );
+    await prefs.setBool('darkTheme', themeData.brightness == Brightness.dark);
   }
 
   @override
@@ -38,7 +35,7 @@ class ThemeTile extends StatelessWidget {
           padding: const EdgeInsets.all(12),
           decoration: BoxDecoration(
             color: isSelected
-                ? Theme.of(context).primaryColor.withValues(alpha:0.1)
+                ? Theme.of(context).primaryColor.withValues(alpha: 0.1)
                 : Colors.grey.withValues(alpha: 0.1),
             borderRadius: BorderRadius.circular(12),
           ),
@@ -59,29 +56,21 @@ class ThemeTile extends StatelessWidget {
         ),
         subtitle: Text(
           subtitle,
-          style: TextStyle(
-            color: Colors.grey[600],
-            fontSize: 12,
-          ),
+          style: TextStyle(color: Colors.grey[600], fontSize: 12),
         ),
         trailing: isSelected
             ? Icon(
-          Icons.check_circle,
-          color: Theme.of(context).primaryColor,
-          size: 24,
-        )
+                Icons.check_circle,
+                color: Theme.of(context).primaryColor,
+                size: 24,
+              )
             : const Icon(
-          Icons.radio_button_unchecked,
-          color: Colors.grey,
-          size: 24,
-        ),
-        contentPadding: const EdgeInsets.symmetric(
-          horizontal: 16,
-          vertical: 8,
-        ),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
-        ),
+                Icons.radio_button_unchecked,
+                color: Colors.grey,
+                size: 24,
+              ),
+        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         onTap: () {
           context.read<ThemeCubit>().updateTheme(themeData);
           _saveThemePreference();
@@ -117,9 +106,8 @@ class ThemeSettings extends StatelessWidget {
                     children: [
                       Text(
                         'Appearance',
-                        style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                          fontWeight: FontWeight.bold,
-                        ),
+                        style: Theme.of(context).textTheme.headlineSmall
+                            ?.copyWith(fontWeight: FontWeight.bold),
                       ),
                       const SizedBox(height: 8),
                       Text(

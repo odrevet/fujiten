@@ -17,10 +17,12 @@ Widget buildRubyText(String mainReading) {
       // Split by colon - format is kanji:reading
       List<String> kanjiReading = part.split(':');
       if (kanjiReading.length == 2) {
-        rubyTextDataList.add(RubyTextData(
-          kanjiReading[0], // kanji
-          ruby: kanjiReading[1], // reading
-        ));
+        rubyTextDataList.add(
+          RubyTextData(
+            kanjiReading[0], // kanji
+            ruby: kanjiReading[1], // reading
+          ),
+        );
       } else {
         // If format is incorrect, treat as plain text
         rubyTextDataList.add(RubyTextData(part));
@@ -93,9 +95,7 @@ class _ResultExpressionListState extends State<ResultExpressionList> {
         title: Row(
           children: [
             Expanded(
-              child: Center(
-                child: Text('Details for ${literals.join()}'),
-              ),
+              child: Center(child: Text('Details for ${literals.join()}')),
             ),
             IconButton(
               onPressed: () => Navigator.of(context).pop(),
@@ -110,6 +110,7 @@ class _ResultExpressionListState extends State<ResultExpressionList> {
       ),
     );
   }
+
   void _copyToClipboard(String text) {
     Clipboard.setData(ClipboardData(text: text));
     ScaffoldMessenger.of(context).showSnackBar(
@@ -271,10 +272,9 @@ class _ResultExpressionListState extends State<ResultExpressionList> {
                       children: [
                         SelectableText(
                           sense.glosses.join(', '),
-                          style: Theme.of(context)
-                              .textTheme
-                              .bodyMedium
-                              ?.copyWith(height: 1.3),
+                          style: Theme.of(
+                            context,
+                          ).textTheme.bodyMedium?.copyWith(height: 1.3),
                         ),
                         if (sense.dial.isNotEmpty ||
                             sense.misc.isNotEmpty ||
@@ -283,7 +283,8 @@ class _ResultExpressionListState extends State<ResultExpressionList> {
                             padding: const EdgeInsets.only(top: 4.0),
                             child: Wrap(
                               spacing: 8.0,
-                              runSpacing: 4.0, // Added for better vertical spacing
+                              runSpacing: 4.0,
+                              // Added for better vertical spacing
                               children: [
                                 if (sense.dial.isNotEmpty)
                                   Container(
@@ -293,7 +294,9 @@ class _ResultExpressionListState extends State<ResultExpressionList> {
                                     ),
                                     decoration: BoxDecoration(
                                       borderRadius: BorderRadius.circular(4),
-                                      color: Colors.orange.withValues(alpha: 0.1),
+                                      color: Colors.orange.withValues(
+                                        alpha: 0.1,
+                                      ),
                                     ),
                                     child: SelectableText(
                                       sense.dial.join(', '),
@@ -310,7 +313,9 @@ class _ResultExpressionListState extends State<ResultExpressionList> {
                                     ),
                                     decoration: BoxDecoration(
                                       borderRadius: BorderRadius.circular(4),
-                                      color: Colors.purple.withValues(alpha: 0.1),
+                                      color: Colors.purple.withValues(
+                                        alpha: 0.1,
+                                      ),
                                     ),
                                     child: SelectableText(
                                       sense.misc.join(', '),
@@ -327,7 +332,9 @@ class _ResultExpressionListState extends State<ResultExpressionList> {
                                     ),
                                     decoration: BoxDecoration(
                                       borderRadius: BorderRadius.circular(4),
-                                      color: Colors.green.withValues(alpha: 0.1),
+                                      color: Colors.green.withValues(
+                                        alpha: 0.1,
+                                      ),
                                     ),
                                     child: SelectableText(
                                       sense.fields.join(', '),

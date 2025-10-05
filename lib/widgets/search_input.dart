@@ -12,13 +12,13 @@ class SearchInput extends StatefulWidget {
   final VoidCallback? onConvert;
 
   const SearchInput(
-      this.textEditingController,
-      this.onSubmitted,
-      this.onFocusChanged,
-      this.focusNode, {
-        this.onConvert,
-        super.key,
-      });
+    this.textEditingController,
+    this.onSubmitted,
+    this.onFocusChanged,
+    this.focusNode, {
+    this.onConvert,
+    super.key,
+  });
 
   @override
   State<SearchInput> createState() => _SearchInputState();
