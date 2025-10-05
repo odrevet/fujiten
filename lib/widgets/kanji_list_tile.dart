@@ -96,7 +96,7 @@ class _KanjiListTileState extends State<KanjiListTile> with TickerProviderStateM
             color: theme.colorScheme.surface,
             borderRadius: BorderRadius.circular(12),
             border: Border.all(
-              color: theme.colorScheme.outline.withOpacity(0.3),
+              color: theme.colorScheme.outline.withValues(alpha:0.3),
             ),
           ),
           child: SizedBox.square(
@@ -108,7 +108,7 @@ class _KanjiListTileState extends State<KanjiListTile> with TickerProviderStateM
               size: 150,
               thickness: 4,
               color: theme.colorScheme.primary,
-              hintColor: theme.colorScheme.primary.withOpacity(0.3),
+              hintColor: theme.colorScheme.primary.withValues(alpha:0.3),
             ),
           ),
         ),
