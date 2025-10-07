@@ -1,7 +1,11 @@
+import 'dart:io';
+
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_kanjivg/flutter_kanjivg.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../cubits/expression_cubit.dart';
 import '../cubits/search_options_cubit.dart';
@@ -34,7 +38,7 @@ class _KanjiListTileState extends State<KanjiListTile>
   bool _loadingExpressions = false;
   bool _expressionsLoaded = false;
 
-  late KanjiController _controller;
+  KanjiController? _controller;
   KvgData? _data;
 
   @override
@@ -45,26 +49,52 @@ class _KanjiListTileState extends State<KanjiListTile>
   }
 
   Future<void> _loadKanjiSvg() async {
-    final parser = const KanjiParser();
-    final codepoint = widget.kanji.literal
-        .codeUnitAt(0)
-        .toRadixString(16)
-        .padLeft(5, '0');
-    final source = await rootBundle.loadString('assets/kanji/$codepoint.svg');
-    final data = parser.parse(source);
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final kanjiVgPath = prefs.getString('kanjivg_path') ?? '';
 
-    setState(() {
-      _data = data;
-      _controller =
+      if (kanjiVgPath.isEmpty) {
+        // KanjiVG path not set, skip loading
+        return;
+      }
+
+      final parser = const KanjiParser();
+      final codepoint = widget.kanji.literal
+          .codeUnitAt(0)
+          .toRadixString(16)
+          .padLeft(5, '0');
+
+      // Load from downloaded KanjiVG directory
+      final svgFile = File('$kanjiVgPath/kanji/$codepoint.svg');
+
+      if (!await svgFile.exists()) {
+        // SVG file doesn't exist, skip loading
+        return;
+      }
+
+      final source = await svgFile.readAsString();
+      final data = parser.parse(source);
+
+      if (mounted) {
+        setState(() {
+          _data = data;
+          _controller =
           KanjiController(vsync: this, duration: const Duration(seconds: 5))
             ..load(data)
             ..repeat();
-    });
+        });
+      }
+    } catch (e) {
+      // Handle errors silently - if KanjiVG isn't available, just don't show animation
+      if (kDebugMode) {
+        print('Error loading KanjiVG: $e');
+      }
+    }
   }
 
   @override
   void dispose() {
-    _controller.dispose();
+    _controller?.dispose();
     super.dispose();
   }
 
@@ -103,15 +133,30 @@ class _KanjiListTileState extends State<KanjiListTile>
           ),
           child: SizedBox.square(
             dimension: 150,
-            child: _data == null
-                ? const Center(child: CircularProgressIndicator())
-                : KanjiCanvas(
-                    controller: _controller,
-                    size: 150,
-                    thickness: 4,
-                    color: theme.colorScheme.primary,
-                    hintColor: theme.colorScheme.primary.withValues(alpha: 0.3),
+            child: _data == null || _controller == null
+                ? Center(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const CircularProgressIndicator(),
+                  const SizedBox(height: 8),
+                  Text(
+                    'KanjiVG not available',
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
+                    ),
                   ),
+                ],
+              ),
+            )
+                : KanjiCanvas(
+              controller: _controller!,
+              size: 150,
+              thickness: 4,
+              color: theme.colorScheme.primary,
+              hintColor: theme.colorScheme.primary.withValues(alpha: 0.3),
+            ),
           ),
         ),
       ],
@@ -158,6 +203,11 @@ class _KanjiListTileState extends State<KanjiListTile>
   void _toggleAnimationView() {
     setState(() {
       _showAnimation = !_showAnimation;
+      // Reset animation to beginning when showing
+      if (_showAnimation && _controller != null && _data != null) {
+        _controller!.reset();
+        _controller!.repeat();
+      }
     });
   }
 
@@ -197,9 +247,9 @@ class _KanjiListTileState extends State<KanjiListTile>
         borderRadius: BorderRadius.circular(12),
         side: widget.selected
             ? BorderSide(
-                color: Theme.of(context).colorScheme.primary,
-                width: 2.0,
-              )
+          color: Theme.of(context).colorScheme.primary,
+          width: 2.0,
+        )
             : BorderSide.none,
       ),
       child: Container(
@@ -207,8 +257,8 @@ class _KanjiListTileState extends State<KanjiListTile>
           borderRadius: BorderRadius.circular(12),
           color: widget.selected
               ? Theme.of(
-                  context,
-                ).colorScheme.primaryContainer.withValues(alpha: 0.3)
+            context,
+          ).colorScheme.primaryContainer.withValues(alpha: 0.3)
               : null,
         ),
         child: Padding(
@@ -330,9 +380,9 @@ class _KanjiListTileState extends State<KanjiListTile>
   }
 
   Widget _buildKanjiDetails(
-    BuildContext context, {
-    required bool showCompactExamples,
-  }) {
+      BuildContext context, {
+        required bool showCompactExamples,
+      }) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -367,7 +417,6 @@ class _KanjiListTileState extends State<KanjiListTile>
                 context,
                 'On-yomi',
                 _getOnReading(),
-                Theme.of(context).colorScheme.primary,
               ),
             if (_getOnReading().isNotEmpty && _getKunReading().isNotEmpty)
               const SizedBox(height: 8.0),
@@ -376,7 +425,6 @@ class _KanjiListTileState extends State<KanjiListTile>
                 context,
                 'Kun-yomi',
                 _getKunReading(),
-                Theme.of(context).colorScheme.secondary,
               ),
           ],
 
@@ -387,7 +435,6 @@ class _KanjiListTileState extends State<KanjiListTile>
             context,
             'Strokes',
             '${widget.kanji.strokeCount}',
-            Theme.of(context).colorScheme.tertiary,
           ),
 
           // Radicals section
@@ -397,7 +444,6 @@ class _KanjiListTileState extends State<KanjiListTile>
               context,
               'Radicals',
               _getRadicals(),
-              Theme.of(context).colorScheme.outline,
               onLongPress: _copyRadicalsToClipboard,
             ),
           ],
@@ -409,14 +455,13 @@ class _KanjiListTileState extends State<KanjiListTile>
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Container(
-                  width: 60,
+                  width: 70,
                   margin: const EdgeInsets.only(right: 8.0),
                   child: Text(
                     'Meanings:',
                     style: TextStyle(
                       fontSize: 12,
                       fontWeight: FontWeight.w600,
-                      color: Colors.blueGrey,
                     ),
                   ),
                 ),
@@ -533,9 +578,9 @@ class _KanjiListTileState extends State<KanjiListTile>
   }
 
   Widget _buildExpressionDetailedItem(
-    BuildContext context,
-    ExpressionEntry expression,
-  ) {
+      BuildContext context,
+      ExpressionEntry expression,
+      ) {
     final theme = Theme.of(context);
     final reading = expression.reading.isNotEmpty
         ? expression.reading.first
@@ -643,9 +688,9 @@ class _KanjiListTileState extends State<KanjiListTile>
   }
 
   Widget _buildDialogExpressionItem(
-    BuildContext context,
-    ExpressionEntry expression,
-  ) {
+      BuildContext context,
+      ExpressionEntry expression,
+      ) {
     final theme = Theme.of(context);
 
     return Container(
@@ -672,7 +717,7 @@ class _KanjiListTileState extends State<KanjiListTile>
             ),
             const SizedBox(height: 4.0),
             ...expression.reading.map(
-              (reading) => Padding(
+                  (reading) => Padding(
                 padding: const EdgeInsets.only(left: 8.0, bottom: 2.0),
                 child: Text(
                   reading,
@@ -727,24 +772,22 @@ class _KanjiListTileState extends State<KanjiListTile>
   }
 
   Widget _buildReadingRow(
-    BuildContext context,
-    String label,
-    String reading,
-    Color color, {
-    VoidCallback? onLongPress,
-  }) {
+      BuildContext context,
+      String label,
+      String reading, {
+        VoidCallback? onLongPress,
+      }) {
     Widget content = Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Container(
-          width: 60,
+          width: 70,
           margin: const EdgeInsets.only(right: 8.0),
           child: Text(
             '$label:',
             style: TextStyle(
               fontSize: 12.0,
               fontWeight: FontWeight.w600,
-              color: color,
             ),
           ),
         ),
