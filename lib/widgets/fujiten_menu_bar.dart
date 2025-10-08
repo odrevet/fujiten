@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../cubits/expression_cubit.dart';
 import '../cubits/input_cubit.dart';
 import '../cubits/kanji_cubit.dart';
 import '../cubits/search_options_cubit.dart';
@@ -10,7 +9,6 @@ import '../models/states/search_options_state.dart';
 import '../string_utils.dart';
 import 'radical_page.dart';
 import 'search_input.dart';
-import 'settings/settings.dart';
 
 class FujitenMenuBar extends StatefulWidget {
   final Search? search;
@@ -202,19 +200,6 @@ class _FujitenMenuBarState extends State<FujitenMenuBar> {
         return AppBar(
           title: Row(
             children: [
-              IconButton(
-                icon: const Icon(Icons.menu),
-                onPressed: () =>
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (context) => SettingsPage()),
-                    ).then((_) {
-                      if (context.mounted) {
-                        context.read<ExpressionCubit>().refreshDatabaseStatus();
-                        context.read<KanjiCubit>().refreshDatabaseStatus();
-                      }
-                    }),
-              ),
               if (isLandscape)
                 Expanded(
                   child: SearchInput(
