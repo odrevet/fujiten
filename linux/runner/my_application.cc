@@ -7,12 +7,35 @@
 
 #include "flutter/generated_plugin_registrant.h"
 
+#include <string>
+#include <unistd.h>
+#include <cstdio>
+
 struct _MyApplication {
   GtkApplication parent_instance;
   char** dart_entrypoint_arguments;
 };
 
 G_DEFINE_TYPE(MyApplication, my_application, GTK_TYPE_APPLICATION)
+
+static std::string getExecutablePath() {
+    std::string path = "";
+    pid_t pid = getpid();
+
+    std::string _link = "/proc/" + std::to_string(pid) + "/exe";
+
+    char proc[512];
+    ssize_t ch = readlink(_link.c_str(), proc, sizeof(proc) - 1);
+
+    if (ch != -1) {
+        proc[ch] = 0;
+        path = proc;
+        std::string::size_type t = path.find_last_of("/");
+        path = path.substr(0, t);
+    }
+
+    return path + "/";
+}
 
 // Implements GApplication::activate.
 static void my_application_activate(GApplication* application) {
@@ -49,6 +72,11 @@ static void my_application_activate(GApplication* application) {
 
   gtk_window_set_default_size(window, 1280, 720);
   gtk_widget_show(GTK_WIDGET(window));
+
+
+  printf("%s\n", (getExecutablePath() + "data/flutter_assets/assets/img/icon.png").c_str());
+  gtk_window_set_icon_from_file(window, (getExecutablePath() + "data/flutter_assets/assets/img/icon.png").c_str(), NULL); // For launcher mode
+
 
   g_autoptr(FlDartProject) project = fl_dart_project_new();
   fl_dart_project_set_dart_entrypoint_arguments(project, self->dart_entrypoint_arguments);
