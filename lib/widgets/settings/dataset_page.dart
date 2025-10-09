@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:fujiten/widgets/settings/database_settings_widget.dart';
+import 'package:fujiten/widgets/settings/kanji_vg_settings_widget.dart';
 
 class DatasetPage extends StatefulWidget {
   const DatasetPage({super.key});
@@ -17,6 +18,7 @@ class _DatasetPageState extends State<DatasetPage> {
         children: [
           DatabaseSettingsWidget(type: "expression"),
           DatabaseSettingsWidget(type: "kanji"),
+          KanjiVGSettingsWidget(),
         ],
       ),
     );

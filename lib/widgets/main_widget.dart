@@ -12,7 +12,6 @@ import '../cubits/expression_cubit.dart';
 import '../cubits/input_cubit.dart';
 import '../cubits/kanji_cubit.dart';
 import '../cubits/search_options_cubit.dart';
-import '../cubits/theme_cubit.dart';
 import '../models/states/db_state_expression.dart';
 import '../models/states/db_state_kanji.dart';
 import '../models/states/search_options_state.dart';
@@ -20,6 +19,7 @@ import '../string_utils.dart';
 import 'fujiten_menu_bar.dart';
 import 'results_widget.dart';
 import 'search_input.dart';
+import 'settings/settings.dart';
 
 class MainWidget extends StatefulWidget {
   final String? title;
@@ -79,18 +79,7 @@ class _MainWidgetState extends State<MainWidget> with TickerProviderStateMixin {
       final newSearchType = _tabController.index == 0
           ? SearchType.expression
           : SearchType.kanji;
-
       context.read<SearchOptionsCubit>().setSearchType(newSearchType);
-    });
-
-    _prefs.then((SharedPreferences prefs) {
-      if (!mounted) return;
-      bool? isLight = prefs.getBool("darkTheme");
-      if (isLight == true) {
-        context.read<ThemeCubit>().updateTheme(
-          ThemeData(brightness: Brightness.dark),
-        );
-      }
     });
   }
 
@@ -323,6 +312,27 @@ class _MainWidgetState extends State<MainWidget> with TickerProviderStateMixin {
     _tabController.animateTo(newSearchType == SearchType.expression ? 0 : 1);
   }
 
+  void convert() {
+    String? input = widget._textEditingController.text;
+    String convertedInput;
+    if (kanaKit.isRomaji(input)) {
+      convertedInput = kanaKit.toKana(input);
+    } else if (kanaKit.isHiragana(input)) {
+      convertedInput = kanaKit.toKatakana(input);
+    } else if (kanaKit.isKatakana(input)) {
+      convertedInput = kanaKit.toRomaji(input);
+    } else {
+      convertedInput = kanaKit.toKana(input);
+    }
+
+    widget._textEditingController.text = convertedInput;
+    context.read<InputCubit>().state.inputs[context
+        .read<InputCubit>()
+        .state
+        .searchIndex] =
+        convertedInput;
+  }
+
   Widget _buildTokensTable() {
     if (!_mecabInitialized) {
       return const Center(
@@ -386,6 +396,7 @@ class _MainWidgetState extends State<MainWidget> with TickerProviderStateMixin {
     );
   }
 
+
   @override
   Widget build(BuildContext context) {
     final isLandscape =
@@ -418,6 +429,9 @@ class _MainWidgetState extends State<MainWidget> with TickerProviderStateMixin {
                       },
                       child: Scaffold(
                         key: _scaffoldKey,
+                        drawer: Drawer(
+                          child: SettingsPage(),
+                        ),
                         floatingActionButton: search.isLoadingNextPage
                             ? const FloatingActionButton(
                           onPressed: null,
@@ -440,9 +454,9 @@ class _MainWidgetState extends State<MainWidget> with TickerProviderStateMixin {
                               onSearch: onSearch,
                               focusNode: focusNode,
                               insertPosition: cursorPosition,
-                              // Pass the toggle function and current search type
                               onToggleSearchType: _toggleSearchType,
                               currentSearchType: searchOptionsState.searchType,
+                              onConvert: convert,
                             ),
                           ),
                         ),
@@ -454,6 +468,7 @@ class _MainWidgetState extends State<MainWidget> with TickerProviderStateMixin {
                                 onSearch,
                                 onFocusChanged,
                                 focusNode,
+                                onConvert: convert,
                               ),
                             // Display MeCab tokens table
                             if (_tokens.isNotEmpty) _buildTokensTable(),

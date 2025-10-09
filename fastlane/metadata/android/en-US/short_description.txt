@@ -1,1 +1,1 @@
-Japanese dictionary made with flutter
+Japanese dictionary made with Flutter

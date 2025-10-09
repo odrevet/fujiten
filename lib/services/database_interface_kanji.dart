@@ -1,4 +1,5 @@
 import 'dart:developer';
+
 import 'package:sqflite/sqflite.dart';
 
 import '../models/entry.dart';
@@ -20,33 +21,51 @@ class DatabaseInterfaceKanji extends DatabaseInterface {
     String searchOperator = useRegexp ? 'REGEXP' : 'GLOB';
 
     Iterable<RegExpMatch> matchesKanji = RegExp(matchKanji).allMatches(input);
+    bool hasHiragana = input.runes.any((rune) => kanaKit.isHiragana(String.fromCharCode(rune)));
+    bool hasKatakana = input.runes.any((rune) => kanaKit.isKatakana(String.fromCharCode(rune)));
+    bool hasRomaji = kanaKit.isRomaji(input);
 
     if (matchesKanji.isNotEmpty) {
       where =
-          "WHERE character.id IN (${matchesKanji.map((m) => "'${m.group(0)}'").join(',')})";
-    } else if (kanaKit.isHiragana(input)) {
+      "WHERE character.id IN (${matchesKanji.map((m) => "'${m.group(0)}'").join(',')})";
+    } else if (hasHiragana && !hasKatakana && !hasRomaji) {
       where =
-          '''WHERE character.id IN (SELECT character.id
-             FROM character 
-             INNER JOIN kun_yomi ON kun_yomi.id_character = character.id 
-             WHERE REPLACE(REPLACE(kun_yomi.reading,'-',''),'.','') = '$input'
-             GROUP BY character.id)''';
-    } else if (kanaKit.isKatakana(input)) {
+      '''WHERE character.id IN (SELECT character.id
+         FROM character 
+         INNER JOIN kun_yomi ON kun_yomi.id_character = character.id 
+         WHERE REPLACE(REPLACE(kun_yomi.reading,'-',''),'.','') $searchOperator '$input'
+         GROUP BY character.id)''';
+    } else if (hasKatakana && !hasHiragana && !hasRomaji) {
       where =
-          '''WHERE character.id IN (SELECT character.id
-             FROM character 
-             INNER JOIN on_yomi ON on_yomi.id_character = character.id 
-             WHERE on_yomi.reading = '$input'
-             GROUP BY character.id)''';
-    } else if (kanaKit.isRomaji(input)) {
+      '''WHERE character.id IN (SELECT character.id
+         FROM character 
+         INNER JOIN on_yomi ON on_yomi.id_character = character.id 
+         WHERE on_yomi.reading $searchOperator '$input'
+         GROUP BY character.id)''';
+    } else if (hasRomaji && !hasHiragana && !hasKatakana) {
       where =
-          '''WHERE character.id IN (SELECT character.id
-             FROM character 
-             LEFT JOIN meaning ON meaning.id_character = character.id
-             WHERE meaning.content $searchOperator '$input'
-             GROUP BY character.id)''';
+      '''WHERE character.id IN (SELECT character.id
+         FROM character 
+         LEFT JOIN meaning ON meaning.id_character = character.id
+         WHERE meaning.content $searchOperator '$input'
+         GROUP BY character.id)''';
     } else {
-      where = "WHERE character.id $searchOperator '$input'";
+      // Convert input to both hiragana and katakana for searching
+      String hiraganaInput = kanaKit.toHiragana(input);
+      String katakanaInput = kanaKit.toKatakana(input);
+
+      where =
+      '''WHERE character.id IN (
+         SELECT character.id FROM character 
+         INNER JOIN kun_yomi ON kun_yomi.id_character = character.id 
+         WHERE REPLACE(REPLACE(kun_yomi.reading,'-',''),'.','') $searchOperator '$hiraganaInput'
+         GROUP BY character.id
+         UNION
+         SELECT character.id FROM character 
+         INNER JOIN on_yomi ON on_yomi.id_character = character.id 
+         WHERE on_yomi.reading $searchOperator '$katakanaInput'
+         GROUP BY character.id
+      )''';
     }
 
     String sql =

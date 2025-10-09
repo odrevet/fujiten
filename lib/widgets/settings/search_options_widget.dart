@@ -150,16 +150,16 @@ class _SearchOptionsWidgetState extends State<SearchOptionsWidget> {
         onChanged: _isTestingRegexp
             ? null
             : (bool value) {
-          context.read<SearchOptionsCubit>().setUseRegexp(value);
-        },
+                context.read<SearchOptionsCubit>().setUseRegexp(value);
+              },
       ),
     );
   }
 
   Widget _buildResultsPerPageExpression(
-      BuildContext context,
-      SearchOptionsState state,
-      ) {
+    BuildContext context,
+    SearchOptionsState state,
+  ) {
     return _buildResultsPerPageCard(
       context: context,
       title: 'Expression Results',
@@ -173,9 +173,9 @@ class _SearchOptionsWidgetState extends State<SearchOptionsWidget> {
   }
 
   Widget _buildResultsPerPageKanji(
-      BuildContext context,
-      SearchOptionsState state,
-      ) {
+    BuildContext context,
+    SearchOptionsState state,
+  ) {
     return _buildResultsPerPageCard(
       context: context,
       title: 'Kanji Results',
@@ -252,10 +252,10 @@ class _SearchOptionsWidgetState extends State<SearchOptionsWidget> {
               ),
               onTap: currentValue > min
                   ? () {
-                final newValue = currentValue - 1;
-                controller.text = newValue.toString();
-                onChanged(newValue);
-              }
+                      final newValue = currentValue - 1;
+                      controller.text = newValue.toString();
+                      onChanged(newValue);
+                    }
                   : null,
               child: Container(
                 width: 32,
@@ -267,8 +267,8 @@ class _SearchOptionsWidgetState extends State<SearchOptionsWidget> {
                   color: currentValue > min
                       ? Theme.of(context).colorScheme.primary
                       : Theme.of(
-                    context,
-                  ).colorScheme.onSurface.withValues(alpha:0.3),
+                          context,
+                        ).colorScheme.onSurface.withValues(alpha: 0.3),
                 ),
               ),
             ),
@@ -330,10 +330,10 @@ class _SearchOptionsWidgetState extends State<SearchOptionsWidget> {
               ),
               onTap: currentValue < max
                   ? () {
-                final newValue = currentValue + 1;
-                controller.text = newValue.toString();
-                onChanged(newValue);
-              }
+                      final newValue = currentValue + 1;
+                      controller.text = newValue.toString();
+                      onChanged(newValue);
+                    }
                   : null,
               child: Container(
                 width: 32,
@@ -345,8 +345,8 @@ class _SearchOptionsWidgetState extends State<SearchOptionsWidget> {
                   color: currentValue < max
                       ? Theme.of(context).colorScheme.primary
                       : Theme.of(
-                    context,
-                  ).colorScheme.onSurface.withValues(alpha:0.3),
+                          context,
+                        ).colorScheme.onSurface.withValues(alpha: 0.3),
                 ),
               ),
             ),
@@ -391,9 +391,9 @@ class _RangeTextInputFormatter extends TextInputFormatter {
 
   @override
   TextEditingValue formatEditUpdate(
-      TextEditingValue oldValue,
-      TextEditingValue newValue,
-      ) {
+    TextEditingValue oldValue,
+    TextEditingValue newValue,
+  ) {
     if (newValue.text.isEmpty) {
       return newValue;
     }
