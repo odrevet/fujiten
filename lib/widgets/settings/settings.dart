@@ -37,7 +37,7 @@ class SettingsPage extends StatelessWidget {
           ),
           ListTile(
             leading: const Icon(Icons.palette),
-            title: const Text("Brightness"),
+            title: const Text("Theme"),
             onTap: () => Navigator.push(
               context,
               MaterialPageRoute(builder: (context) => const ThemeSettings()),

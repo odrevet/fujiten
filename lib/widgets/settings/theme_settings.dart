@@ -1,87 +1,23 @@
+import 'dart:io' show Platform;
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../cubits/theme_cubit.dart';
+import '../../models/states/theme_state.dart';
 
-class ThemeTile extends StatelessWidget {
-  final String title;
-  final String subtitle;
-  final IconData icon;
-  final ThemeData themeData;
-  final bool isSelected;
-
-  const ThemeTile({
-    required this.title,
-    required this.subtitle,
-    required this.icon,
-    required this.themeData,
-    required this.isSelected,
-    super.key,
-  });
-
-  Future<void> _saveThemePreference() async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setBool('darkTheme', themeData.brightness == Brightness.dark);
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Card(
-      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      elevation: isSelected ? 4 : 1,
-      child: ListTile(
-        leading: Container(
-          padding: const EdgeInsets.all(12),
-          decoration: BoxDecoration(
-            color: isSelected
-                ? Theme.of(context).primaryColor.withValues(alpha: 0.1)
-                : Colors.grey.withValues(alpha: 0.1),
-            borderRadius: BorderRadius.circular(12),
-          ),
-          child: Icon(
-            icon,
-            color: isSelected
-                ? Theme.of(context).primaryColor
-                : Colors.grey[600],
-            size: 24,
-          ),
-        ),
-        title: Text(
-          title,
-          style: TextStyle(
-            fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
-            color: isSelected ? Theme.of(context).primaryColor : null,
-          ),
-        ),
-        subtitle: Text(
-          subtitle,
-          style: TextStyle(color: Colors.grey[600], fontSize: 12),
-        ),
-        trailing: isSelected
-            ? Icon(
-                Icons.check_circle,
-                color: Theme.of(context).primaryColor,
-                size: 24,
-              )
-            : const Icon(
-                Icons.radio_button_unchecked,
-                color: Colors.grey,
-                size: 24,
-              ),
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-        onTap: () {
-          context.read<ThemeCubit>().updateTheme(themeData);
-          _saveThemePreference();
-        },
-      ),
-    );
-  }
-}
 
 class ThemeSettings extends StatelessWidget {
   const ThemeSettings({super.key});
+
+  // Check if dynamic colors are supported on this platform
+  bool get _supportsDynamicColors {
+    try {
+      return Platform.isAndroid || Platform.isIOS || Platform.isMacOS || Platform.isWindows;
+    } catch (e) {
+      // If Platform is not available (web), assume no support
+      return false;
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -92,53 +28,112 @@ class ThemeSettings extends StatelessWidget {
         backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         foregroundColor: Theme.of(context).textTheme.bodyLarge?.color,
       ),
-      body: BlocBuilder<ThemeCubit, ThemeData>(
-        builder: (context, currentTheme) {
+      body: BlocBuilder<ThemeCubit, ThemeState>(
+        builder: (context, themeState) {
+          final currentMode = themeState.themeMode;
+          final isDynamicColor = themeState.isDynamicColor;
+          final isDark = currentMode == ThemeMode.dark;
+
           return SingleChildScrollView(
             padding: const EdgeInsets.symmetric(vertical: 16),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 24),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Appearance',
-                        style: Theme.of(context).textTheme.headlineSmall
-                            ?.copyWith(fontWeight: FontWeight.bold),
+                // Theme Mode Switch (Light/Dark)
+                Card(
+                  margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  elevation: 2,
+                  child: SwitchListTile(
+                    secondary: Container(
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: isDark
+                            ? Theme.of(context).primaryColor.withValues(alpha: 0.1)
+                            : Colors.grey.withValues(alpha: 0.1),
+                        borderRadius: BorderRadius.circular(12),
                       ),
-                      const SizedBox(height: 8),
-                      Text(
-                        'Choose your preferred theme for the app',
-                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          color: Colors.grey[600],
+                      child: Icon(
+                        isDark ? Icons.dark_mode : Icons.light_mode,
+                        color: isDark
+                            ? Theme.of(context).primaryColor
+                            : Colors.grey[600],
+                        size: 24,
+                      ),
+                    ),
+                    title: Text(
+                      isDark ? 'Dark Mode' : 'Light Mode',
+                      style: TextStyle(
+                        fontWeight: FontWeight.w600,
+                        color: isDark ? Theme.of(context).primaryColor : null,
+                      ),
+                    ),
+                    subtitle: Text(
+                      isDark
+                          ? 'Easy on the eyes in low light'
+                          : 'Clean and bright interface',
+                      style: TextStyle(color: Colors.grey[600], fontSize: 12),
+                    ),
+                    value: isDark,
+                    onChanged: (value) {
+                      context.read<ThemeCubit>().toggleThemeMode(value);
+                    },
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                ),
+
+                // Dynamic Colors Switch (only show if supported)
+                if (_supportsDynamicColors) ...[
+                  const SizedBox(height: 8),
+                  Card(
+                    margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                    elevation: 2,
+                    child: SwitchListTile(
+                      secondary: Container(
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: isDynamicColor
+                              ? Theme.of(context).primaryColor.withValues(alpha: 0.1)
+                              : Colors.grey.withValues(alpha: 0.1),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Icon(
+                          Icons.palette,
+                          color: isDynamicColor
+                              ? Theme.of(context).primaryColor
+                              : Colors.grey[600],
+                          size: 24,
                         ),
                       ),
-                    ],
+                      title: Text(
+                        'Dynamic Colors',
+                        style: TextStyle(
+                          fontWeight: FontWeight.w600,
+                          color: isDynamicColor ? Theme.of(context).primaryColor : null,
+                        ),
+                      ),
+                      subtitle: Text(
+                        'Use colors from your wallpaper (Android 12+)',
+                        style: TextStyle(color: Colors.grey[600], fontSize: 12),
+                      ),
+                      value: isDynamicColor,
+                      onChanged: (value) {
+                        context.read<ThemeCubit>().toggleDynamicColors(value);
+                      },
+                      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
                   ),
-                ),
-                const SizedBox(height: 24),
-                ThemeTile(
-                  title: "Light Theme",
-                  subtitle: "Clean and bright interface",
-                  icon: Icons.light_mode,
-                  themeData: ThemeData(
-                    brightness: Brightness.light,
-                    useMaterial3: true,
-                  ),
-                  isSelected: currentTheme.brightness == Brightness.light,
-                ),
-                ThemeTile(
-                  title: "Dark Theme",
-                  subtitle: "Easy on the eyes in low light",
-                  icon: Icons.dark_mode,
-                  themeData: ThemeData(
-                    brightness: Brightness.dark,
-                    useMaterial3: true,
-                  ),
-                  isSelected: currentTheme.brightness == Brightness.dark,
+                ],
+
+                const SizedBox(height: 16),
+                const Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 24, vertical: 8),
+                  child: Divider(),
                 ),
               ],
             ),

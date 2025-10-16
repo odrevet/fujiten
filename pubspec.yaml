@@ -23,6 +23,7 @@ dependencies:
   equatable: ^2.0.7
   ruby_text: ^3.0.3
   flutter_kanjivg: ^0.1.1
+  dynamic_color: ^1.8.1
 
 dev_dependencies:
   sqflite_common_ffi: ^2.3.6

@@ -8,9 +8,11 @@ import 'cubits/input_cubit.dart';
 import 'cubits/kanji_cubit.dart';
 import 'cubits/search_options_cubit.dart';
 import 'cubits/theme_cubit.dart';
+import 'models/states/theme_state.dart';
 import 'services/database_interface_expression.dart';
 import 'services/database_interface_kanji.dart';
 import 'widgets/main_widget.dart';
+import 'package:dynamic_color/dynamic_color.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -29,30 +31,36 @@ class App extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (_) => ThemeCubit()..updateTheme(
-        ThemeData(
-          brightness: isDarkTheme ? Brightness.dark : Brightness.light,
-        ),
-      ),
-      child: BlocBuilder<ThemeCubit, ThemeData>(
-        builder: (context, themeData) => MultiBlocProvider(
-          providers: [
-            BlocProvider(create: (_) => InputCubit()),
-            BlocProvider(create: (_) => SearchCubit()),
-            BlocProvider(create: (_) => SearchOptionsCubit()),
-            BlocProvider(
-              create: (_) => ExpressionCubit(DatabaseInterfaceExpression()),
+    return DynamicColorBuilder(
+      builder: (ColorScheme? lightDynamic, ColorScheme? darkDynamic) {
+        return BlocProvider(
+          create: (_) => ThemeCubit()..updateTheme(
+            ThemeData(
+              brightness: isDarkTheme ? Brightness.dark : Brightness.light,
             ),
-            BlocProvider(create: (_) => KanjiCubit(DatabaseInterfaceKanji())),
-          ],
-          child: MaterialApp(
-            title: "Fujiten",
-            theme: themeData,
-            home: MainWidget(),
           ),
-        ),
-      ),
+          child: BlocBuilder<ThemeCubit, ThemeState>(
+            builder: (context, themeState) => MultiBlocProvider(
+              providers: [
+                BlocProvider(create: (_) => InputCubit()),
+                BlocProvider(create: (_) => SearchCubit()),
+                BlocProvider(create: (_) => SearchOptionsCubit()),
+                BlocProvider(
+                  create: (_) => ExpressionCubit(DatabaseInterfaceExpression()),
+                ),
+                BlocProvider(create: (_) => KanjiCubit(DatabaseInterfaceKanji())),
+              ],
+              child: MaterialApp(
+                title: "Fujiten",
+                theme: themeState.themeData,
+                home: MainWidget(),
+              ),
+            ),
+          ),
+        );
+
+      },
     );
+
   }
 }
