@@ -12,55 +12,65 @@ import 'models/states/theme_state.dart';
 import 'services/database_interface_expression.dart';
 import 'services/database_interface_kanji.dart';
 import 'widgets/main_widget.dart';
-import 'package:dynamic_color/dynamic_color.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-
-  // Load theme preference before running app
-  final prefs = await SharedPreferences.getInstance();
-  final isDarkTheme = prefs.getBool("darkTheme") ?? false;
-
-  runApp(App(isDarkTheme: isDarkTheme));
+  runApp(const App());
 }
 
 class App extends StatelessWidget {
-  final bool isDarkTheme;
-
-  const App({super.key, required this.isDarkTheme});
+  const App({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return DynamicColorBuilder(
-      builder: (ColorScheme? lightDynamic, ColorScheme? darkDynamic) {
-        return BlocProvider(
-          create: (_) => ThemeCubit()..updateTheme(
-            ThemeData(
-              brightness: isDarkTheme ? Brightness.dark : Brightness.light,
-            ),
-          ),
-          child: BlocBuilder<ThemeCubit, ThemeState>(
-            builder: (context, themeState) => MultiBlocProvider(
-              providers: [
-                BlocProvider(create: (_) => InputCubit()),
-                BlocProvider(create: (_) => SearchCubit()),
-                BlocProvider(create: (_) => SearchOptionsCubit()),
-                BlocProvider(
-                  create: (_) => ExpressionCubit(DatabaseInterfaceExpression()),
-                ),
-                BlocProvider(create: (_) => KanjiCubit(DatabaseInterfaceKanji())),
-              ],
-              child: MaterialApp(
-                title: "Fujiten",
-                theme: themeState.themeData,
-                home: MainWidget(),
-              ),
-            ),
-          ),
-        );
-
-      },
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider(
+          create: (_) => ThemeCubit()..loadSavedTheme(),
+        ),
+        BlocProvider(create: (_) => InputCubit()),
+        BlocProvider(create: (_) => SearchCubit()),
+        BlocProvider(create: (_) => SearchOptionsCubit()),
+        BlocProvider(
+          create: (_) => ExpressionCubit(DatabaseInterfaceExpression()),
+        ),
+        BlocProvider(create: (_) => KanjiCubit(DatabaseInterfaceKanji())),
+      ],
+      child: BlocBuilder<ThemeCubit, ThemeState>(
+        builder: (context, themeState) {
+          return MaterialApp(
+            title: "Fujiten",
+            theme: themeState.themeData,
+            darkTheme: _buildDarkTheme(themeState),
+            themeMode: themeState.themeMode,
+            home: MainWidget(),
+          );
+        },
+      ),
     );
+  }
 
+  ThemeData _buildDarkTheme(ThemeState themeState) {
+    // If using dynamic colors, create a dark version
+    if (themeState.isDynamicColor || themeState.useAccentColor || themeState.customAccentColor != null) {
+      final seedColor = themeState.customAccentColor ??
+          themeState.themeData.colorScheme.primary;
+      return ThemeData(
+        colorScheme: ColorScheme.fromSeed(
+          seedColor: seedColor,
+          brightness: Brightness.dark,
+        ),
+        useMaterial3: true,
+      );
+    }
+
+    // Default dark theme
+    return ThemeData(
+      colorScheme: ColorScheme.fromSeed(
+        seedColor: Colors.blue,
+        brightness: Brightness.dark,
+      ),
+      useMaterial3: true,
+    );
   }
 }

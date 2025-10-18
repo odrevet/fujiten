@@ -1,12 +1,12 @@
 import 'dart:io' show Platform;
+
+import 'package:dynamic_color/dynamic_color.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:dynamic_color/dynamic_color.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 
 import '../../cubits/theme_cubit.dart';
 import '../../models/states/theme_state.dart';
-
 
 class ThemeSettings extends StatelessWidget {
   const ThemeSettings({super.key});
@@ -29,7 +29,10 @@ class ThemeSettings extends StatelessWidget {
     }
   }
 
-  Future<void> _showColorPicker(BuildContext context, Color currentColor) async {
+  Future<void> _showColorPicker(
+    BuildContext context,
+    Color currentColor,
+  ) async {
     Color pickerColor = currentColor;
 
     await showDialog(
@@ -89,38 +92,21 @@ class ThemeSettings extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 24),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Appearance',
-                        style: Theme.of(context).textTheme.headlineSmall
-                            ?.copyWith(fontWeight: FontWeight.bold),
-                      ),
-                      const SizedBox(height: 8),
-                      Text(
-                        'Customize the look and feel of your app',
-                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          color: Colors.grey[600],
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 24),
-
                 // Theme Mode Switch (Light/Dark)
                 Card(
-                  margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  margin: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 8,
+                  ),
                   elevation: 2,
                   child: SwitchListTile(
                     secondary: Container(
                       padding: const EdgeInsets.all(12),
                       decoration: BoxDecoration(
                         color: isDark
-                            ? Theme.of(context).primaryColor.withValues(alpha: 0.1)
+                            ? Theme.of(
+                                context,
+                              ).primaryColor.withValues(alpha: 0.1)
                             : Colors.grey.withValues(alpha: 0.1),
                         borderRadius: BorderRadius.circular(12),
                       ),
@@ -136,20 +122,30 @@ class ThemeSettings extends StatelessWidget {
                       isDark ? 'Dark Mode' : 'Light Mode',
                       style: TextStyle(
                         fontWeight: FontWeight.w600,
-                        color: isDark ? Theme.of(context).primaryColor : null,
+                        color: customAccentColor != null
+                            ? Theme.of(context).primaryColor
+                            : null,
                       ),
                     ),
                     subtitle: Text(
                       isDark
                           ? 'Easy on the eyes in low light'
                           : 'Clean and bright interface',
-                      style: TextStyle(color: Colors.grey[600], fontSize: 12),
+                      style: TextStyle(
+                        color: Theme.of(
+                          context,
+                        ).textTheme.bodySmall?.color?.withValues(alpha: 0.7),
+                        fontSize: 12,
+                      ),
                     ),
                     value: isDark,
                     onChanged: (value) {
                       context.read<ThemeCubit>().toggleThemeMode(value);
                     },
-                    contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                    contentPadding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 8,
+                    ),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
                     ),
@@ -164,25 +160,34 @@ class ThemeSettings extends StatelessWidget {
 
                 // Color Options Section Header
                 Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 24,
+                    vertical: 8,
+                  ),
                   child: Text(
                     'Color Options',
-                    style: Theme.of(context).textTheme.titleMedium
-                        ?.copyWith(fontWeight: FontWeight.bold),
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                 ),
 
                 // Dynamic Colors Switch (Android only)
                 if (_supportsDynamicColors) ...[
                   Card(
-                    margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                    margin: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 8,
+                    ),
                     elevation: 2,
                     child: SwitchListTile(
                       secondary: Container(
                         padding: const EdgeInsets.all(12),
                         decoration: BoxDecoration(
                           color: isDynamicColor
-                              ? Theme.of(context).primaryColor.withValues(alpha: 0.1)
+                              ? Theme.of(
+                                  context,
+                                ).primaryColor.withValues(alpha: 0.1)
                               : Colors.grey.withValues(alpha: 0.1),
                           borderRadius: BorderRadius.circular(12),
                         ),
@@ -198,18 +203,28 @@ class ThemeSettings extends StatelessWidget {
                         'Dynamic Colors',
                         style: TextStyle(
                           fontWeight: FontWeight.w600,
-                          color: isDynamicColor ? Theme.of(context).primaryColor : null,
+                          color: isDynamicColor
+                              ? Theme.of(context).primaryColor
+                              : null,
                         ),
                       ),
                       subtitle: Text(
                         'Use colors from your wallpaper (Android 12+)',
-                        style: TextStyle(color: Colors.grey[600], fontSize: 12),
+                        style: TextStyle(
+                          color: Theme.of(
+                            context,
+                          ).textTheme.bodySmall?.color?.withValues(alpha: 0.7),
+                          fontSize: 12,
+                        ),
                       ),
                       value: isDynamicColor,
                       onChanged: (value) {
                         context.read<ThemeCubit>().toggleDynamicColors(value);
                       },
-                      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 8,
+                      ),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12),
                       ),
@@ -222,17 +237,23 @@ class ThemeSettings extends StatelessWidget {
                   FutureBuilder<Color?>(
                     future: DynamicColorPlugin.getAccentColor(),
                     builder: (context, snapshot) {
-                      final accentColorAvailable = snapshot.hasData && snapshot.data != null;
+                      final accentColorAvailable =
+                          snapshot.hasData && snapshot.data != null;
 
                       return Card(
-                        margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                        margin: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 8,
+                        ),
                         elevation: 2,
                         child: SwitchListTile(
                           secondary: Container(
                             padding: const EdgeInsets.all(12),
                             decoration: BoxDecoration(
                               color: useAccentColor && accentColorAvailable
-                                  ? Theme.of(context).primaryColor.withValues(alpha: 0.1)
+                                  ? Theme.of(
+                                      context,
+                                    ).primaryColor.withValues(alpha: 0.1)
                                   : Colors.grey.withValues(alpha: 0.1),
                               borderRadius: BorderRadius.circular(12),
                             ),
@@ -248,7 +269,7 @@ class ThemeSettings extends StatelessWidget {
                             'System Accent Color',
                             style: TextStyle(
                               fontWeight: FontWeight.w600,
-                              color: useAccentColor && accentColorAvailable
+                              color: customAccentColor != null
                                   ? Theme.of(context).primaryColor
                                   : null,
                             ),
@@ -257,15 +278,25 @@ class ThemeSettings extends StatelessWidget {
                             accentColorAvailable
                                 ? 'Use your system accent color'
                                 : 'System accent color not available',
-                            style: TextStyle(color: Colors.grey[600], fontSize: 12),
+                            style: TextStyle(
+                              color: customAccentColor != null
+                                  ? Theme.of(context).primaryColor
+                                  : null,
+                              fontSize: 12,
+                            ),
                           ),
                           value: useAccentColor && accentColorAvailable,
                           onChanged: accentColorAvailable
                               ? (value) {
-                            context.read<ThemeCubit>().toggleAccentColor(value);
-                          }
+                                  context.read<ThemeCubit>().toggleAccentColor(
+                                    value,
+                                  );
+                                }
                               : null,
-                          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                          contentPadding: const EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 8,
+                          ),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(12),
                           ),
@@ -277,7 +308,10 @@ class ThemeSettings extends StatelessWidget {
 
                 // Custom Accent Color Picker
                 Card(
-                  margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  margin: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 8,
+                  ),
                   elevation: 2,
                   child: ListTile(
                     leading: Container(
@@ -314,14 +348,19 @@ class ThemeSettings extends StatelessWidget {
                     ),
                     trailing: customAccentColor != null
                         ? IconButton(
-                      icon: const Icon(Icons.close, size: 20),
-                      onPressed: () {
-                        context.read<ThemeCubit>().clearCustomAccentColor();
-                      },
-                      tooltip: 'Clear custom color',
-                    )
+                            icon: const Icon(Icons.close, size: 20),
+                            onPressed: () {
+                              context
+                                  .read<ThemeCubit>()
+                                  .clearCustomAccentColor();
+                            },
+                            tooltip: 'Clear custom color',
+                          )
                         : const Icon(Icons.chevron_right),
-                    contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                    contentPadding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 8,
+                    ),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
                     ),
@@ -333,59 +372,11 @@ class ThemeSettings extends StatelessWidget {
                     },
                   ),
                 ),
-
-                const SizedBox(height: 16),
-                const Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 24, vertical: 8),
-                  child: Divider(),
-                ),
-
-                // Info Section
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 24),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'About Color Themes',
-                        style: Theme.of(context).textTheme.titleMedium
-                            ?.copyWith(fontWeight: FontWeight.bold),
-                      ),
-                      const SizedBox(height: 8),
-                      Text(
-                        _getColorInfoText(
-                          isDynamicColor: isDynamicColor,
-                          useAccentColor: useAccentColor,
-                          hasCustomColor: customAccentColor != null,
-                        ),
-                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: Colors.grey[600],
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
               ],
             ),
           );
         },
       ),
     );
-  }
-
-  String _getColorInfoText({
-    required bool isDynamicColor,
-    required bool useAccentColor,
-    required bool hasCustomColor,
-  }) {
-    if (isDynamicColor) {
-      return 'Dynamic colors adapt to your system wallpaper, creating a personalized color palette that matches your style.';
-    } else if (useAccentColor) {
-      return 'Using your system accent color to create a consistent experience across all your applications.';
-    } else if (hasCustomColor) {
-      return 'Using your custom accent color for a personalized appearance.';
-    } else {
-      return 'Using standard Material Design blue color scheme for a clean, consistent experience.';
-    }
   }
 }
