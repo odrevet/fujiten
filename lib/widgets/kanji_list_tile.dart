@@ -9,7 +9,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../cubits/expression_cubit.dart';
 import '../cubits/search_options_cubit.dart';
-import '../models/entry.dart'; // Add your entry model import
+import '../models/entry.dart';
 import '../models/kanji.dart';
 import 'kanji_widget.dart';
 
@@ -34,9 +34,10 @@ class KanjiListTile extends StatefulWidget {
 class _KanjiListTileState extends State<KanjiListTile>
     with TickerProviderStateMixin {
   bool _showAnimation = false;
-  List<ExpressionEntry>? _expressions; // Store the fetched expressions
+  List<ExpressionEntry>? _expressions;
   bool _loadingExpressions = false;
   bool _expressionsLoaded = false;
+  bool _kanjiVgAvailable = false; // Track if KanjiVG is available
 
   KanjiController? _controller;
   KvgData? _data;
@@ -44,8 +45,27 @@ class _KanjiListTileState extends State<KanjiListTile>
   @override
   void initState() {
     super.initState();
-    _loadKanjiSvg();
+    _checkKanjiVgAvailability();
     _loadExpressions();
+  }
+
+  Future<void> _checkKanjiVgAvailability() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final kanjiVgPath = prefs.getString('kanjivg_path') ?? '';
+
+      setState(() {
+        _kanjiVgAvailable = kanjiVgPath.isNotEmpty;
+      });
+
+      if (_kanjiVgAvailable) {
+        _loadKanjiSvg();
+      }
+    } catch (e) {
+      setState(() {
+        _kanjiVgAvailable = false;
+      });
+    }
   }
 
   Future<void> _loadKanjiSvg() async {
@@ -54,7 +74,6 @@ class _KanjiListTileState extends State<KanjiListTile>
       final kanjiVgPath = prefs.getString('kanjivg_path') ?? '';
 
       if (kanjiVgPath.isEmpty) {
-        // KanjiVG path not set, skip loading
         return;
       }
 
@@ -64,11 +83,9 @@ class _KanjiListTileState extends State<KanjiListTile>
           .toRadixString(16)
           .padLeft(5, '0');
 
-      // Load from downloaded KanjiVG directory
       final svgFile = File('$kanjiVgPath/kanji/$codepoint.svg');
 
       if (!await svgFile.exists()) {
-        // SVG file doesn't exist, skip loading
         return;
       }
 
@@ -85,7 +102,6 @@ class _KanjiListTileState extends State<KanjiListTile>
         });
       }
     } catch (e) {
-      // Handle errors silently - if KanjiVG isn't available, just don't show animation
       if (kDebugMode) {
         print('Error loading KanjiVG: $e');
       }
@@ -141,7 +157,7 @@ class _KanjiListTileState extends State<KanjiListTile>
                   const CircularProgressIndicator(),
                   const SizedBox(height: 8),
                   Text(
-                    'KanjiVG not available',
+                    'Kanji drawing not found in KanjiVG',
                     style: TextStyle(
                       fontSize: 12,
                       color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
@@ -201,9 +217,19 @@ class _KanjiListTileState extends State<KanjiListTile>
   }
 
   void _toggleAnimationView() {
+    if (!_kanjiVgAvailable) {
+      // Show a snackbar if KanjiVG is not available
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Please download or configure KanjiVG in settings'),
+          duration: Duration(seconds: 2),
+        ),
+      );
+      return;
+    }
+
     setState(() {
       _showAnimation = !_showAnimation;
-      // Reset animation to beginning when showing
       if (_showAnimation && _controller != null && _data != null) {
         _controller!.reset();
         _controller!.repeat();
@@ -277,21 +303,15 @@ class _KanjiListTileState extends State<KanjiListTile>
         final isWideScreen = constraints.maxWidth > 600;
 
         if (isWideScreen) {
-          // Wide screen layout - kanji on left side
           return Row(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              // Kanji character with enhanced interaction
               _buildInteractiveKanjiCharacter(context),
               const SizedBox(width: 16.0),
-
-              // Kanji details
               Expanded(
                 flex: 2,
                 child: _buildKanjiDetails(context, showCompactExamples: false),
               ),
-
-              // Expression examples for wide screen
               if (_expressions != null && _expressions!.isNotEmpty)
                 Expanded(
                   flex: 1,
@@ -300,15 +320,11 @@ class _KanjiListTileState extends State<KanjiListTile>
             ],
           );
         } else {
-          // Small screen layout - kanji as title above content
           return Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Kanji character as title
               _buildKanjiTitle(context),
               const SizedBox(height: 12.0),
-
-              // Kanji details
               _buildKanjiDetails(context, showCompactExamples: true),
             ],
           );
@@ -325,7 +341,7 @@ class _KanjiListTileState extends State<KanjiListTile>
         onTap: _toggleAnimationView,
         onLongPress: _copyKanjiToClipboard,
         child: MouseRegion(
-          cursor: SystemMouseCursors.click,
+          cursor: _kanjiVgAvailable ? SystemMouseCursors.click : SystemMouseCursors.basic,
           child: KanjiCharacterWidget(
             kanji: widget.kanji,
             onTap: widget.onTapLeading,
@@ -349,7 +365,7 @@ class _KanjiListTileState extends State<KanjiListTile>
       onTap: _toggleAnimationView,
       onLongPress: _copyKanjiToClipboard,
       child: MouseRegion(
-        cursor: SystemMouseCursors.click,
+        cursor: _kanjiVgAvailable ? SystemMouseCursors.click : SystemMouseCursors.basic,
         child: Container(
           width: 60,
           height: 60,
@@ -386,10 +402,7 @@ class _KanjiListTileState extends State<KanjiListTile>
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Readings, meanings, stroke count, and radicals sections (grouped like senses)
         _buildKanjiInfoGroup(context),
-
-        // Expressions section for mobile/narrow screens only
         if (showCompactExamples) ...[
           const SizedBox(height: 8.0),
           _buildExpressionsSection(context),
@@ -410,7 +423,6 @@ class _KanjiListTileState extends State<KanjiListTile>
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Readings section
           if (_getOnReading().isNotEmpty || _getKunReading().isNotEmpty) ...[
             if (_getOnReading().isNotEmpty)
               _buildReadingRow(
@@ -427,8 +439,6 @@ class _KanjiListTileState extends State<KanjiListTile>
                 _getKunReading(),
               ),
           ],
-
-          // Stroke count section
           if ((_getOnReading().isNotEmpty || _getKunReading().isNotEmpty))
             const SizedBox(height: 8.0),
           _buildReadingRow(
@@ -436,8 +446,6 @@ class _KanjiListTileState extends State<KanjiListTile>
             'Strokes',
             '${widget.kanji.strokeCount}',
           ),
-
-          // Radicals section
           if (_getRadicals().isNotEmpty) ...[
             const SizedBox(height: 8.0),
             _buildReadingRow(
@@ -447,8 +455,6 @@ class _KanjiListTileState extends State<KanjiListTile>
               onLongPress: _copyRadicalsToClipboard,
             ),
           ],
-
-          // Meanings section
           if (_getMeaning().isNotEmpty) ...[
             const SizedBox(height: 12.0),
             Row(
@@ -515,7 +521,7 @@ class _KanjiListTileState extends State<KanjiListTile>
     }
 
     if (_expressions == null || _expressions!.isEmpty) {
-      return const SizedBox.shrink(); // Don't show anything if no expressions
+      return const SizedBox.shrink();
     }
 
     return Row(
@@ -705,7 +711,6 @@ class _KanjiListTileState extends State<KanjiListTile>
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Readings section
           if (expression.reading.isNotEmpty) ...[
             Text(
               'Reading${expression.reading.length > 1 ? 's' : ''}:',
@@ -730,12 +735,8 @@ class _KanjiListTileState extends State<KanjiListTile>
               ),
             ),
           ],
-
-          // Spacing between readings and meanings
           if (expression.reading.isNotEmpty && expression.senses.isNotEmpty)
             const SizedBox(height: 8.0),
-
-          // Meanings section
           if (expression.senses.isNotEmpty) ...[
             Text(
               'Meaning${expression.senses.length > 1 ? 's' : ''}:',
