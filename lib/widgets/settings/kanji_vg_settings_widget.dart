@@ -195,7 +195,7 @@ class _KanjiVGSettingsWidgetState extends State<KanjiVGSettingsWidget> {
                                         ..writeAsBytesSync(data);
                                     } else {
                                       Directory('$path/$filename')
-                                        .createSync(recursive: true);
+                                          .createSync(recursive: true);
                                     }
                                   }
 

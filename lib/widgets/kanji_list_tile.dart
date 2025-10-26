@@ -37,7 +37,7 @@ class _KanjiListTileState extends State<KanjiListTile>
   List<ExpressionEntry>? _expressions;
   bool _loadingExpressions = false;
   bool _expressionsLoaded = false;
-  bool _kanjiVgAvailable = false; // Track if KanjiVG is available
+  bool _kanjiVgAvailable = false;
 
   KanjiController? _controller;
   KvgData? _data;
@@ -49,16 +49,27 @@ class _KanjiListTileState extends State<KanjiListTile>
     _loadExpressions();
   }
 
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // Re-check KanjiVG availability when dependencies change
+    _checkKanjiVgAvailability();
+  }
+
   Future<void> _checkKanjiVgAvailability() async {
     try {
       final prefs = await SharedPreferences.getInstance();
       final kanjiVgPath = prefs.getString('kanjivg_path') ?? '';
 
+      final wasAvailable = _kanjiVgAvailable;
+      final isNowAvailable = kanjiVgPath.isNotEmpty;
+
       setState(() {
-        _kanjiVgAvailable = kanjiVgPath.isNotEmpty;
+        _kanjiVgAvailable = isNowAvailable;
       });
 
-      if (_kanjiVgAvailable) {
+      // Load SVG if it just became available
+      if (!wasAvailable && isNowAvailable) {
         _loadKanjiSvg();
       }
     } catch (e) {
@@ -218,7 +229,6 @@ class _KanjiListTileState extends State<KanjiListTile>
 
   void _toggleAnimationView() {
     if (!_kanjiVgAvailable) {
-      // Show a snackbar if KanjiVG is not available
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Please download or configure KanjiVG in settings'),
@@ -340,18 +350,15 @@ class _KanjiListTileState extends State<KanjiListTile>
       child: GestureDetector(
         onTap: _toggleAnimationView,
         onLongPress: _copyKanjiToClipboard,
-        child: MouseRegion(
-          cursor: _kanjiVgAvailable ? SystemMouseCursors.click : SystemMouseCursors.basic,
-          child: KanjiCharacterWidget(
-            kanji: widget.kanji,
-            onTap: widget.onTapLeading,
-            style: TextStyle(
-              fontSize: 28.0,
-              fontWeight: FontWeight.bold,
-              color: widget.selected
-                  ? theme.colorScheme.primary
-                  : theme.colorScheme.onSurface,
-            ),
+        child: KanjiCharacterWidget(
+          kanji: widget.kanji,
+          onTap: widget.onTapLeading,
+          style: TextStyle(
+            fontSize: 28.0,
+            fontWeight: FontWeight.bold,
+            color: widget.selected
+                ? theme.colorScheme.primary
+                : theme.colorScheme.onSurface,
           ),
         ),
       ),
@@ -361,11 +368,11 @@ class _KanjiListTileState extends State<KanjiListTile>
   Widget _buildInteractiveKanjiCharacter(BuildContext context) {
     final theme = Theme.of(context);
 
-    return GestureDetector(
-      onTap: _toggleAnimationView,
-      onLongPress: _copyKanjiToClipboard,
-      child: MouseRegion(
-        cursor: _kanjiVgAvailable ? SystemMouseCursors.click : SystemMouseCursors.basic,
+    return MouseRegion(
+      cursor: _kanjiVgAvailable ? SystemMouseCursors.click : SystemMouseCursors.basic,
+      child: GestureDetector(
+        onTap: _toggleAnimationView,
+        onLongPress: _copyKanjiToClipboard,
         child: Container(
           width: 60,
           height: 60,
