@@ -1,18 +1,21 @@
+import 'package:dynamic_color/dynamic_color.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:dynamic_color/dynamic_color.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../models/states/theme_state.dart';
 
 class ThemeCubit extends Cubit<ThemeState> {
-  ThemeCubit() : super(ThemeState(
-    themeData: _defaultTheme,
-    themeMode: ThemeMode.light,
-    isDynamicColor: false,
-    useAccentColor: false,
-    customAccentColor: null,
-  ));
+  ThemeCubit()
+    : super(
+        ThemeState(
+          themeData: _defaultTheme,
+          themeMode: ThemeMode.light,
+          isDynamicColor: false,
+          useAccentColor: false,
+          customAccentColor: null,
+        ),
+      );
 
   static final ThemeData _defaultTheme = ThemeData(
     colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
@@ -29,11 +32,13 @@ class ThemeCubit extends Cubit<ThemeState> {
     final customColorValue = prefs.getInt('customAccentColor');
 
     final mode = ThemeMode.values.firstWhere(
-          (e) => e.toString() == themeModeString,
+      (e) => e.toString() == themeModeString,
       orElse: () => ThemeMode.light,
     );
 
-    final customColor = customColorValue != null ? Color(customColorValue) : null;
+    final customColor = customColorValue != null
+        ? Color(customColorValue)
+        : null;
 
     await updateThemeMode(
       mode,
@@ -67,7 +72,7 @@ class ThemeCubit extends Cubit<ThemeState> {
 
     // Save custom color
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setInt('customAccentColor', color.value);
+    await prefs.setInt('customAccentColor', color.toARGB32());
   }
 
   /// Clear custom accent color
@@ -95,11 +100,11 @@ class ThemeCubit extends Cubit<ThemeState> {
 
   /// Update theme mode with all color options
   Future<void> updateThemeMode(
-      ThemeMode mode, {
-        bool useDynamicColors = false,
-        bool useAccentColor = false,
-        Color? customAccentColor,
-      }) async {
+    ThemeMode mode, {
+    bool useDynamicColors = false,
+    bool useAccentColor = false,
+    Color? customAccentColor,
+  }) async {
     // Priority: Dynamic Colors > Accent Color > Custom Color > Default
     if (useDynamicColors) {
       await _applyDynamicTheme(mode);
@@ -124,16 +129,20 @@ class ThemeCubit extends Cubit<ThemeState> {
       final corePalette = await DynamicColorPlugin.getCorePalette();
 
       if (corePalette != null) {
-        final brightness = mode == ThemeMode.dark ? Brightness.dark : Brightness.light;
+        final brightness = mode == ThemeMode.dark
+            ? Brightness.dark
+            : Brightness.light;
         final colorScheme = corePalette.toColorScheme(brightness: brightness);
 
-        emit(ThemeState(
-          themeData: ThemeData(colorScheme: colorScheme, useMaterial3: true),
-          themeMode: mode,
-          isDynamicColor: true,
-          useAccentColor: false,
-          customAccentColor: null,
-        ));
+        emit(
+          ThemeState(
+            themeData: ThemeData(colorScheme: colorScheme, useMaterial3: true),
+            themeMode: mode,
+            isDynamicColor: true,
+            useAccentColor: false,
+            customAccentColor: null,
+          ),
+        );
       } else {
         _applyStaticTheme(mode);
       }
@@ -149,19 +158,23 @@ class ThemeCubit extends Cubit<ThemeState> {
       final accentColor = await DynamicColorPlugin.getAccentColor();
 
       if (accentColor != null) {
-        final brightness = mode == ThemeMode.dark ? Brightness.dark : Brightness.light;
+        final brightness = mode == ThemeMode.dark
+            ? Brightness.dark
+            : Brightness.light;
         final colorScheme = ColorScheme.fromSeed(
           seedColor: accentColor,
           brightness: brightness,
         );
 
-        emit(ThemeState(
-          themeData: ThemeData(colorScheme: colorScheme, useMaterial3: true),
-          themeMode: mode,
-          isDynamicColor: false,
-          useAccentColor: true,
-          customAccentColor: null,
-        ));
+        emit(
+          ThemeState(
+            themeData: ThemeData(colorScheme: colorScheme, useMaterial3: true),
+            themeMode: mode,
+            isDynamicColor: false,
+            useAccentColor: true,
+            customAccentColor: null,
+          ),
+        );
       } else {
         _applyStaticTheme(mode);
       }
@@ -173,60 +186,66 @@ class ThemeCubit extends Cubit<ThemeState> {
 
   /// Apply theme with custom accent color
   void _applyCustomColorTheme(ThemeMode mode, Color accentColor) {
-    final brightness = mode == ThemeMode.dark ? Brightness.dark : Brightness.light;
+    final brightness = mode == ThemeMode.dark
+        ? Brightness.dark
+        : Brightness.light;
     final colorScheme = ColorScheme.fromSeed(
       seedColor: accentColor,
       brightness: brightness,
     );
 
-    emit(ThemeState(
-      themeData: ThemeData(
-        colorScheme: colorScheme,
-        useMaterial3: true,
+    emit(
+      ThemeState(
+        themeData: ThemeData(colorScheme: colorScheme, useMaterial3: true),
+        themeMode: mode,
+        isDynamicColor: false,
+        useAccentColor: false,
+        customAccentColor: accentColor,
       ),
-      themeMode: mode,
-      isDynamicColor: false,
-      useAccentColor: false,
-      customAccentColor: accentColor,
-    ));
+    );
   }
 
   /// Apply static theme without dynamic colors
   void _applyStaticTheme(ThemeMode mode) {
-    final brightness = mode == ThemeMode.dark ? Brightness.dark : Brightness.light;
+    final brightness = mode == ThemeMode.dark
+        ? Brightness.dark
+        : Brightness.light;
     final colorScheme = ColorScheme.fromSeed(
       seedColor: Colors.blue,
       brightness: brightness,
     );
 
-    emit(ThemeState(
-      themeData: ThemeData(
-        colorScheme: colorScheme,
-        useMaterial3: true,
+    emit(
+      ThemeState(
+        themeData: ThemeData(colorScheme: colorScheme, useMaterial3: true),
+        themeMode: mode,
+        isDynamicColor: false,
+        useAccentColor: false,
+        customAccentColor: null,
       ),
-      themeMode: mode,
-      isDynamicColor: false,
-      useAccentColor: false,
-      customAccentColor: null,
-    ));
+    );
   }
 
   /// Update theme from a custom image
   Future<void> updateThemeFromImage(ImageProvider imageProvider) async {
     try {
-      final brightness = state.themeMode == ThemeMode.dark ? Brightness.dark : Brightness.light;
+      final brightness = state.themeMode == ThemeMode.dark
+          ? Brightness.dark
+          : Brightness.light;
       final colorScheme = await ColorScheme.fromImageProvider(
         provider: imageProvider,
         brightness: brightness,
       );
 
-      emit(ThemeState(
-        themeData: ThemeData(colorScheme: colorScheme, useMaterial3: true),
-        themeMode: state.themeMode,
-        isDynamicColor: false,
-        useAccentColor: false,
-        customAccentColor: null,
-      ));
+      emit(
+        ThemeState(
+          themeData: ThemeData(colorScheme: colorScheme, useMaterial3: true),
+          themeMode: state.themeMode,
+          isDynamicColor: false,
+          useAccentColor: false,
+          customAccentColor: null,
+        ),
+      );
 
       final prefs = await SharedPreferences.getInstance();
       await prefs.setBool('useDynamicColors', false);
@@ -238,13 +257,17 @@ class ThemeCubit extends Cubit<ThemeState> {
 
   /// Update theme directly
   void updateTheme(ThemeData themeData) {
-    final mode = themeData.brightness == Brightness.dark ? ThemeMode.dark : ThemeMode.light;
-    emit(ThemeState(
-      themeData: themeData,
-      themeMode: mode,
-      isDynamicColor: false,
-      useAccentColor: false,
-      customAccentColor: null,
-    ));
+    final mode = themeData.brightness == Brightness.dark
+        ? ThemeMode.dark
+        : ThemeMode.light;
+    emit(
+      ThemeState(
+        themeData: themeData,
+        themeMode: mode,
+        isDynamicColor: false,
+        useAccentColor: false,
+        customAccentColor: null,
+      ),
+    );
   }
 }

@@ -175,9 +175,9 @@ class _MainWidgetState extends State<MainWidget> with TickerProviderStateMixin {
   }
 
   Future<void> _runSearchForType(
-      SearchType searchType,
-      String formattedInput,
-      ) async {
+    SearchType searchType,
+    String formattedInput,
+  ) async {
     final searchOptions = context.read<SearchOptionsCubit>().state;
     final searchCubit = _getCurrentSearchCubit(searchType);
 
@@ -261,9 +261,9 @@ class _MainWidgetState extends State<MainWidget> with TickerProviderStateMixin {
 
     widget._textEditingController.text = convertedInput;
     context.read<InputCubit>().state.inputs[context
-        .read<InputCubit>()
-        .state
-        .searchIndex] =
+            .read<InputCubit>()
+            .state
+            .searchIndex] =
         convertedInput;
   }
 
@@ -289,8 +289,8 @@ class _MainWidgetState extends State<MainWidget> with TickerProviderStateMixin {
                         saveSearchOptions(searchOptionsState);
                         // Update tab controller when search type changes externally
                         final newIndex =
-                        searchOptionsState.searchType ==
-                            SearchType.expression
+                            searchOptionsState.searchType ==
+                                SearchType.expression
                             ? 0
                             : 1;
                         if (_tabController.index != newIndex) {
@@ -299,20 +299,18 @@ class _MainWidgetState extends State<MainWidget> with TickerProviderStateMixin {
                       },
                       child: Scaffold(
                         key: _scaffoldKey,
-                        drawer: Drawer(
-                          child: SettingsPage(),
-                        ),
+                        drawer: Drawer(child: SettingsPage()),
                         floatingActionButton: search.isLoadingNextPage
                             ? const FloatingActionButton(
-                          onPressed: null,
-                          backgroundColor: Colors.white,
-                          mini: true,
-                          child: SizedBox(
-                            height: 10,
-                            width: 10,
-                            child: CircularProgressIndicator(),
-                          ),
-                        )
+                                onPressed: null,
+                                backgroundColor: Colors.white,
+                                mini: true,
+                                child: SizedBox(
+                                  height: 10,
+                                  width: 10,
+                                  child: CircularProgressIndicator(),
+                                ),
+                              )
                             : null,
                         appBar: PreferredSize(
                           preferredSize: const Size.fromHeight(56),
@@ -320,7 +318,7 @@ class _MainWidgetState extends State<MainWidget> with TickerProviderStateMixin {
                             builder: (context) => FujitenMenuBar(
                               search: search,
                               textEditingController:
-                              widget._textEditingController,
+                                  widget._textEditingController,
                               onSearch: onSearch,
                               focusNode: focusNode,
                               insertPosition: cursorPosition,
@@ -351,7 +349,7 @@ class _MainWidgetState extends State<MainWidget> with TickerProviderStateMixin {
                                     child: ResultsWidget(
                                       onEndReached,
                                       textEditingController:
-                                      widget._textEditingController,
+                                          widget._textEditingController,
                                       onSearch: onSearch,
                                     ),
                                   ),
@@ -361,7 +359,7 @@ class _MainWidgetState extends State<MainWidget> with TickerProviderStateMixin {
                                     child: ResultsWidget(
                                       onEndReached,
                                       textEditingController:
-                                      widget._textEditingController,
+                                          widget._textEditingController,
                                       onSearch: onSearch,
                                     ),
                                   ),

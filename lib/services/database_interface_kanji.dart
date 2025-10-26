@@ -21,30 +21,34 @@ class DatabaseInterfaceKanji extends DatabaseInterface {
     String searchOperator = useRegexp ? 'REGEXP' : 'GLOB';
 
     Iterable<RegExpMatch> matchesKanji = RegExp(matchKanji).allMatches(input);
-    bool hasHiragana = input.runes.any((rune) => kanaKit.isHiragana(String.fromCharCode(rune)));
-    bool hasKatakana = input.runes.any((rune) => kanaKit.isKatakana(String.fromCharCode(rune)));
+    bool hasHiragana = input.runes.any(
+      (rune) => kanaKit.isHiragana(String.fromCharCode(rune)),
+    );
+    bool hasKatakana = input.runes.any(
+      (rune) => kanaKit.isKatakana(String.fromCharCode(rune)),
+    );
     bool hasRomaji = kanaKit.isRomaji(input);
 
     if (matchesKanji.isNotEmpty) {
       where =
-      "WHERE character.id IN (${matchesKanji.map((m) => "'${m.group(0)}'").join(',')})";
+          "WHERE character.id IN (${matchesKanji.map((m) => "'${m.group(0)}'").join(',')})";
     } else if (hasHiragana && !hasKatakana && !hasRomaji) {
       where =
-      '''WHERE character.id IN (SELECT character.id
+          '''WHERE character.id IN (SELECT character.id
          FROM character 
          INNER JOIN kun_yomi ON kun_yomi.id_character = character.id 
          WHERE REPLACE(REPLACE(kun_yomi.reading,'-',''),'.','') $searchOperator '$input'
          GROUP BY character.id)''';
     } else if (hasKatakana && !hasHiragana && !hasRomaji) {
       where =
-      '''WHERE character.id IN (SELECT character.id
+          '''WHERE character.id IN (SELECT character.id
          FROM character 
          INNER JOIN on_yomi ON on_yomi.id_character = character.id 
          WHERE on_yomi.reading $searchOperator '$input'
          GROUP BY character.id)''';
     } else if (hasRomaji && !hasHiragana && !hasKatakana) {
       where =
-      '''WHERE character.id IN (SELECT character.id
+          '''WHERE character.id IN (SELECT character.id
          FROM character 
          LEFT JOIN meaning ON meaning.id_character = character.id
          WHERE meaning.content $searchOperator '$input'
@@ -55,7 +59,7 @@ class DatabaseInterfaceKanji extends DatabaseInterface {
       String katakanaInput = kanaKit.toKatakana(input);
 
       where =
-      '''WHERE character.id IN (
+          '''WHERE character.id IN (
          SELECT character.id FROM character 
          INNER JOIN kun_yomi ON kun_yomi.id_character = character.id 
          WHERE REPLACE(REPLACE(kun_yomi.reading,'-',''),'.','') $searchOperator '$hiraganaInput'

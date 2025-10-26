@@ -30,9 +30,9 @@ class ThemeSettings extends StatelessWidget {
   }
 
   Future<void> _showColorPicker(
-      BuildContext context,
-      Color currentColor,
-      ) async {
+    BuildContext context,
+    Color currentColor,
+  ) async {
     Color pickerColor = currentColor;
 
     await showDialog(
@@ -105,8 +105,8 @@ class ThemeSettings extends StatelessWidget {
                       decoration: BoxDecoration(
                         color: isDark
                             ? Theme.of(
-                          context,
-                        ).primaryColor.withValues(alpha: 0.1)
+                                context,
+                              ).primaryColor.withValues(alpha: 0.1)
                             : Colors.grey.withValues(alpha: 0.1),
                         borderRadius: BorderRadius.circular(12),
                       ),
@@ -120,9 +120,7 @@ class ThemeSettings extends StatelessWidget {
                     ),
                     title: Text(
                       isDark ? 'Dark Mode' : 'Light Mode',
-                      style: const TextStyle(
-                        fontWeight: FontWeight.w600,
-                      ),
+                      style: const TextStyle(fontWeight: FontWeight.w600),
                     ),
                     subtitle: Text(
                       isDark
@@ -183,8 +181,8 @@ class ThemeSettings extends StatelessWidget {
                         decoration: BoxDecoration(
                           color: isDynamicColor
                               ? Theme.of(
-                            context,
-                          ).primaryColor.withValues(alpha: 0.1)
+                                  context,
+                                ).primaryColor.withValues(alpha: 0.1)
                               : Colors.grey.withValues(alpha: 0.1),
                           borderRadius: BorderRadius.circular(12),
                         ),
@@ -249,8 +247,8 @@ class ThemeSettings extends StatelessWidget {
                             decoration: BoxDecoration(
                               color: useAccentColor && accentColorAvailable
                                   ? Theme.of(
-                                context,
-                              ).primaryColor.withValues(alpha: 0.1)
+                                      context,
+                                    ).primaryColor.withValues(alpha: 0.1)
                                   : Colors.grey.withValues(alpha: 0.1),
                               borderRadius: BorderRadius.circular(12),
                             ),
@@ -264,25 +262,21 @@ class ThemeSettings extends StatelessWidget {
                           ),
                           title: const Text(
                             'System Accent Color',
-                            style: TextStyle(
-                              fontWeight: FontWeight.w600,
-                            ),
+                            style: TextStyle(fontWeight: FontWeight.w600),
                           ),
                           subtitle: Text(
                             accentColorAvailable
                                 ? 'Use your system accent color'
                                 : 'System accent color not available',
-                            style: const TextStyle(
-                              fontSize: 12,
-                            ),
+                            style: const TextStyle(fontSize: 12),
                           ),
                           value: useAccentColor && accentColorAvailable,
                           onChanged: accentColorAvailable
                               ? (value) {
-                            context.read<ThemeCubit>().toggleAccentColor(
-                              value,
-                            );
-                          }
+                                  context.read<ThemeCubit>().toggleAccentColor(
+                                    value,
+                                  );
+                                }
                               : null,
                           contentPadding: const EdgeInsets.symmetric(
                             horizontal: 16,
@@ -324,9 +318,7 @@ class ThemeSettings extends StatelessWidget {
                     ),
                     title: const Text(
                       'Custom Accent Color',
-                      style: TextStyle(
-                        fontWeight: FontWeight.w600,
-                      ),
+                      style: TextStyle(fontWeight: FontWeight.w600),
                     ),
                     subtitle: Text(
                       customAccentColor != null
@@ -336,14 +328,14 @@ class ThemeSettings extends StatelessWidget {
                     ),
                     trailing: customAccentColor != null
                         ? IconButton(
-                      icon: const Icon(Icons.close, size: 20),
-                      onPressed: () {
-                        context
-                            .read<ThemeCubit>()
-                            .clearCustomAccentColor();
-                      },
-                      tooltip: 'Clear custom color',
-                    )
+                            icon: const Icon(Icons.close, size: 20),
+                            onPressed: () {
+                              context
+                                  .read<ThemeCubit>()
+                                  .clearCustomAccentColor();
+                            },
+                            tooltip: 'Clear custom color',
+                          )
                         : const Icon(Icons.chevron_right),
                     contentPadding: const EdgeInsets.symmetric(
                       horizontal: 16,

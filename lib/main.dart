@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:fujiten/cubits/search_cubit.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 import 'cubits/expression_cubit.dart';
 import 'cubits/input_cubit.dart';
@@ -25,9 +24,7 @@ class App extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiBlocProvider(
       providers: [
-        BlocProvider(
-          create: (_) => ThemeCubit()..loadSavedTheme(),
-        ),
+        BlocProvider(create: (_) => ThemeCubit()..loadSavedTheme()),
         BlocProvider(create: (_) => InputCubit()),
         BlocProvider(create: (_) => SearchCubit()),
         BlocProvider(create: (_) => SearchOptionsCubit()),
@@ -52,8 +49,11 @@ class App extends StatelessWidget {
 
   ThemeData _buildDarkTheme(ThemeState themeState) {
     // If using dynamic colors, create a dark version
-    if (themeState.isDynamicColor || themeState.useAccentColor || themeState.customAccentColor != null) {
-      final seedColor = themeState.customAccentColor ??
+    if (themeState.isDynamicColor ||
+        themeState.useAccentColor ||
+        themeState.customAccentColor != null) {
+      final seedColor =
+          themeState.customAccentColor ??
           themeState.themeData.colorScheme.primary;
       return ThemeData(
         colorScheme: ColorScheme.fromSeed(

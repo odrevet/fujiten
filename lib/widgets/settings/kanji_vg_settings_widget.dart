@@ -32,9 +32,7 @@ class _KanjiVGSettingsWidgetState extends State<KanjiVGSettingsWidget> {
   Future<void> setPath(String path) async {
     final SharedPreferences prefs = await _prefs;
     setState(() {
-      pathKanjiVG = prefs.setString('kanjivg_path', path).then((
-          bool success,
-          ) {
+      pathKanjiVG = prefs.setString('kanjivg_path', path).then((bool success) {
         return path;
       });
     });
@@ -69,9 +67,9 @@ class _KanjiVGSettingsWidgetState extends State<KanjiVGSettingsWidget> {
                           Container(
                             padding: const EdgeInsets.all(8),
                             decoration: BoxDecoration(
-                              color: Theme.of(context)
-                                  .colorScheme
-                                  .primaryContainer,
+                              color: Theme.of(
+                                context,
+                              ).colorScheme.primaryContainer,
                               borderRadius: BorderRadius.circular(8),
                             ),
                             child: Text(
@@ -122,15 +120,15 @@ class _KanjiVGSettingsWidgetState extends State<KanjiVGSettingsWidget> {
                                   : snapshot.data!,
                               style: Theme.of(context).textTheme.bodyMedium
                                   ?.copyWith(
-                                color: snapshot.data!.isEmpty
-                                    ? Theme.of(context).colorScheme.error
-                                    : Theme.of(
-                                  context,
-                                ).colorScheme.onSurface,
-                                fontStyle: snapshot.data!.isEmpty
-                                    ? FontStyle.italic
-                                    : FontStyle.normal,
-                              ),
+                                    color: snapshot.data!.isEmpty
+                                        ? Theme.of(context).colorScheme.error
+                                        : Theme.of(
+                                            context,
+                                          ).colorScheme.onSurface,
+                                    fontStyle: snapshot.data!.isEmpty
+                                        ? FontStyle.italic
+                                        : FontStyle.normal,
+                                  ),
                             ),
                           ],
                         ),
@@ -147,74 +145,80 @@ class _KanjiVGSettingsWidgetState extends State<KanjiVGSettingsWidget> {
                             onPressed: downloadLog.isNotEmpty
                                 ? null
                                 : () async {
-                              Directory appDocDir =
-                              await getApplicationDocumentsDirectory();
-                              String appDocPath = appDocDir.path;
-                              String downloadTo =
-                                  "$appDocPath/kanjivg.zip";
-                              Dio()
-                                  .download(
-                                'https://github.com/KanjiVG/kanjivg/releases/download/r20250816/kanjivg-20250816-all.zip',
-                                downloadTo,
-                                onReceiveProgress: (received, total) {
-                                  if (total != -1) {
-                                    setState(
-                                          () => downloadLog =
-                                      ("Downloading... ${(received / total * 100).toStringAsFixed(0)}%"),
-                                    );
-                                  }
-                                },
-                              )
-                                  .then((_) async {
-                                String path = "$appDocPath/kanjivg";
+                                    Directory appDocDir =
+                                        await getApplicationDocumentsDirectory();
+                                    String appDocPath = appDocDir.path;
+                                    String downloadTo =
+                                        "$appDocPath/kanjivg.zip";
+                                    Dio()
+                                        .download(
+                                          'https://github.com/KanjiVG/kanjivg/releases/download/r20250816/kanjivg-20250816-all.zip',
+                                          downloadTo,
+                                          onReceiveProgress: (received, total) {
+                                            if (total != -1) {
+                                              setState(
+                                                () => downloadLog =
+                                                    ("Downloading... ${(received / total * 100).toStringAsFixed(0)}%"),
+                                              );
+                                            }
+                                          },
+                                        )
+                                        .then((_) async {
+                                          String path = "$appDocPath/kanjivg";
 
-                                // Extract zip
-                                try {
-                                  // Read the Zip file from disk.
-                                  final bytes = File(
-                                    downloadTo,
-                                  ).readAsBytesSync();
+                                          // Extract zip
+                                          try {
+                                            // Read the Zip file from disk.
+                                            final bytes = File(
+                                              downloadTo,
+                                            ).readAsBytesSync();
 
-                                  // Decode the Zip file
-                                  final archive = ZipDecoder()
-                                      .decodeBytes(bytes);
+                                            // Decode the Zip file
+                                            final archive = ZipDecoder()
+                                                .decodeBytes(bytes);
 
-                                  // Extract to kanjivg directory
-                                  Directory kanjiVgDir = Directory(path);
-                                  if (!kanjiVgDir.existsSync()) {
-                                    kanjiVgDir.createSync(recursive: true);
-                                  }
+                                            // Extract to kanjivg directory
+                                            Directory kanjiVgDir = Directory(
+                                              path,
+                                            );
+                                            if (!kanjiVgDir.existsSync()) {
+                                              kanjiVgDir.createSync(
+                                                recursive: true,
+                                              );
+                                            }
 
-                                  // Extract all files
-                                  for (final file in archive) {
-                                    final filename = file.name;
-                                    if (file.isFile) {
-                                      final data = file.content as List<int>;
-                                      File('$path/$filename')
-                                        ..createSync(recursive: true)
-                                        ..writeAsBytesSync(data);
-                                    } else {
-                                      Directory('$path/$filename')
-                                          .createSync(recursive: true);
-                                    }
-                                  }
+                                            // Extract all files
+                                            for (final file in archive) {
+                                              final filename = file.name;
+                                              if (file.isFile) {
+                                                final data =
+                                                    file.content as List<int>;
+                                                File('$path/$filename')
+                                                  ..createSync(recursive: true)
+                                                  ..writeAsBytesSync(data);
+                                              } else {
+                                                Directory(
+                                                  '$path/$filename',
+                                                ).createSync(recursive: true);
+                                              }
+                                            }
 
-                                  // Delete the zip file
-                                  File(downloadTo).deleteSync();
+                                            // Delete the zip file
+                                            File(downloadTo).deleteSync();
 
-                                  // Set path
-                                  await setPath(path);
-                                  setState(() {
-                                    downloadLog = "";
-                                  });
-                                } catch (e) {
-                                  setState(
-                                        () => downloadLog =
-                                    "Error ${e.toString()}",
-                                  );
-                                }
-                              });
-                            },
+                                            // Set path
+                                            await setPath(path);
+                                            setState(() {
+                                              downloadLog = "";
+                                            });
+                                          } catch (e) {
+                                            setState(
+                                              () => downloadLog =
+                                                  "Error ${e.toString()}",
+                                            );
+                                          }
+                                        });
+                                  },
                             icon: const Icon(Icons.download),
                             label: const Text('Download'),
                             style: ElevatedButton.styleFrom(
@@ -228,13 +232,13 @@ class _KanjiVGSettingsWidgetState extends State<KanjiVGSettingsWidget> {
                             onPressed: downloadLog.isNotEmpty
                                 ? null
                                 : () => _pickDirectory().then((path) async {
-                              if (path != null) {
-                                await setPath(path);
-                                setState(() {
-                                  downloadLog = '';
-                                });
-                              }
-                            }),
+                                    if (path != null) {
+                                      await setPath(path);
+                                      setState(() {
+                                        downloadLog = '';
+                                      });
+                                    }
+                                  }),
                             icon: const Icon(Icons.folder_open),
                             label: const Text('Pick Directory'),
                             style: OutlinedButton.styleFrom(
@@ -248,12 +252,12 @@ class _KanjiVGSettingsWidgetState extends State<KanjiVGSettingsWidget> {
                             onPressed: snapshot.data == ''
                                 ? null
                                 : () async {
-                              String path = '';
-                              setPath(path);
-                              setState(() {
-                                downloadLog = '';
-                              });
-                            },
+                                    String path = '';
+                                    setPath(path);
+                                    setState(() {
+                                      downloadLog = '';
+                                    });
+                                  },
                             icon: const Icon(Icons.clear),
                             label: const Text('Clear'),
                             style: TextButton.styleFrom(
@@ -279,8 +283,8 @@ class _KanjiVGSettingsWidgetState extends State<KanjiVGSettingsWidget> {
                             color: downloadLog.contains('Error')
                                 ? Theme.of(context).colorScheme.errorContainer
                                 : Theme.of(
-                              context,
-                            ).colorScheme.primaryContainer,
+                                    context,
+                                  ).colorScheme.primaryContainer,
                             borderRadius: BorderRadius.circular(8),
                           ),
                           child: Row(
@@ -312,15 +316,15 @@ class _KanjiVGSettingsWidgetState extends State<KanjiVGSettingsWidget> {
                                   downloadLog,
                                   style: Theme.of(context).textTheme.bodyMedium
                                       ?.copyWith(
-                                    color: downloadLog.contains('Error')
-                                        ? Theme.of(
-                                      context,
-                                    ).colorScheme.onErrorContainer
-                                        : Theme.of(
-                                      context,
-                                    ).colorScheme.onPrimaryContainer,
-                                    fontWeight: FontWeight.normal,
-                                  ),
+                                        color: downloadLog.contains('Error')
+                                            ? Theme.of(
+                                                context,
+                                              ).colorScheme.onErrorContainer
+                                            : Theme.of(
+                                                context,
+                                              ).colorScheme.onPrimaryContainer,
+                                        fontWeight: FontWeight.normal,
+                                      ),
                                 ),
                               ),
                             ],
