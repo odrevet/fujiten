@@ -1,76 +1,95 @@
-Fujiten is an offline Japanese dictionary application made with the flutter framework.
+# Fujiten
 
-Definition and kanji comes from the EDICT dictionary, compiled as a database from the edict_database project.
+**Fujiten** is an **offline Japanese dictionary app** built with the **Flutter** framework.  
+It provides fast and reliable access to Japanese definitions and kanji information, all available offline.
 
-[<img src="https://fdroid.gitlab.io/artwork/badge/get-it-on.png"
-     alt="Get it on F-Droid"
-     height="80">](https://f-droid.org/packages/fr.odrevet.fujiten/)
-[<img src="https://play.google.com/intl/en_us/badges/images/generic/en-play-badge.png"
-     alt="Get it on Google Play"
-     height="80">](https://play.google.com/store/apps/details?id=fr.odrevet.fujiten)
+Dictionary data is sourced from the **EDICT** project, compiled as a database via the [edict_database](https://github.com/odrevet/edict_database) repository.
 
-or get the APK from the [Releases Section](https://github.com/odrevet/fujiten/releases/latest)
+---
+
+[<img src="https://fdroid.gitlab.io/artwork/badge/get-it-on.png" alt="Get it on F-Droid" height="80">](https://f-droid.org/packages/fr.odrevet.fujiten/)
+[<img src="https://play.google.com/intl/en_us/badges/images/generic/en-play-badge.png" alt="Get it on Google Play" height="80">](https://play.google.com/store/apps/details?id=fr.odrevet.fujiten)
+
+Or download the latest APK from the [**Releases Section**](https://github.com/odrevet/fujiten/releases/latest).
+
+---
+
+# Screenshots
+
+<p align="center">
+  <img src="fastlane/metadata/android/en-US/images/phoneScreenshots/search.jpg" width="250" alt="Search"/>
+  <img src="fastlane/metadata/android/en-US/images/phoneScreenshots/radicals.jpg" width="250" alt="Radicals"/>
+  <img src="fastlane/metadata/android/en-US/images/phoneScreenshots/databases_settings.jpg" width="250" alt="Database Settings"/>
+</p>
+
+---
 
 # Setup
 
-In order to fujiten to work, the Expression Database and the Kanji Database are needed.
+Fujiten requires two databases to function properly:
+- **Expression Database**
+- **Kanji Database**
 
-The databases can be downloaded and installed from fujiten via the "settings/databases menu or by downloading the database manually from https://github.com/odrevet/edict_database
+You can download and install these databases directly from Fujiten via **Settings → Databases**,  
+or manually from the [edict_database repository](https://github.com/odrevet/edict_database).
 
-# Top menu
+---
+
+# Top Menu
 
 ## Bars
-
-Access the settings menu.
-
-The settings menu allow you to download the dictionaries, set brightness and read legal information.
+Opens the **Settings menu**, where you can:
+- Download or update dictionaries
+- Adjust brightness
+- Read legal information
 
 ## Insert
 
-### Radicals <>
-
-Will match kanji composed with the selected radicals
-
-### Kanji character Ⓚ
-
-Will match any kanji
-
-### Kana character ㋐
-
-Will match a hiragana/katakana character
-
-### Joker .*
-
-Any match
+| Icon | Function | Description |
+|------|-----------|-------------|
+| `<>` | **Radicals** | Finds kanji containing selected radicals |
+| `Ⓚ` | **Kanji** | Matches any kanji character |
+| `㋐` | **Kana** | Matches any hiragana or katakana character |
+| `.*` | **Wildcard** | Matches any sequence (regular expression syntax) |
 
 ## Convert
+If your device lacks a Japanese input keyboard, Fujiten can convert **romaji** (Latin characters) to kana:
+- **Lowercase** → Hiragana
+- **Uppercase** → Katakana
 
-In case your device is not equipped with a Japanese input keyboard, fujiten can convert Latin character (romaji) to hiragana or katakana.
+---
 
-Lowercase romaji will be converted to hiragana, uppercase romaji will be converted to katakana.
+# Kotoba / Kanji Search
 
+Switch between:
+- **Kotoba** → Search for expressions or words
+- **Kanji** → Search for kanji
 
-# Kotoba / Kanji search
+### Buttons
+- **Clear** → Erases the input field
+- **Search** → Executes the search query
 
-When Kotoba is selected, fujiten will search for expression.
-
-When Kanji is selected, fujiten will search for kanji.
-
-## Clear
-
-Clear the input field.
-
-## Search
-
-Run the search.
+---
 
 # Tips
 
-* Search are performed with regular expression, quantifiers "{}" and meta-characters like "." and others can be use
+- Searches support **regular expressions** — use quantifiers (`{}`), wildcards (`.`), and other regex syntax.
+- Use **radical search** (`<>`) when you don’t know the full kanji but recognize its components, e.g. `＜化＞`.
+- If no results appear, try adding `.*` at the **beginning** or **end** of your search term.
 
-* Use search by radical < > when searching for an expression which you do not know a kanji but recognize some of it's radical example: ＜化＞
+---
 
-* When no results, add ".*" at the beginning or the end of your search
+# Platforms
+
+Fujiten uses either **sqflite_common_ffi** or **sqflite**, depending on the build configuration.
+
+When the Dart flag `FFI` is **true**, `sqflite_common_ffi` is used.  
+Otherwise, `sqflite` is used.
+
+### Command Line
+```bash
+flutter run --dart-define=FFI=true
+```
 
 # Platforms
 
