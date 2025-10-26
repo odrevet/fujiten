@@ -79,13 +79,6 @@ Switch between:
 
 ---
 
-# Platforms
-
-Fujiten uses either **sqflite_common_ffi** or **sqflite**, depending on the build configuration.
-
-When the Dart flag `FFI` is **true**, `sqflite_common_ffi` is used.  
-Otherwise, `sqflite` is used.
-
 ### Command Line
 ```bash
 flutter run --dart-define=FFI=true
