@@ -10,7 +10,7 @@ dependencies:
   flutter:
     sdk: flutter
 
-  sqflite: ^2.3.0
+  sqflite: ^2.4.0
   shared_preferences: ^2.2.0
   package_info_plus: ^9.0.0
   kana_kit: ^2.0.0
