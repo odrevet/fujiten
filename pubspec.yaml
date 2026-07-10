@@ -12,15 +12,15 @@ dependencies:
 
   sqflite: ^2.4.0
   shared_preferences: ^2.2.0
-  package_info_plus: ^9.0.0
+  package_info_plus: ^9.0.1
   kana_kit: ^2.0.0
   path: ^1.8.0
   file_picker: ^10.3.3
   flutter_bloc: ^9.1.1
-  path_provider: ^2.1.0
-  dio: ^5.9.0
+  path_provider: ^2.1.6
+  dio: ^5.10.0
   archive: ^4.0.7
-  equatable: ^2.0.7
+  equatable: ^2.1.0
   ruby_text: ^3.0.3
   flutter_kanjivg: ^0.1.1
   dynamic_color: ^1.8.1
@@ -28,7 +28,7 @@ dependencies:
   flutter_staggered_grid_view: ^0.7.0
 
 dev_dependencies:
-  sqflite_common_ffi: ^2.3.6
+  sqflite_common_ffi: ^2.4.2
   test: ^1.16.5
   flutter_test:
     sdk: flutter
