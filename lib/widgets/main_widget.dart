@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:fujiten/cubits/search_cubit.dart';
 import 'package:fujiten/models/search.dart';
@@ -61,6 +62,11 @@ class _MainWidgetState extends State<MainWidget> with TickerProviderStateMixin {
       vsync: this,
       initialIndex: initialIndex,
     );
+
+    // Listen for shared text from Android intents
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _setupSharedTextHandler();
+    });
 
     // Listen to tab changes and update search type
     _tabController.addListener(() {
@@ -195,6 +201,29 @@ class _MainWidgetState extends State<MainWidget> with TickerProviderStateMixin {
       resultsPerPage,
       searchOptions.useRegexp,
     );
+  }
+
+  Future<void> _setupSharedTextHandler() async {
+    const platform = MethodChannel('app.fujiten/shared_text');
+
+    platform.setMethodCallHandler((call) async {
+      if (call.method == 'onSharedText') {
+        final text = call.arguments as String?;
+        if (text != null && mounted) {
+          _handleSharedText(text);
+        }
+      }
+    });
+
+    final initialText = await platform.invokeMethod<String>('getSharedText');
+    if (initialText != null && initialText.isNotEmpty && mounted) {
+      _handleSharedText(initialText);
+    }
+  }
+
+  void _handleSharedText(String text) {
+    widget._textEditingController.text = text;
+    onSearch();
   }
 
   void onFocusChanged(bool hasFocus) async {
