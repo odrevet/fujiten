@@ -132,7 +132,11 @@ class ThemeCubit extends Cubit<ThemeState> {
         final brightness = mode == ThemeMode.dark
             ? Brightness.dark
             : Brightness.light;
-        final colorScheme = corePalette.toColorScheme(brightness: brightness);
+        final rawScheme = corePalette.toColorScheme(brightness: brightness);
+        final colorScheme = ColorScheme.fromSeed(
+          seedColor: rawScheme.primary,
+          brightness: brightness,
+        );
 
         emit(
           ThemeState(

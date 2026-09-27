@@ -342,7 +342,7 @@ class _KanjiVGSettingsWidgetState extends State<KanjiVGSettingsWidget> {
 
   Future<String?> _pickDirectory() async {
     try {
-      String? selectedDirectory = await FilePicker.platform.getDirectoryPath();
+      String? selectedDirectory = await FilePicker.getDirectoryPath();
       return selectedDirectory;
     } catch (e) {
       if (kDebugMode) {

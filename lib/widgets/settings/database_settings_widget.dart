@@ -402,10 +402,7 @@ class _DatabaseSettingsWidgetState extends State<DatabaseSettingsWidget> {
 
   Future<List<PlatformFile>?> _pickFile() async {
     try {
-      return (await FilePicker.platform.pickFiles(
-        type: FileType.any,
-        allowMultiple: false,
-      ))?.files;
+      return await FilePicker.pickFiles(type: FileType.any);
     } on PlatformException catch (e) {
       if (kDebugMode) {
         print('Unsupported operation $e');
