@@ -4,7 +4,7 @@ description: Offline Japanese dictionary made with flutter
 version: 2.3.0+14
 
 environment:
-  sdk: ^3.13.0
+  sdk: ^3.13.4
 
 dependencies:
   flutter:
