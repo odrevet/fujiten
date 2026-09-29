@@ -35,7 +35,10 @@ abstract class DatabaseInterface {
     int resultsPerPage,
     int currentPage,
     bool useRegexp,
+    List<String> langs,
   );
+
+  Future<List<String>> getAvailableLangs();
 
   Future<int> count();
 

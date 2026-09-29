@@ -38,6 +38,7 @@ class ExpressionCubit extends Cubit<ExpressionState> {
     int resultsPerPage,
     int currentPage,
     bool useRegexp,
+    List<String> langs,
   ) async {
     if (databaseInterface.status != DatabaseStatus.ok) {
       emit(
@@ -62,6 +63,7 @@ class ExpressionCubit extends Cubit<ExpressionState> {
         resultsPerPage,
         currentPage,
         useRegexp,
+        langs,
       );
       final totalCount = await databaseInterface.count();
 

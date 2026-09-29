@@ -1,10 +1,16 @@
+class Gloss {
+  final String content;
+  final String lang;
+
+  Gloss({required this.content, required this.lang});
+}
+
 class Sense {
-  List<String> glosses;
+  List<Gloss> glosses;
   List<String> posses;
   List<String> dial;
   List<String> misc;
   List<String> fields;
-  String lang;
 
   Sense({
     required this.glosses,
@@ -12,6 +18,5 @@ class Sense {
     required this.dial,
     required this.misc,
     required this.fields,
-    this.lang = "eng",
   });
 }

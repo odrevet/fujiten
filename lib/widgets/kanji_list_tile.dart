@@ -203,11 +203,16 @@ class _KanjiListTileState extends State<KanjiListTile>
       var wildcard = context.read<SearchOptionsCubit>().state.useRegexp
           ? '.*'
           : '*';
+      final langs = context
+          .read<SearchOptionsCubit>()
+          .state
+          .selectedLangsExpression;
       final entries = await expressionCubit.databaseInterface.search(
         '$wildcard${widget.kanji.literal}$wildcard',
         3,
         0,
         context.read<SearchOptionsCubit>().state.useRegexp,
+        langs,
       );
 
       if (mounted) {
@@ -465,12 +470,7 @@ class _KanjiListTileState extends State<KanjiListTile>
                   ),
                 ),
                 Expanded(
-                  child: SelectableText(
-                    _getMeaning(),
-                    style: Theme.of(
-                      context,
-                    ).textTheme.bodyMedium?.copyWith(height: 1.3),
-                  ),
+                  child: _buildMeanings(),
                 ),
               ],
             ),
@@ -585,7 +585,7 @@ class _KanjiListTileState extends State<KanjiListTile>
         ? expression.reading.first
         : '';
     final meanings = expression.senses
-        .expand((sense) => sense.glosses)
+        .expand((sense) => sense.glosses.map((g) => g.content))
         .take(1)
         .join(', ');
 
@@ -743,7 +743,7 @@ class _KanjiListTileState extends State<KanjiListTile>
             ...expression.senses.asMap().entries.map((entry) {
               final index = entry.key + 1;
               final sense = entry.value;
-              final glosses = sense.glosses.join(', ');
+              final glosses = sense.glosses.map((g) => g.content).join(', ');
 
               if (glosses.isEmpty) return const SizedBox.shrink();
 
@@ -813,6 +813,52 @@ class _KanjiListTileState extends State<KanjiListTile>
   }
 
   String _getMeaning() {
-    return widget.kanji.meanings?.join(', ') ?? '';
+    return widget.kanji.meanings?.map((m) => m.content).join(', ') ?? '';
+  }
+
+  Widget _buildMeanings() {
+    final meanings = widget.kanji.meanings ?? [];
+    final showLangTags =
+        context.read<SearchOptionsCubit>().state.selectedLangsKanji.length > 1;
+
+    return Wrap(
+      spacing: 8.0,
+      runSpacing: 4.0,
+      crossAxisAlignment: WrapCrossAlignment.center,
+      children: meanings.map<Widget>((meaning) {
+        return Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            SelectableText(
+              meaning.content,
+              style: Theme.of(
+                context,
+              ).textTheme.bodyMedium?.copyWith(height: 1.3),
+            ),
+            if (showLangTags && meaning.lang.isNotEmpty) ...[
+              const SizedBox(width: 4),
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 4.0,
+                  vertical: 1.0,
+                ),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(4),
+                  color: Colors.teal.withValues(alpha: 0.1),
+                ),
+                child: SelectableText(
+                  meaning.lang,
+                  style: TextStyle(
+                    fontSize: 11,
+                    fontStyle: FontStyle.italic,
+                    color: Colors.teal[700],
+                  ),
+                ),
+              ),
+            ],
+          ],
+        );
+      }).toList(),
+    );
   }
 }

@@ -31,6 +31,7 @@ class SearchCubit extends Cubit<Search> {
     String formattedInput,
     int resultsPerPage,
     bool useRegexp,
+    List<String> langs,
   ) {
     // Don't run search if we know there are no more results
     if (state.page > 0 && !state.hasMoreResults) {
@@ -46,7 +47,7 @@ class SearchCubit extends Cubit<Search> {
     );
 
     databaseInterface
-        .search(formattedInput, resultsPerPage, state.page, useRegexp)
+        .search(formattedInput, resultsPerPage, state.page, useRegexp, langs)
         .then((searchResults) {
           // Check if we got fewer results than requested, indicating end of results
           final hasMoreResults = searchResults.length == resultsPerPage;

@@ -11,20 +11,24 @@ class DatabaseInterfaceExpression extends DatabaseInterface {
   DatabaseInterfaceExpression({super.database});
 
   String subQuery(
-    String input,
-    int? resultsPerPage,
-    int currentPage,
-    bool useRegexp,
-  ) {
+      String input,
+      int? resultsPerPage,
+      int currentPage,
+      bool useRegexp,
+      List<String> langs,
+      ) {
     String sql;
     String searchOperator = useRegexp ? 'REGEXP' : 'GLOB';
+    String langFilter = langs.isEmpty
+        ? ''
+        : "AND lang.iso3 IN (${langs.map((l) => "'$l'").join(',')})";
 
     if (kanaKit.isRomaji(input)) {
       sql = '''SELECT DISTINCT sense.id_entry 
              FROM sense JOIN gloss ON gloss.id_sense = sense.id 
-             WHERE gloss.content $searchOperator '$input' ''';
+             JOIN lang ON gloss.id_lang = lang.id
+             WHERE gloss.content $searchOperator '$input' $langFilter''';
     } else {
-      // if the input does not contains a kanji do not search in the reb
       var regExp = RegExp(matchKanji);
       var hasKanji = regExp.hasMatch(input);
       sql = '''SELECT DISTINCT entry_sub.id 
@@ -42,18 +46,32 @@ class DatabaseInterfaceExpression extends DatabaseInterface {
   }
 
   @override
+  Future<List<String>> getAvailableLangs() async {
+    try {
+      final results = await database!.rawQuery(
+        'SELECT iso3 FROM lang ORDER BY id',
+      );
+      return results.map((row) => row['iso3'] as String).toList();
+    } catch (e) {
+      log('getAvailableLangs expression: $e');
+      return [];
+    }
+  }
+
+  @override
   Future<List<ExpressionEntry>> search(
-    String input,
-    int resultsPerPage,
-    int currentPage,
-    useRegexp,
-  ) async {
+      String input,
+      int resultsPerPage,
+      int currentPage,
+      useRegexp,
+      List<String> langs,
+      ) async {
     String sql =
-        '''SELECT
+    '''SELECT
                     entry.id AS entry_id,
                     sense.id AS sense_id,
                     GROUP_CONCAT(DISTINCT COALESCE(k_ele.keb || ':', '') || r_ele.reb) keb_reb_group,
-                    GROUP_CONCAT(DISTINCT gloss.content) AS gloss_group,
+                    GROUP_CONCAT(DISTINCT gloss.content || '|' || lang.iso3) AS gloss_group,
                     GROUP_CONCAT(DISTINCT pos.name) AS pos_group,
                     GROUP_CONCAT(DISTINCT dial.name) AS dial_group,
                     GROUP_CONCAT(DISTINCT misc.name) AS misc_group,
@@ -78,6 +96,7 @@ class DatabaseInterfaceExpression extends DatabaseInterface {
                     JOIN r_ele ON entry.id = r_ele.id_entry
                     JOIN sense ON sense.id_entry = entry.id
                     JOIN gloss ON gloss.id_sense = sense.id
+                    JOIN lang ON gloss.id_lang = lang.id
                     LEFT JOIN k_ele ON entry.id = k_ele.id_entry
                     LEFT JOIN sense_pos ON sense.id = sense_pos.id_sense
                     LEFT JOIN pos ON sense_pos.id_pos = pos.id
@@ -89,21 +108,22 @@ class DatabaseInterfaceExpression extends DatabaseInterface {
                     LEFT JOIN field ON sense_field.id_field = field.id
                     LEFT JOIN sense_xref ON sense.id = sense_xref.id_sense
                     LEFT JOIN sense_ant ON sense.id = sense_ant.id_sense
-                WHERE entry.id IN (${subQuery(input, resultsPerPage, currentPage, useRegexp)})
+                WHERE entry.id IN (${subQuery(input, resultsPerPage, currentPage, useRegexp, langs)})
+                ${langs.isEmpty ? '' : "AND lang.iso3 IN (${langs.map((l) => "'$l'").join(',')})"}
                 GROUP BY entry.id, sense.id;''';
     log(sql);
     List<Map<String, dynamic>> queryResults;
     try {
       queryResults = await database!.rawQuery(sql);
     } catch (e) {
-      //throw ('ERROR $e');
+      log('search expression: $e');
       return [];
     }
 
     int? entryId;
     int? senseId;
     List<ExpressionEntry> entries = [];
-    List<String> glosses = [];
+    List<Gloss> glosses = [];
     List<Sense> senses = [];
 
     for (var queryResult in queryResults) {
@@ -142,12 +162,21 @@ class DatabaseInterfaceExpression extends DatabaseInterface {
             fields: queryResult['field_group'] != null
                 ? queryResult['field_group'].split(',')
                 : [],
-            lang: "eng",
           ),
         );
       }
 
-      glosses.add(queryResult['gloss_group']);
+      if (queryResult['gloss_group'] != null) {
+        for (var gloss in queryResult['gloss_group'].split(',')) {
+          final parts = gloss.split('|');
+          glosses.add(
+            Gloss(
+              content: parts[0],
+              lang: parts.length > 1 ? parts[1] : '',
+            ),
+          );
+        }
+      }
     }
 
     return entries;

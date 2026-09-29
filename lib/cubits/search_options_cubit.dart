@@ -25,12 +25,24 @@ class SearchOptionsCubit extends Cubit<SearchOptionsState> {
     emit(state.copyWith(searchType: type));
   }
 
+  // Update selected languages for expression
+  void setSelectedLangsExpression(List<String> langs) {
+    emit(state.copyWith(selectedLangsExpression: langs));
+  }
+
+  // Update selected languages for kanji
+  void setSelectedLangsKanji(List<String> langs) {
+    emit(state.copyWith(selectedLangsKanji: langs));
+  }
+
   // Update multiple fields at once
   void updateSearchOptions({
     bool? useRegexp,
     int? resultsPerPageKanji,
     int? resultsPerPageExpression,
     SearchType? searchType,
+    List<String>? selectedLangsExpression,
+    List<String>? selectedLangsKanji,
   }) {
     emit(
       state.copyWith(
@@ -38,6 +50,8 @@ class SearchOptionsCubit extends Cubit<SearchOptionsState> {
         resultsPerPageKanji: resultsPerPageKanji,
         resultsPerPageExpression: resultsPerPageExpression,
         searchType: searchType,
+        selectedLangsExpression: selectedLangsExpression,
+        selectedLangsKanji: selectedLangsKanji,
       ),
     );
   }

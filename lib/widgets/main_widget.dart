@@ -117,12 +117,18 @@ class _MainWidgetState extends State<MainWidget> with TickerProviderStateMixin {
     final searchType = searchTypeIndex == 0
         ? SearchType.expression
         : SearchType.kanji;
+    final selectedLangsExpression =
+        prefs.getStringList("search_langs_expression") ?? [];
+    final selectedLangsKanji =
+        prefs.getStringList("search_langs_kanji") ?? [];
 
     context.read<SearchOptionsCubit>().updateSearchOptions(
       useRegexp: useRegexp,
       resultsPerPageKanji: resultsPerPageKanji,
       resultsPerPageExpression: resultsPerPageExpression,
       searchType: searchType,
+      selectedLangsExpression: selectedLangsExpression,
+      selectedLangsKanji: selectedLangsKanji,
     );
 
     // Update tab controller to match loaded search type
@@ -145,6 +151,14 @@ class _MainWidgetState extends State<MainWidget> with TickerProviderStateMixin {
       searchOptions.resultsPerPageExpression,
     );
     await prefs.setInt("search_type", searchOptions.searchType.index);
+    await prefs.setStringList(
+      "search_langs_expression",
+      searchOptions.selectedLangsExpression,
+    );
+    await prefs.setStringList(
+      "search_langs_kanji",
+      searchOptions.selectedLangsKanji,
+    );
   }
 
   // Get the appropriate search cubit based on search type
@@ -195,11 +209,16 @@ class _MainWidgetState extends State<MainWidget> with TickerProviderStateMixin {
         ? searchOptions.resultsPerPageKanji
         : searchOptions.resultsPerPageExpression;
 
+    final langs = searchType == SearchType.kanji
+        ? searchOptions.selectedLangsKanji
+        : searchOptions.selectedLangsExpression;
+
     searchCubit.runSearch(
       databaseInterface,
       formattedInput,
       resultsPerPage,
       searchOptions.useRegexp,
+      langs,
     );
   }
 
@@ -253,11 +272,16 @@ class _MainWidgetState extends State<MainWidget> with TickerProviderStateMixin {
         ? searchOptions.resultsPerPageKanji
         : searchOptions.resultsPerPageExpression;
 
+    final langs = searchOptions.searchType == SearchType.kanji
+        ? searchOptions.selectedLangsKanji
+        : searchOptions.selectedLangsExpression;
+
     searchCubit.runSearch(
       databaseInterface,
       context.read<InputCubit>().state.formattedInput,
       resultsPerPage,
       searchOptions.useRegexp,
+      langs,
     );
   }
 

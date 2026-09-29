@@ -1,7 +1,8 @@
 class Meaning {
-  String meaning;
+  final String content;
+  final String lang;
 
-  Meaning({required this.meaning});
+  Meaning({required this.content, required this.lang});
 }
 
 class Kanji {
@@ -10,7 +11,7 @@ class Kanji {
   final List<String>? radicals;
   final List<String>? on;
   final List<String>? kun;
-  final List<String>? meanings;
+  final List<Meaning>? meanings;
 
   Kanji({
     required this.literal,
@@ -28,7 +29,16 @@ class Kanji {
       radicals: map['radicals']?.split(','),
       on: map['on_reading']?.split(','),
       kun: map['kun_reading']?.split(','),
-      meanings: map['meanings']?.split(','),
+      meanings: (map['meanings'] as String?)
+          ?.split(',')
+          .map((meaning) {
+            final parts = meaning.split('|');
+            return Meaning(
+              content: parts[0],
+              lang: parts.length > 1 ? parts[1] : '',
+            );
+          })
+          .toList(),
     );
   }
 

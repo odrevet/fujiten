@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:ruby_text/ruby_text.dart';
 
+import '../cubits/search_options_cubit.dart';
 import '../models/entry.dart';
 import '../models/sense.dart';
 import '../string_utils.dart' show kanaKit;
@@ -225,6 +227,50 @@ class _ResultExpressionListState extends State<ResultExpressionList> {
     );
   }
 
+  Widget _buildGlosses(Sense sense) {
+    final showLangTags =
+        context.read<SearchOptionsCubit>().state.selectedLangsExpression.length >
+        1;
+
+    return Wrap(
+      spacing: 8.0,
+      runSpacing: 4.0,
+      crossAxisAlignment: WrapCrossAlignment.center,
+      children: sense.glosses.map<Widget>((gloss) {
+        return Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            SelectableText(
+              gloss.content,
+              style: Theme.of(
+                context,
+              ).textTheme.bodyMedium?.copyWith(height: 1.3),
+            ),
+            if (showLangTags && gloss.lang.isNotEmpty) ...[
+              const SizedBox(width: 4),
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 4.0,
+                  vertical: 1.0,
+                ),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(4),
+                  color: Colors.teal.withValues(alpha: 0.1),
+                ),
+                child: SelectableText(
+                  gloss.lang,
+                  style: _styleFieldInformation.copyWith(
+                    color: Colors.teal[700],
+                  ),
+                ),
+              ),
+            ],
+          ],
+        );
+      }).toList(),
+    );
+  }
+
   Widget _buildSenseGroup(String? pos, List<Sense> senses) {
     return Container(
       margin: const EdgeInsets.only(bottom: 16.0),
@@ -270,12 +316,7 @@ class _ResultExpressionListState extends State<ResultExpressionList> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        SelectableText(
-                          sense.glosses.join(', '),
-                          style: Theme.of(
-                            context,
-                          ).textTheme.bodyMedium?.copyWith(height: 1.3),
-                        ),
+                        _buildGlosses(sense),
                         if (sense.dial.isNotEmpty ||
                             sense.misc.isNotEmpty ||
                             sense.fields.isNotEmpty)

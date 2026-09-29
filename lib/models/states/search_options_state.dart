@@ -8,12 +8,16 @@ class SearchOptionsState extends Equatable {
   final int resultsPerPageKanji;
   final int resultsPerPageExpression;
   final SearchType searchType;
+  final List<String> selectedLangsExpression;
+  final List<String> selectedLangsKanji;
 
   const SearchOptionsState({
     required this.useRegexp,
     required this.resultsPerPageKanji,
     required this.resultsPerPageExpression,
     required this.searchType,
+    required this.selectedLangsExpression,
+    required this.selectedLangsKanji,
   });
 
   // Default constructor with initial values
@@ -21,7 +25,9 @@ class SearchOptionsState extends Equatable {
     : useRegexp = false,
       resultsPerPageKanji = 20,
       resultsPerPageExpression = 20,
-      searchType = SearchType.expression;
+      searchType = SearchType.expression,
+      selectedLangsExpression = const [],
+      selectedLangsKanji = const [];
 
   // CopyWith method for immutable state updates
   SearchOptionsState copyWith({
@@ -29,6 +35,8 @@ class SearchOptionsState extends Equatable {
     int? resultsPerPageKanji,
     int? resultsPerPageExpression,
     SearchType? searchType,
+    List<String>? selectedLangsExpression,
+    List<String>? selectedLangsKanji,
   }) {
     return SearchOptionsState(
       useRegexp: useRegexp ?? this.useRegexp,
@@ -36,6 +44,9 @@ class SearchOptionsState extends Equatable {
       resultsPerPageExpression:
           resultsPerPageExpression ?? this.resultsPerPageExpression,
       searchType: searchType ?? this.searchType,
+      selectedLangsExpression:
+          selectedLangsExpression ?? this.selectedLangsExpression,
+      selectedLangsKanji: selectedLangsKanji ?? this.selectedLangsKanji,
     );
   }
 
@@ -45,5 +56,7 @@ class SearchOptionsState extends Equatable {
     resultsPerPageKanji,
     resultsPerPageExpression,
     searchType,
+    selectedLangsExpression,
+    selectedLangsKanji,
   ];
 }

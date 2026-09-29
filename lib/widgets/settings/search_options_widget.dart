@@ -3,7 +3,10 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../cubits/expression_cubit.dart';
+import '../../cubits/kanji_cubit.dart';
 import '../../cubits/search_options_cubit.dart';
+import '../../models/states/db_state_expression.dart';
+import '../../models/states/db_state_kanji.dart';
 import '../../models/states/search_options_state.dart';
 
 class SearchOptionsWidget extends StatefulWidget {
@@ -16,6 +19,8 @@ class SearchOptionsWidget extends StatefulWidget {
 class _SearchOptionsWidgetState extends State<SearchOptionsWidget> {
   bool _isTestingRegexp = true; // Start as testing
   bool _isRegexpAvailable = false;
+  List<String> _availableLangsExpression = [];
+  List<String> _availableLangsKanji = [];
 
   // Controllers for text fields
   late TextEditingController _kanjiController;
@@ -35,6 +40,28 @@ class _SearchOptionsWidgetState extends State<SearchOptionsWidget> {
 
     // Automatically test regexp availability when widget initializes
     _testRegexpAvailability();
+    _loadAvailableLangs();
+  }
+
+  Future<void> _loadAvailableLangs() async {
+    final expressionInterface = context
+        .read<ExpressionCubit>()
+        .databaseInterface;
+    final kanjiInterface = context.read<KanjiCubit>().databaseInterface;
+
+    final expressionLangs = await expressionInterface.getAvailableLangs();
+    final kanjiLangs = await kanjiInterface.getAvailableLangs();
+
+    if (!mounted) return;
+
+    setState(() {
+      if (expressionLangs.isNotEmpty) {
+        _availableLangsExpression = expressionLangs;
+      }
+      if (kanjiLangs.isNotEmpty) {
+        _availableLangsKanji = kanjiLangs;
+      }
+    });
   }
 
   @override
@@ -77,9 +104,21 @@ class _SearchOptionsWidgetState extends State<SearchOptionsWidget> {
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<SearchOptionsCubit, SearchOptionsState>(
-      builder: (context, state) {
-        return ListView(
+    return BlocListener<ExpressionCubit, ExpressionState>(
+      listener: (context, state) {
+        if (state is ExpressionReady) {
+          _loadAvailableLangs();
+        }
+      },
+      child: BlocListener<KanjiCubit, KanjiState>(
+        listener: (context, state) {
+          if (state is KanjiReady) {
+            _loadAvailableLangs();
+          }
+        },
+        child: BlocBuilder<SearchOptionsCubit, SearchOptionsState>(
+          builder: (context, state) {
+            return ListView(
           padding: const EdgeInsets.all(16),
           children: [
             // Regular Expressions Section
@@ -98,6 +137,34 @@ class _SearchOptionsWidgetState extends State<SearchOptionsWidget> {
             _buildResultsPerPageKanji(context, state),
             const SizedBox(height: 24),
 
+            // Languages Section
+            _buildSectionHeader(context, 'Languages'),
+            const SizedBox(height: 8),
+            _buildLanguageSelector(
+              context,
+              title: 'Expression Languages',
+              availableLangs: _availableLangsExpression,
+              selectedLangs: state.selectedLangsExpression,
+              onChanged: (langs) {
+                context
+                    .read<SearchOptionsCubit>()
+                    .setSelectedLangsExpression(langs);
+              },
+            ),
+            const SizedBox(height: 8),
+            _buildLanguageSelector(
+              context,
+              title: 'Kanji Languages',
+              availableLangs: _availableLangsKanji,
+              selectedLangs: state.selectedLangsKanji,
+              onChanged: (langs) {
+                context
+                    .read<SearchOptionsCubit>()
+                    .setSelectedLangsKanji(langs);
+              },
+            ),
+            const SizedBox(height: 24),
+
             // Actions Section
             _buildSectionHeader(context, 'Actions'),
             const SizedBox(height: 8),
@@ -107,7 +174,9 @@ class _SearchOptionsWidgetState extends State<SearchOptionsWidget> {
             const SizedBox(height: 24),
           ],
         );
-      },
+          },
+        ),
+      ),
     );
   }
 
@@ -352,6 +421,73 @@ class _SearchOptionsWidgetState extends State<SearchOptionsWidget> {
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildLanguageSelector(
+    BuildContext context, {
+    required String title,
+    required List<String> availableLangs,
+    required List<String> selectedLangs,
+    required Function(List<String>) onChanged,
+  }) {
+    return Card(
+      elevation: 0,
+      color: Theme.of(context).colorScheme.surfaceContainerLow,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              title,
+              style: Theme.of(
+                context,
+              ).textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.w500),
+            ),
+            const SizedBox(height: 4),
+            if (availableLangs.isEmpty)
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 8),
+                child: Text(
+                  'No database loaded',
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
+                ),
+              )
+            else
+              ...availableLangs.map((lang) {
+                final isSelected = selectedLangs.isEmpty ||
+                    selectedLangs.contains(lang);
+                return CheckboxListTile(
+                  dense: true,
+                  contentPadding: EdgeInsets.zero,
+                  controlAffinity: ListTileControlAffinity.leading,
+                  title: Text(lang),
+                  value: isSelected,
+                  onChanged: (checked) {
+                    List<String> newSelection;
+                    if (selectedLangs.isEmpty) {
+                      // Currently all selected; start from all available
+                      newSelection = [...availableLangs];
+                    } else {
+                      newSelection = [...selectedLangs];
+                    }
+                    if (checked == true) {
+                      if (!newSelection.contains(lang)) {
+                        newSelection.add(lang);
+                      }
+                    } else {
+                      newSelection.remove(lang);
+                    }
+                    onChanged(newSelection);
+                  },
+                );
+              }),
+          ],
+        ),
       ),
     );
   }

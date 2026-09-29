@@ -36,6 +36,7 @@ class KanjiCubit extends Cubit<KanjiState> {
     int resultsPerPage,
     int currentPage,
     bool useRegexp,
+    List<String> langs,
   ) async {
     if (databaseInterface.status != DatabaseStatus.ok) {
       emit(
@@ -59,6 +60,8 @@ class KanjiCubit extends Cubit<KanjiState> {
         input,
         resultsPerPage,
         currentPage,
+        useRegexp,
+        langs,
       );
       final totalCount = await databaseInterface.count();
 

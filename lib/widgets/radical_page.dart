@@ -74,7 +74,7 @@ class RadicalPageState extends State<RadicalPage> {
                     (radical) => radical.meanings == null
                         ? false
                         : radical.meanings!.any(
-                            (meaning) => meaning.contains(filter),
+                            (meaning) => meaning.content.contains(filter),
                           ),
                   )
                   .toList();
