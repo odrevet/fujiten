@@ -10,31 +10,23 @@ import '../string_utils.dart' show kanaKit;
 import 'kanji_dialog.dart';
 
 Widget buildRubyText(String mainReading) {
-  // Split the string by spaces or other delimiters to handle multiple words/phrases
   List<String> parts = mainReading.split(' ');
   List<RubyTextData> rubyTextDataList = [];
 
   for (String part in parts) {
     if (part.contains(':')) {
-      // Split by colon - format is kanji:reading
       List<String> kanjiReading = part.split(':');
       if (kanjiReading.length == 2) {
         rubyTextDataList.add(
-          RubyTextData(
-            kanjiReading[0], // kanji
-            ruby: kanjiReading[1], // reading
-          ),
+          RubyTextData(kanjiReading[0], ruby: kanjiReading[1]),
         );
       } else {
-        // If format is incorrect, treat as plain text
         rubyTextDataList.add(RubyTextData(part));
       }
     } else {
-      // No colon, treat as plain text
       rubyTextDataList.add(RubyTextData(part));
     }
 
-    // Add space between parts (except for the last part)
     if (part != parts.last) {
       rubyTextDataList.add(RubyTextData(' '));
     }
@@ -44,7 +36,7 @@ Widget buildRubyText(String mainReading) {
     child: RubyText(
       rubyTextDataList,
       style: const TextStyle(fontSize: 24.0, fontWeight: FontWeight.w500),
-      rubyStyle: const TextStyle(fontSize: 12.0), // Smaller font for ruby text
+      rubyStyle: const TextStyle(fontSize: 12.0),
       textAlign: TextAlign.center,
     ),
   );
@@ -200,7 +192,7 @@ class _ResultExpressionListState extends State<ResultExpressionList> {
               onLongPress: () => _copyToClipboard(reference),
               child: SelectableText(
                 reference,
-                style: TextStyle(
+                style: const TextStyle(
                   color: Colors.blue,
                   fontWeight: FontWeight.w500,
                 ),
@@ -215,7 +207,7 @@ class _ResultExpressionListState extends State<ResultExpressionList> {
               onLongPress: () => _copyToClipboard(reference),
               child: SelectableText(
                 reference,
-                style: TextStyle(
+                style: const TextStyle(
                   color: Colors.red,
                   fontWeight: FontWeight.w500,
                 ),
@@ -227,47 +219,81 @@ class _ResultExpressionListState extends State<ResultExpressionList> {
     );
   }
 
+  Widget _infoTag(String text, MaterialColor color) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 6.0, vertical: 2.0),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(4),
+        color: color.withValues(alpha: 0.1),
+      ),
+      child: SelectableText(
+        text,
+        style: _styleFieldInformation.copyWith(color: color[700]),
+      ),
+    );
+  }
+
   Widget _buildGlosses(Sense sense) {
     final showLangTags =
         context.read<SearchOptionsCubit>().state.selectedLangsExpression.length >
-        1;
+            1;
 
-    return Wrap(
-      spacing: 8.0,
-      runSpacing: 4.0,
-      crossAxisAlignment: WrapCrossAlignment.center,
-      children: sense.glosses.map<Widget>((gloss) {
-        return Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            SelectableText(
-              gloss.content,
-              style: Theme.of(
-                context,
-              ).textTheme.bodyMedium?.copyWith(height: 1.3),
-            ),
-            if (showLangTags && gloss.lang.isNotEmpty) ...[
-              const SizedBox(width: 4),
-              Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 4.0,
-                  vertical: 1.0,
-                ),
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(4),
-                  color: Colors.teal.withValues(alpha: 0.1),
-                ),
-                child: SelectableText(
-                  gloss.lang,
-                  style: _styleFieldInformation.copyWith(
-                    color: Colors.teal[700],
+    final groups = <String, List<String>>{};
+    for (final gloss in sense.glosses) {
+      groups.putIfAbsent(gloss.lang, () => []).add(gloss.content);
+    }
+
+    final glossStyle = Theme.of(
+      context,
+    ).textTheme.bodyMedium?.copyWith(height: 1.3);
+
+    final extraTags = <Widget>[
+      if (sense.dial.isNotEmpty) _infoTag(sense.dial.join(', '), Colors.orange),
+      if (sense.misc.isNotEmpty) _infoTag(sense.misc.join(', '), Colors.purple),
+      if (sense.fields.isNotEmpty)
+        _infoTag(sense.fields.join(', '), Colors.green),
+    ];
+
+    final entries = groups.entries.toList();
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: List<Widget>.generate(entries.length, (i) {
+        final entry = entries[i];
+        final isLast = i == entries.length - 1;
+
+        return Padding(
+          padding: const EdgeInsets.only(bottom: 2.0),
+          child: Wrap(
+            spacing: 8.0,
+            runSpacing: 4.0,
+            crossAxisAlignment: WrapCrossAlignment.center,
+            children: [
+              ...entry.value.map<Widget>(
+                    (content) => SelectableText(content, style: glossStyle),
+              ),
+              if (showLangTags && entry.key.isNotEmpty)
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 4.0,
+                    vertical: 1.0,
+                  ),
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(4),
+                    color: Colors.teal.withValues(alpha: 0.1),
+                  ),
+                  child: SelectableText(
+                    entry.key,
+                    style: _styleFieldInformation.copyWith(
+                      color: Colors.teal[700],
+                    ),
                   ),
                 ),
-              ),
+              if (isLast) ...extraTags,
             ],
-          ],
+          ),
         );
-      }).toList(),
+      }),
     );
   }
 
@@ -312,84 +338,7 @@ class _ResultExpressionListState extends State<ResultExpressionList> {
                         ),
                       ),
                     ),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        _buildGlosses(sense),
-                        if (sense.dial.isNotEmpty ||
-                            sense.misc.isNotEmpty ||
-                            sense.fields.isNotEmpty)
-                          Padding(
-                            padding: const EdgeInsets.only(top: 4.0),
-                            child: Wrap(
-                              spacing: 8.0,
-                              runSpacing: 4.0,
-                              // Added for better vertical spacing
-                              children: [
-                                if (sense.dial.isNotEmpty)
-                                  Container(
-                                    padding: const EdgeInsets.symmetric(
-                                      horizontal: 6.0,
-                                      vertical: 2.0,
-                                    ),
-                                    decoration: BoxDecoration(
-                                      borderRadius: BorderRadius.circular(4),
-                                      color: Colors.orange.withValues(
-                                        alpha: 0.1,
-                                      ),
-                                    ),
-                                    child: SelectableText(
-                                      sense.dial.join(', '),
-                                      style: _styleFieldInformation.copyWith(
-                                        color: Colors.orange[700],
-                                      ),
-                                    ),
-                                  ),
-                                if (sense.misc.isNotEmpty)
-                                  Container(
-                                    padding: const EdgeInsets.symmetric(
-                                      horizontal: 6.0,
-                                      vertical: 2.0,
-                                    ),
-                                    decoration: BoxDecoration(
-                                      borderRadius: BorderRadius.circular(4),
-                                      color: Colors.purple.withValues(
-                                        alpha: 0.1,
-                                      ),
-                                    ),
-                                    child: SelectableText(
-                                      sense.misc.join(', '),
-                                      style: _styleFieldInformation.copyWith(
-                                        color: Colors.purple[700],
-                                      ),
-                                    ),
-                                  ),
-                                if (sense.fields.isNotEmpty)
-                                  Container(
-                                    padding: const EdgeInsets.symmetric(
-                                      horizontal: 6.0,
-                                      vertical: 2.0,
-                                    ),
-                                    decoration: BoxDecoration(
-                                      borderRadius: BorderRadius.circular(4),
-                                      color: Colors.green.withValues(
-                                        alpha: 0.1,
-                                      ),
-                                    ),
-                                    child: SelectableText(
-                                      sense.fields.join(', '),
-                                      style: _styleFieldInformation.copyWith(
-                                        color: Colors.green[700],
-                                      ),
-                                    ),
-                                  ),
-                              ],
-                            ),
-                          ),
-                      ],
-                    ),
-                  ),
+                  Expanded(child: _buildGlosses(sense)),
                 ],
               ),
             );
@@ -401,7 +350,6 @@ class _ResultExpressionListState extends State<ResultExpressionList> {
 
   @override
   Widget build(BuildContext context) {
-    // Group senses by part of speech
     Map<String?, List<Sense>> sensesGroupedByPosses = <String?, List<Sense>>{};
     for (var sense in widget.searchResult.senses) {
       String? posString = sense.posses.join(', ');
