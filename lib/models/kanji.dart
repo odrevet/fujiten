@@ -8,6 +8,7 @@ class Meaning {
 class Kanji {
   final String literal;
   final int strokeCount;
+  final int? freq;
   final List<String>? radicals;
   final List<String>? on;
   final List<String>? kun;
@@ -16,6 +17,7 @@ class Kanji {
   Kanji({
     required this.literal,
     required this.strokeCount,
+    this.freq,
     this.radicals = const [],
     this.on = const [],
     this.kun = const [],
@@ -26,6 +28,7 @@ class Kanji {
     return Kanji(
       literal: map['id'],
       strokeCount: map['stroke_count'],
+      freq: map['freq'],
       radicals: map['radicals']?.split(','),
       on: map['on_reading']?.split(','),
       kun: map['kun_reading']?.split(','),

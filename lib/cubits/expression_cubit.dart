@@ -2,10 +2,11 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:fujiten/services/database_interface.dart';
 
 import '../models/states/db_state_expression.dart';
+import '../models/states/search_options_state.dart';
 import '../services/database_interface_expression.dart';
-
+import '../services/database_interface_factory.dart';
 class ExpressionCubit extends Cubit<ExpressionState> {
-  final DatabaseInterfaceExpression databaseInterface;
+  DatabaseInterfaceExpression databaseInterface;
 
   ExpressionCubit(this.databaseInterface) : super(ExpressionInitial());
 
@@ -20,7 +21,7 @@ class ExpressionCubit extends Cubit<ExpressionState> {
         emit(
           ExpressionDatabaseNotReady(
             status: databaseInterface.status!,
-            log: databaseInterface.log,
+            log: databaseInterface.logMessage,
           ),
         );
       } else {
@@ -33,18 +34,32 @@ class ExpressionCubit extends Cubit<ExpressionState> {
     }
   }
 
+  Future<void> configure(
+    DatabaseBackend backend, {
+    String? url,
+    String? anonKey,
+    String? path,
+  }) async {
+    databaseInterface = createExpressionInterface(
+      backend,
+      url: url,
+      anonKey: anonKey,
+    );
+    await openDatabase(path ?? '');
+  }
+
   Future<void> search(
     String input,
     int resultsPerPage,
     int currentPage,
-    bool useRegexp,
+    SearchMode mode,
     List<String> langs,
   ) async {
     if (databaseInterface.status != DatabaseStatus.ok) {
       emit(
         ExpressionDatabaseNotReady(
           status: databaseInterface.status ?? DatabaseStatus.pathNotSet,
-          log: databaseInterface.log,
+          log: databaseInterface.logMessage,
         ),
       );
       return;
@@ -62,7 +77,7 @@ class ExpressionCubit extends Cubit<ExpressionState> {
         input,
         resultsPerPage,
         currentPage,
-        useRegexp,
+        mode,
         langs,
       );
       final totalCount = await databaseInterface.count();

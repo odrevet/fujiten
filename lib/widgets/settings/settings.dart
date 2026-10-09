@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:fujiten/widgets/favorites/favorites_page.dart';
 import 'package:fujiten/widgets/settings/search_options_widget.dart';
 import 'package:fujiten/widgets/settings/theme_settings.dart';
-import 'package:package_info_plus/package_info_plus.dart';
 
+import 'about_dialog.dart';
 import 'dataset_page.dart';
 
 class SettingsPage extends StatelessWidget {
@@ -20,6 +21,14 @@ class SettingsPage extends StatelessWidget {
             onTap: () => Navigator.push(
               context,
               MaterialPageRoute(builder: (context) => DatasetPage()),
+            ),
+          ),
+          ListTile(
+            leading: const Icon(Icons.star),
+            title: const Text("Favorites"),
+            onTap: () => Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => const FavoritesPage()),
             ),
           ),
           ListTile(
@@ -46,32 +55,7 @@ class SettingsPage extends StatelessWidget {
           ListTile(
             leading: const Icon(Icons.info),
             title: const Text("About"),
-            onTap: () {
-              PackageInfo.fromPlatform().then((PackageInfo packageInfo) {
-                String appName = packageInfo.appName;
-                String version = packageInfo.version;
-
-                if (!context.mounted) return;
-
-                // Check FFI environment variable
-                const bool ffiEnabled = bool.fromEnvironment(
-                  'FFI',
-                  defaultValue: false,
-                );
-
-                showAboutDialog(
-                  context: context,
-                  applicationName: appName,
-                  applicationVersion: version,
-                  applicationLegalese:
-                      '''2022-2025 Olivier Drevet All right reserved
-This software uses data from JMDict, Kanjidic2, Radkfile by the Electronic Dictionary Research and Development Group
-under the Creative Commons Attribution-ShareAlike Licence (V3.0)
-
-${ffiEnabled ? 'Database: SQLite via FFI' : 'Database: SQLite native'}''',
-                );
-              });
-            },
+            onTap: () => showFujitenAboutDialog(context),
           ),
         ],
       ),

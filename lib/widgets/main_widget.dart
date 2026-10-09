@@ -1,6 +1,10 @@
+import 'dart:convert';
+
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:fujiten/config.dart';
 import 'package:fujiten/cubits/search_cubit.dart';
 import 'package:fujiten/models/search.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -9,9 +13,11 @@ import '../cubits/expression_cubit.dart';
 import '../cubits/input_cubit.dart';
 import '../cubits/kanji_cubit.dart';
 import '../cubits/search_options_cubit.dart';
+import '../models/input.dart';
 import '../models/states/db_state_expression.dart';
 import '../models/states/db_state_kanji.dart';
 import '../models/states/search_options_state.dart';
+import '../services/database_interface.dart';
 import '../string_utils.dart';
 import 'fujiten_menu_bar.dart';
 import 'results_widget.dart';
@@ -48,9 +54,9 @@ class _MainWidgetState extends State<MainWidget> with TickerProviderStateMixin {
     _expressionSearchCubit = SearchCubit();
     _kanjiSearchCubit = SearchCubit();
 
-    context.read<InputCubit>().addInput();
     initDb();
     loadSearchOptions();
+    loadSessions();
 
     // Initialize tab controller
     final searchOptions = context.read<SearchOptionsCubit>().state;
@@ -90,16 +96,51 @@ class _MainWidgetState extends State<MainWidget> with TickerProviderStateMixin {
   void initDb() async {
     final prefs = await _prefs;
 
+    // On web only the Postgres backend is available.
+    final isWeb = kIsWeb;
+
     // Initialize expression database
-    String? expressionPath = prefs.getString("expression_path");
-    if (expressionPath != null && mounted) {
-      context.read<ExpressionCubit>().openDatabase(expressionPath);
+    final expressionBackend = isWeb
+        ? 'postgres'
+        : prefs.getString("expression_backend") ?? 'sqlite';
+    if (expressionBackend == 'postgres') {
+      final url = prefs.getString("postgres_url") ?? SupabaseConfig.url;
+      final anonKey =
+          prefs.getString("postgres_anon_key") ?? SupabaseConfig.anonKey;
+      if (url.isNotEmpty && anonKey.isNotEmpty && mounted) {
+        context.read<ExpressionCubit>().configure(
+          DatabaseBackend.postgres,
+          url: url,
+          anonKey: anonKey,
+        );
+      }
+    } else {
+      String? expressionPath = prefs.getString("expression_path");
+      if (expressionPath != null && mounted) {
+        context.read<ExpressionCubit>().openDatabase(expressionPath);
+      }
     }
 
     // Initialize kanji database
-    String? kanjiPath = prefs.getString("kanji_path");
-    if (kanjiPath != null && mounted) {
-      context.read<KanjiCubit>().openDatabase(kanjiPath);
+    final kanjiBackend = isWeb
+        ? 'postgres'
+        : prefs.getString("kanji_backend") ?? 'sqlite';
+    if (kanjiBackend == 'postgres') {
+      final url = prefs.getString("postgres_url") ?? SupabaseConfig.url;
+      final anonKey =
+          prefs.getString("postgres_anon_key") ?? SupabaseConfig.anonKey;
+      if (url.isNotEmpty && anonKey.isNotEmpty && mounted) {
+        context.read<KanjiCubit>().configure(
+          DatabaseBackend.postgres,
+          url: url,
+          anonKey: anonKey,
+        );
+      }
+    } else {
+      String? kanjiPath = prefs.getString("kanji_path");
+      if (kanjiPath != null && mounted) {
+        context.read<KanjiCubit>().openDatabase(kanjiPath);
+      }
     }
   }
 
@@ -108,7 +149,48 @@ class _MainWidgetState extends State<MainWidget> with TickerProviderStateMixin {
     if (!mounted) return;
 
     // Load search options from SharedPreferences
-    final useRegexp = prefs.getBool("search_use_regexp") ?? false;
+    SearchMode readMode(String key, SearchMode fallback) {
+      final name = prefs.getString(key);
+      if (name != null) {
+        return SearchMode.values.firstWhere(
+          (m) => m.name == name,
+          orElse: () => fallback,
+        );
+      }
+      return fallback;
+    }
+
+    // Migrate the old single regexp toggle if the new keys are absent.
+    final hasExpressionMode = prefs.containsKey("search_mode_expression");
+    final hasKanjiMode = prefs.containsKey("search_mode_kanji");
+    final oldUseRegexp = prefs.getBool("search_use_regexp");
+
+    // Default to regexp when the backend supports it, otherwise glob.
+    final isWeb = kIsWeb;
+    final expressionBackend = isWeb
+        ? 'postgres'
+        : prefs.getString("expression_backend") ?? 'sqlite';
+    final kanjiBackend = isWeb
+        ? 'postgres'
+        : prefs.getString("kanji_backend") ?? 'sqlite';
+    SearchMode backendDefault(String backend) =>
+        backend == 'postgres' ? SearchMode.regexp : SearchMode.glob;
+
+    final expressionSearchMode = hasExpressionMode
+        ? readMode("search_mode_expression", SearchMode.regexp)
+        : (oldUseRegexp == true
+              ? SearchMode.regexp
+              : (oldUseRegexp == false
+                    ? SearchMode.glob
+                    : backendDefault(expressionBackend)));
+    final kanjiSearchMode = hasKanjiMode
+        ? readMode("search_mode_kanji", SearchMode.regexp)
+        : (oldUseRegexp == true
+              ? SearchMode.regexp
+              : (oldUseRegexp == false
+                    ? SearchMode.glob
+                    : backendDefault(kanjiBackend)));
+
     final resultsPerPageKanji =
         prefs.getInt("search_results_per_page_kanji") ?? 20;
     final resultsPerPageExpression =
@@ -123,7 +205,8 @@ class _MainWidgetState extends State<MainWidget> with TickerProviderStateMixin {
         prefs.getStringList("search_langs_kanji") ?? [];
 
     context.read<SearchOptionsCubit>().updateSearchOptions(
-      useRegexp: useRegexp,
+      expressionSearchMode: expressionSearchMode,
+      kanjiSearchMode: kanjiSearchMode,
       resultsPerPageKanji: resultsPerPageKanji,
       resultsPerPageExpression: resultsPerPageExpression,
       searchType: searchType,
@@ -141,7 +224,14 @@ class _MainWidgetState extends State<MainWidget> with TickerProviderStateMixin {
     final prefs = await _prefs;
 
     // Save search options to SharedPreferences
-    await prefs.setBool("search_use_regexp", searchOptions.useRegexp);
+    await prefs.setString(
+      "search_mode_expression",
+      searchOptions.expressionSearchMode.name,
+    );
+    await prefs.setString(
+      "search_mode_kanji",
+      searchOptions.kanjiSearchMode.name,
+    );
     await prefs.setInt(
       "search_results_per_page_kanji",
       searchOptions.resultsPerPageKanji,
@@ -159,6 +249,42 @@ class _MainWidgetState extends State<MainWidget> with TickerProviderStateMixin {
       "search_langs_kanji",
       searchOptions.selectedLangsKanji,
     );
+  }
+
+  void loadSessions() async {
+    final prefs = await _prefs;
+    if (!mounted) return;
+
+    final sessionsJson = prefs.getString("search_sessions");
+    final sessions = _parseSessions(sessionsJson);
+
+    var searchIndex = prefs.getInt("search_index") ?? 0;
+    if (searchIndex < 0 || searchIndex >= sessions.length) {
+      searchIndex = 0;
+    }
+
+    context.read<InputCubit>().loadSessions(sessions, searchIndex);
+    widget._textEditingController.text = sessions[searchIndex].currentInput;
+  }
+
+  List<SearchSession> _parseSessions(String? json) {
+    if (json == null || json.isEmpty) return [SearchSession()];
+    try {
+      return (jsonDecode(json) as List)
+          .map((e) => SearchSession.fromJson(e as Map<String, dynamic>))
+          .toList();
+    } catch (_) {
+      return [SearchSession()];
+    }
+  }
+
+  void saveSessions(Input input) async {
+    final prefs = await _prefs;
+    await prefs.setString(
+      "search_sessions",
+      jsonEncode(input.sessions.map((s) => s.toJson()).toList()),
+    );
+    await prefs.setInt("search_index", input.searchIndex);
   }
 
   // Get the appropriate search cubit based on search type
@@ -181,6 +307,9 @@ class _MainWidgetState extends State<MainWidget> with TickerProviderStateMixin {
       if (!mounted) return;
 
       context.read<InputCubit>().setFormattedInput(formattedInput);
+      context
+          .read<InputCubit>()
+          .recordSearch(widget._textEditingController.text);
 
       // Reset both search cubits when input changes
       _expressionSearchCubit.reset();
@@ -213,16 +342,23 @@ class _MainWidgetState extends State<MainWidget> with TickerProviderStateMixin {
         ? searchOptions.selectedLangsKanji
         : searchOptions.selectedLangsExpression;
 
+    final mode = searchType == SearchType.kanji
+        ? searchOptions.kanjiSearchMode
+        : searchOptions.expressionSearchMode;
+
     searchCubit.runSearch(
       databaseInterface,
       formattedInput,
       resultsPerPage,
-      searchOptions.useRegexp,
+      mode,
       langs,
     );
   }
 
   Future<void> _setupSharedTextHandler() async {
+    // Shared text from intents is only available on mobile platforms.
+    if (kIsWeb) return;
+
     const platform = MethodChannel('app.fujiten/shared_text');
 
     platform.setMethodCallHandler((call) async {
@@ -234,9 +370,13 @@ class _MainWidgetState extends State<MainWidget> with TickerProviderStateMixin {
       }
     });
 
-    final initialText = await platform.invokeMethod<String>('getSharedText');
-    if (initialText != null && initialText.isNotEmpty && mounted) {
-      _handleSharedText(initialText);
+    try {
+      final initialText = await platform.invokeMethod<String>('getSharedText');
+      if (initialText != null && initialText.isNotEmpty && mounted) {
+        _handleSharedText(initialText);
+      }
+    } catch (_) {
+      // Method channel not available on this platform.
     }
   }
 
@@ -276,11 +416,15 @@ class _MainWidgetState extends State<MainWidget> with TickerProviderStateMixin {
         ? searchOptions.selectedLangsKanji
         : searchOptions.selectedLangsExpression;
 
+    final mode = searchOptions.searchType == SearchType.kanji
+        ? searchOptions.kanjiSearchMode
+        : searchOptions.expressionSearchMode;
+
     searchCubit.runSearch(
       databaseInterface,
       context.read<InputCubit>().state.formattedInput,
       resultsPerPage,
-      searchOptions.useRegexp,
+      mode,
       langs,
     );
   }
@@ -313,11 +457,7 @@ class _MainWidgetState extends State<MainWidget> with TickerProviderStateMixin {
     }
 
     widget._textEditingController.text = convertedInput;
-    context.read<InputCubit>().state.inputs[context
-            .read<InputCubit>()
-            .state
-            .searchIndex] =
-        convertedInput;
+    context.read<InputCubit>().setInput(convertedInput);
   }
 
   @override
@@ -350,9 +490,13 @@ class _MainWidgetState extends State<MainWidget> with TickerProviderStateMixin {
                           _tabController.animateTo(newIndex);
                         }
                       },
-                      child: Scaffold(
-                        key: _scaffoldKey,
-                        drawer: Drawer(child: SettingsPage()),
+                      child: BlocListener<InputCubit, Input>(
+                        listener: (context, input) {
+                          saveSessions(input);
+                        },
+                        child: Scaffold(
+                          key: _scaffoldKey,
+                          drawer: Drawer(child: SettingsPage()),
                         floatingActionButton: search.isLoadingNextPage
                             ? const FloatingActionButton(
                                 onPressed: null,
@@ -421,6 +565,7 @@ class _MainWidgetState extends State<MainWidget> with TickerProviderStateMixin {
                             ),
                           ],
                         ),
+                      ),
                       ),
                     );
                   },

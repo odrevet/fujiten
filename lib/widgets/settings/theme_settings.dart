@@ -1,6 +1,5 @@
-import 'dart:io' show Platform;
-
 import 'package:dynamic_color/dynamic_color.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
@@ -12,22 +11,14 @@ class ThemeSettings extends StatelessWidget {
   const ThemeSettings({super.key});
 
   // Check if dynamic colors are supported (Android 12+)
-  bool get _supportsDynamicColors {
-    try {
-      return Platform.isAndroid;
-    } catch (e) {
-      return false;
-    }
-  }
+  bool get _supportsDynamicColors =>
+      defaultTargetPlatform == TargetPlatform.android;
 
   // Check if accent color is supported (Desktop platforms)
-  bool get _supportsAccentColor {
-    try {
-      return Platform.isWindows || Platform.isMacOS || Platform.isLinux;
-    } catch (e) {
-      return false;
-    }
-  }
+  bool get _supportsAccentColor =>
+      defaultTargetPlatform == TargetPlatform.windows ||
+      defaultTargetPlatform == TargetPlatform.macOS ||
+      defaultTargetPlatform == TargetPlatform.linux;
 
   Future<void> _showColorPicker(
     BuildContext context,
@@ -121,17 +112,6 @@ class ThemeSettings extends StatelessWidget {
                     title: Text(
                       isDark ? 'Dark Mode' : 'Light Mode',
                       style: const TextStyle(fontWeight: FontWeight.w600),
-                    ),
-                    subtitle: Text(
-                      isDark
-                          ? 'Easy on the eyes in low light'
-                          : 'Clean and bright interface',
-                      style: TextStyle(
-                        color: Theme.of(
-                          context,
-                        ).textTheme.bodySmall?.color?.withValues(alpha: 0.7),
-                        fontSize: 12,
-                      ),
                     ),
                     value: isDark,
                     onChanged: (value) {

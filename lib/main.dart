@@ -1,15 +1,17 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:fujiten/cubits/search_cubit.dart';
 
 import 'cubits/expression_cubit.dart';
+import 'cubits/favorites_cubit.dart';
 import 'cubits/input_cubit.dart';
 import 'cubits/kanji_cubit.dart';
 import 'cubits/search_options_cubit.dart';
 import 'cubits/theme_cubit.dart';
 import 'models/states/theme_state.dart';
-import 'services/database_interface_expression.dart';
-import 'services/database_interface_kanji.dart';
+import 'services/database_interface.dart';
+import 'services/database_interface_factory.dart';
 import 'widgets/main_widget.dart';
 
 void main() async {
@@ -26,12 +28,27 @@ class App extends StatelessWidget {
       providers: [
         BlocProvider(create: (_) => ThemeCubit()..loadSavedTheme()),
         BlocProvider(create: (_) => InputCubit()),
+        BlocProvider(create: (_) => FavoritesCubit()),
         BlocProvider(create: (_) => SearchCubit()),
         BlocProvider(create: (_) => SearchOptionsCubit()),
         BlocProvider(
-          create: (_) => ExpressionCubit(DatabaseInterfaceExpression()),
+          create: (_) => ExpressionCubit(
+            createExpressionInterface(
+              kIsWeb ? DatabaseBackend.postgres : DatabaseBackend.sqlite,
+              url: kIsWeb ? '' : null,
+              anonKey: kIsWeb ? '' : null,
+            ),
+          ),
         ),
-        BlocProvider(create: (_) => KanjiCubit(DatabaseInterfaceKanji())),
+        BlocProvider(
+          create: (_) => KanjiCubit(
+            createKanjiInterface(
+              kIsWeb ? DatabaseBackend.postgres : DatabaseBackend.sqlite,
+              url: kIsWeb ? '' : null,
+              anonKey: kIsWeb ? '' : null,
+            ),
+          ),
+        ),
       ],
       child: BlocBuilder<ThemeCubit, ThemeState>(
         builder: (context, themeState) {

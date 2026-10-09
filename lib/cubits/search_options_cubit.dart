@@ -5,9 +5,14 @@ import '../models/states/search_options_state.dart';
 class SearchOptionsCubit extends Cubit<SearchOptionsState> {
   SearchOptionsCubit() : super(const SearchOptionsState.initial());
 
-  // Update useRegexp
-  void setUseRegexp(bool value) {
-    emit(state.copyWith(useRegexp: value));
+  // Update expression search mode
+  void setExpressionSearchMode(SearchMode value) {
+    emit(state.copyWith(expressionSearchMode: value));
+  }
+
+  // Update kanji search mode
+  void setKanjiSearchMode(SearchMode value) {
+    emit(state.copyWith(kanjiSearchMode: value));
   }
 
   // Update resultsPerPageKanji
@@ -37,7 +42,8 @@ class SearchOptionsCubit extends Cubit<SearchOptionsState> {
 
   // Update multiple fields at once
   void updateSearchOptions({
-    bool? useRegexp,
+    SearchMode? expressionSearchMode,
+    SearchMode? kanjiSearchMode,
     int? resultsPerPageKanji,
     int? resultsPerPageExpression,
     SearchType? searchType,
@@ -46,7 +52,8 @@ class SearchOptionsCubit extends Cubit<SearchOptionsState> {
   }) {
     emit(
       state.copyWith(
-        useRegexp: useRegexp,
+        expressionSearchMode: expressionSearchMode,
+        kanjiSearchMode: kanjiSearchMode,
         resultsPerPageKanji: resultsPerPageKanji,
         resultsPerPageExpression: resultsPerPageExpression,
         searchType: searchType,

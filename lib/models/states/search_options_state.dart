@@ -2,9 +2,12 @@ import 'package:equatable/equatable.dart';
 
 enum SearchType { expression, kanji }
 
+enum SearchMode { raw, regexp, glob }
+
 // SearchOptions state class
 class SearchOptionsState extends Equatable {
-  final bool useRegexp;
+  final SearchMode expressionSearchMode;
+  final SearchMode kanjiSearchMode;
   final int resultsPerPageKanji;
   final int resultsPerPageExpression;
   final SearchType searchType;
@@ -12,7 +15,8 @@ class SearchOptionsState extends Equatable {
   final List<String> selectedLangsKanji;
 
   const SearchOptionsState({
-    required this.useRegexp,
+    required this.expressionSearchMode,
+    required this.kanjiSearchMode,
     required this.resultsPerPageKanji,
     required this.resultsPerPageExpression,
     required this.searchType,
@@ -22,7 +26,8 @@ class SearchOptionsState extends Equatable {
 
   // Default constructor with initial values
   const SearchOptionsState.initial()
-    : useRegexp = false,
+    : expressionSearchMode = SearchMode.regexp,
+      kanjiSearchMode = SearchMode.regexp,
       resultsPerPageKanji = 20,
       resultsPerPageExpression = 20,
       searchType = SearchType.expression,
@@ -31,7 +36,8 @@ class SearchOptionsState extends Equatable {
 
   // CopyWith method for immutable state updates
   SearchOptionsState copyWith({
-    bool? useRegexp,
+    SearchMode? expressionSearchMode,
+    SearchMode? kanjiSearchMode,
     int? resultsPerPageKanji,
     int? resultsPerPageExpression,
     SearchType? searchType,
@@ -39,7 +45,9 @@ class SearchOptionsState extends Equatable {
     List<String>? selectedLangsKanji,
   }) {
     return SearchOptionsState(
-      useRegexp: useRegexp ?? this.useRegexp,
+      expressionSearchMode:
+          expressionSearchMode ?? this.expressionSearchMode,
+      kanjiSearchMode: kanjiSearchMode ?? this.kanjiSearchMode,
       resultsPerPageKanji: resultsPerPageKanji ?? this.resultsPerPageKanji,
       resultsPerPageExpression:
           resultsPerPageExpression ?? this.resultsPerPageExpression,
@@ -52,7 +60,8 @@ class SearchOptionsState extends Equatable {
 
   @override
   List<Object> get props => [
-    useRegexp,
+    expressionSearchMode,
+    kanjiSearchMode,
     resultsPerPageKanji,
     resultsPerPageExpression,
     searchType,

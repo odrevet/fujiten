@@ -2,10 +2,12 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:fujiten/services/database_interface.dart';
 
 import '../models/states/db_state_kanji.dart';
+import '../models/states/search_options_state.dart';
+import '../services/database_interface_factory.dart';
 import '../services/database_interface_kanji.dart';
 
 class KanjiCubit extends Cubit<KanjiState> {
-  final DatabaseInterfaceKanji databaseInterface;
+  DatabaseInterfaceKanji databaseInterface;
 
   KanjiCubit(this.databaseInterface) : super(KanjiInitial());
 
@@ -20,7 +22,7 @@ class KanjiCubit extends Cubit<KanjiState> {
         emit(
           KanjiDatabaseNotReady(
             status: databaseInterface.status!,
-            log: databaseInterface.log,
+            log: databaseInterface.logMessage,
           ),
         );
       } else {
@@ -31,18 +33,32 @@ class KanjiCubit extends Cubit<KanjiState> {
     }
   }
 
+  Future<void> configure(
+    DatabaseBackend backend, {
+    String? url,
+    String? anonKey,
+    String? path,
+  }) async {
+    databaseInterface = createKanjiInterface(
+      backend,
+      url: url,
+      anonKey: anonKey,
+    );
+    await openDatabase(path ?? '');
+  }
+
   Future<void> search(
     String input,
     int resultsPerPage,
     int currentPage,
-    bool useRegexp,
+    SearchMode mode,
     List<String> langs,
   ) async {
     if (databaseInterface.status != DatabaseStatus.ok) {
       emit(
         KanjiDatabaseNotReady(
           status: databaseInterface.status ?? DatabaseStatus.pathNotSet,
-          log: databaseInterface.log,
+          log: databaseInterface.logMessage,
         ),
       );
       return;
@@ -60,7 +76,7 @@ class KanjiCubit extends Cubit<KanjiState> {
         input,
         resultsPerPage,
         currentPage,
-        useRegexp,
+        mode,
         langs,
       );
       final totalCount = await databaseInterface.count();
@@ -84,7 +100,7 @@ class KanjiCubit extends Cubit<KanjiState> {
       emit(
         KanjiDatabaseNotReady(
           status: databaseInterface.status ?? DatabaseStatus.pathNotSet,
-          log: databaseInterface.log,
+          log: databaseInterface.logMessage,
         ),
       );
       return;
@@ -107,7 +123,7 @@ class KanjiCubit extends Cubit<KanjiState> {
       emit(
         KanjiDatabaseNotReady(
           status: databaseInterface.status ?? DatabaseStatus.pathNotSet,
-          log: databaseInterface.log,
+          log: databaseInterface.logMessage,
         ),
       );
       return;
@@ -135,7 +151,7 @@ class KanjiCubit extends Cubit<KanjiState> {
       emit(
         KanjiDatabaseNotReady(
           status: databaseInterface.status ?? DatabaseStatus.pathNotSet,
-          log: databaseInterface.log,
+          log: databaseInterface.logMessage,
         ),
       );
       return;

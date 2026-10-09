@@ -109,10 +109,37 @@ Desktop build must use FFI. The libsqlite3.so must be installed on the host.
 </component>
 ```
 
-# Regexp support
+## Web
 
-Some build of sqlite do not include the regexp extension, in this case matches must be made using 
-the GLOB operator.  
+The web build only supports the **Postgres** backend (local SQLite databases and KanjiVG are not
+available on web). Configure your Supabase URL and anon key in **Settings → Databases**.
+
+```bash
+flutter build web
+```
+
+### Testing the web build locally
+
+Serve the `build/web` directory with a static server, e.g. using `dhttpd`:
+
+```bash
+dart pub global activate dhttpd
+~/.pub-cache/bin/dhttpd --path build/web --port 8080
+```
+
+Then open http://localhost:8080 in your browser.
+
+# Search modes
+
+Each database (expression and kanji) has an independent search mode, configurable in
+**Settings → Search Options**:
+
+* **Raw** — the input is matched literally (substring). No wildcard expansion.
+* **Regexp** — POSIX regular expression matching.
+* **Glob** — SQL `GLOB` wildcard matching (`*`, `?`).
+
+Only the modes supported by the active backend are shown. Some builds of SQLite do not include
+the regexp extension, in which case regexp matching is unavailable and GLOB must be used.
 
 # releases
 
@@ -122,6 +149,7 @@ Releases are built with:
 ```
 flutter build apk --split-per-abi --dart-define=FFI=false
 flutter build linux --dart-define=FFI=true --release
+flutter build web --release
 ```
 
 * Google play store: 
@@ -129,3 +157,14 @@ flutter build linux --dart-define=FFI=true --release
 ```
 flutter build appbundle --dart-define=FFI=false
 ```
+
+
+# Database support
+
+| Feature | Desktop: SQLite (FFI) | Android: SQLite | All: PostgreSQL |
+|---------|-----------------------|----------------------------------------------------|-----------------|
+| Raw     | Yes                   | Yes                                                | Yes             |
+| Regexp  | No                    | Yes                                                | Yes             |
+| Glob    | Yes                   | Yes                                                | No              |
+
+

@@ -1,16 +1,19 @@
-import 'dart:io';
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_kanjivg/flutter_kanjivg.dart';
+import 'package:fujiten/services/kanjivg_ops.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../cubits/expression_cubit.dart';
+import '../cubits/favorites_cubit.dart';
 import '../cubits/search_options_cubit.dart';
 import '../models/entry.dart';
+import '../models/favorite.dart';
 import '../models/kanji.dart';
+import '../models/states/search_options_state.dart';
+import 'favorites/favorite_picker_dialog.dart';
 
 class KanjiListTile extends StatefulWidget {
   final Kanji kanji;
@@ -57,6 +60,14 @@ class _KanjiListTileState extends State<KanjiListTile>
 
   Future<void> _checkKanjiVgAvailability() async {
     try {
+      // KanjiVG requires local files, which are not available on web.
+      if (kIsWeb) {
+        setState(() {
+          _kanjiVgAvailable = false;
+        });
+        return;
+      }
+
       final prefs = await SharedPreferences.getInstance();
       final kanjiVgPath = prefs.getString('kanjivg_path') ?? '';
 
@@ -93,13 +104,11 @@ class _KanjiListTileState extends State<KanjiListTile>
           .toRadixString(16)
           .padLeft(5, '0');
 
-      final svgFile = File('$kanjiVgPath/kanji/$codepoint.svg');
-
-      if (!await svgFile.exists()) {
+      final source = await readKanjivgSvg(kanjiVgPath, codepoint);
+      if (source == null) {
         return;
       }
 
-      final source = await svgFile.readAsString();
       final data = parser.parse(source);
 
       if (mounted) {
@@ -200,18 +209,22 @@ class _KanjiListTileState extends State<KanjiListTile>
 
     try {
       final expressionCubit = context.read<ExpressionCubit>();
-      var wildcard = context.read<SearchOptionsCubit>().state.useRegexp
-          ? '.*'
-          : '*';
-      final langs = context
-          .read<SearchOptionsCubit>()
-          .state
-          .selectedLangsExpression;
+      final searchOptions = context.read<SearchOptionsCubit>().state;
+      final expressionMode = searchOptions.expressionSearchMode;
+      // Raw mode cannot express wildcards; fall back to a contains-capable
+      // mode so the "examples" search keeps working.
+      final mode = expressionMode == SearchMode.raw
+          ? (await expressionCubit.databaseInterface.isGlobAvailable()
+                ? SearchMode.glob
+                : SearchMode.regexp)
+          : expressionMode;
+      final wildcard = mode == SearchMode.regexp ? '.*' : '*';
+      final langs = searchOptions.selectedLangsExpression;
       final entries = await expressionCubit.databaseInterface.search(
         '$wildcard${widget.kanji.literal}$wildcard',
         3,
         0,
-        context.read<SearchOptionsCubit>().state.useRegexp,
+        mode,
         langs,
       );
 
@@ -280,6 +293,32 @@ class _KanjiListTileState extends State<KanjiListTile>
     }
   }
 
+  void _addToFavorites() {
+    showDialog(
+      context: context,
+      builder: (context) => FavoritePickerDialog(
+        favorite: Favorite.fromKanji(KanjiEntry(kanji: widget.kanji)),
+      ),
+    );
+  }
+
+  Widget _buildFavoriteButton() {
+    final favorite = Favorite.fromKanji(KanjiEntry(kanji: widget.kanji));
+    return BlocBuilder<FavoritesCubit, FavoritesState>(
+      builder: (context, state) {
+        final isFavorite = state.isFavoriteAnywhere(favorite.id);
+        return IconButton(
+          onPressed: _addToFavorites,
+          icon: Icon(
+            isFavorite ? Icons.star : Icons.star_border,
+            color: isFavorite ? Colors.amber : null,
+          ),
+          tooltip: 'Add to favorites',
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Card(
@@ -305,9 +344,18 @@ class _KanjiListTileState extends State<KanjiListTile>
         ),
         child: Padding(
           padding: const EdgeInsets.all(16.0),
-          child: _showAnimation
-              ? _buildAnimationView(context)
-              : _buildNormalView(context),
+          child: Stack(
+            children: [
+              _showAnimation
+                  ? _buildAnimationView(context)
+                  : _buildNormalView(context),
+              Positioned(
+                top: 0,
+                right: 0,
+                child: _buildFavoriteButton(),
+              ),
+            ],
+          ),
         ),
       ),
     );

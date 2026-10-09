@@ -12,13 +12,13 @@ class SearchInput extends StatefulWidget {
   final VoidCallback? onConvert;
 
   const SearchInput(
-    this.textEditingController,
-    this.onSubmitted,
-    this.onFocusChanged,
-    this.focusNode, {
-    this.onConvert,
-    super.key,
-  });
+      this.textEditingController,
+      this.onSubmitted,
+      this.onFocusChanged,
+      this.focusNode, {
+        this.onConvert,
+        super.key,
+      });
 
   @override
   State<SearchInput> createState() => _SearchInputState();
@@ -28,33 +28,37 @@ class _SearchInputState extends State<SearchInput> {
   @override
   void initState() {
     super.initState();
-    widget.focusNode.addListener(() {
-      widget.onFocusChanged(widget.focusNode.hasFocus);
-    });
+    widget.focusNode.addListener(_onFocus);
+  }
+
+  @override
+  void didUpdateWidget(covariant SearchInput oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.focusNode != widget.focusNode) {
+      oldWidget.focusNode.removeListener(_onFocus);
+      widget.focusNode.addListener(_onFocus);
+    }
   }
 
   @override
   void dispose() {
-    // Do not dispose the passed focusNode, it's owned by MainWidget
+    // The focusNode is owned by MainWidget, only remove our listener.
+    widget.focusNode.removeListener(_onFocus);
     super.dispose();
   }
+
+  void _onFocus() => widget.onFocusChanged(widget.focusNode.hasFocus);
 
   @override
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.only(left: 12, right: 12),
-      child: KeyboardListener(
-        focusNode: FocusNode(),
-        onKeyEvent: (KeyEvent event) {
-          if (event is KeyDownEvent) {
-            // Check for Ctrl+J (or Cmd+J on macOS)
-            if (event.logicalKey == LogicalKeyboardKey.keyJ &&
-                (event.logicalKey.keyId == LogicalKeyboardKey.keyJ.keyId) &&
-                (HardwareKeyboard.instance.isControlPressed ||
-                    HardwareKeyboard.instance.isMetaPressed)) {
-              widget.onConvert?.call();
-            }
-          }
+      child: CallbackShortcuts(
+        bindings: {
+          const SingleActivator(LogicalKeyboardKey.keyJ, control: true): () =>
+              widget.onConvert?.call(),
+          const SingleActivator(LogicalKeyboardKey.keyJ, meta: true): () =>
+              widget.onConvert?.call(),
         },
         child: TextField(
           onChanged: (text) => context.read<InputCubit>().setInput(text),

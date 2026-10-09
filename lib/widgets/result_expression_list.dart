@@ -3,10 +3,13 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:ruby_text/ruby_text.dart';
 
+import '../cubits/favorites_cubit.dart';
 import '../cubits/search_options_cubit.dart';
 import '../models/entry.dart';
+import '../models/favorite.dart';
 import '../models/sense.dart';
 import '../string_utils.dart' show kanaKit;
+import 'favorites/favorite_picker_dialog.dart';
 import 'kanji_dialog.dart';
 
 Widget buildRubyText(String mainReading) {
@@ -115,6 +118,32 @@ class _ResultExpressionListState extends State<ResultExpressionList> {
     );
   }
 
+  void _addToFavorites() {
+    showDialog(
+      context: context,
+      builder: (context) => FavoritePickerDialog(
+        favorite: Favorite.fromExpression(widget.searchResult),
+      ),
+    );
+  }
+
+  Widget _buildFavoriteButton() {
+    final favorite = Favorite.fromExpression(widget.searchResult);
+    return BlocBuilder<FavoritesCubit, FavoritesState>(
+      builder: (context, state) {
+        final isFavorite = state.isFavoriteAnywhere(favorite.id);
+        return IconButton(
+          onPressed: _addToFavorites,
+          icon: Icon(
+            isFavorite ? Icons.star : Icons.star_border,
+            color: isFavorite ? Colors.amber : null,
+          ),
+          tooltip: 'Add to favorites',
+        );
+      },
+    );
+  }
+
   Widget _buildMainReading() {
     if (widget.searchResult.reading.isEmpty) return const SizedBox.shrink();
 
@@ -132,16 +161,22 @@ class _ResultExpressionListState extends State<ResultExpressionList> {
               child: buildRubyText(mainReading),
             ),
           ),
-          if (literals.isNotEmpty)
-            Positioned(
-              top: 0,
-              right: 0,
-              child: IconButton(
-                onPressed: () => _showKanjiDialog(literals),
-                icon: const Icon(Icons.info_outline),
-                tooltip: 'Show Kanji',
-              ),
+          Positioned(
+            top: 0,
+            right: 0,
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                _buildFavoriteButton(),
+                if (literals.isNotEmpty)
+                  IconButton(
+                    onPressed: () => _showKanjiDialog(literals),
+                    icon: const Icon(Icons.info_outline),
+                    tooltip: 'Show Kanji',
+                  ),
+              ],
             ),
+          ),
         ],
       ),
     );

@@ -10,12 +10,14 @@ import '../services/database_interface.dart';
 class DatabaseStatusItem extends StatelessWidget {
   final String title;
   final DatabaseStatus? status;
+  final DatabaseBackend? backend;
   final String kanjiChar;
 
   const DatabaseStatusItem({
     required this.title,
     required this.status,
     required this.kanjiChar,
+    this.backend,
     super.key,
   });
 
@@ -53,11 +55,11 @@ class DatabaseStatusItem extends StatelessWidget {
       decoration: BoxDecoration(
         color: status == DatabaseStatus.ok
             ? Theme.of(
-                context,
-              ).colorScheme.primaryContainer.withValues(alpha: 0.3)
+          context,
+        ).colorScheme.primaryContainer.withValues(alpha: 0.3)
             : Theme.of(
-                context,
-              ).colorScheme.errorContainer.withValues(alpha: 0.3),
+          context,
+        ).colorScheme.errorContainer.withValues(alpha: 0.3),
         borderRadius: BorderRadius.circular(12),
         border: Border.all(color: statusColor.withValues(alpha: 0.3), width: 1),
       ),
@@ -67,12 +69,20 @@ class DatabaseStatusItem extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  title,
-                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
-                    color: Theme.of(context).colorScheme.onSurface,
-                  ),
+                Wrap(
+                  crossAxisAlignment: WrapCrossAlignment.center,
+                  spacing: 8,
+                  runSpacing: 4,
+                  children: [
+                    Text(
+                      title,
+                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.bold,
+                        color: Theme.of(context).colorScheme.onSurface,
+                      ),
+                    ),
+                    if (backend != null) BackendBadge(backend: backend!),
+                  ],
                 ),
                 const SizedBox(height: 4),
                 Row(
@@ -117,6 +127,42 @@ class DatabaseStatusItem extends StatelessWidget {
   }
 }
 
+class BackendBadge extends StatelessWidget {
+  final DatabaseBackend backend;
+
+  const BackendBadge({required this.backend, super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final isPostgres = backend == DatabaseBackend.postgres;
+    final label = isPostgres ? 'Postgres' : 'SQLite';
+    final icon = isPostgres ? Icons.cloud_outlined : Icons.storage_outlined;
+    final scheme = Theme.of(context).colorScheme;
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+      decoration: BoxDecoration(
+        color: scheme.secondaryContainer,
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 14, color: scheme.onSecondaryContainer),
+          const SizedBox(width: 4),
+          Text(
+            label,
+            style: Theme.of(context).textTheme.labelSmall?.copyWith(
+              color: scheme.onSecondaryContainer,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
 class DatabaseStatusDisplay extends StatelessWidget {
   const DatabaseStatusDisplay({super.key});
 
@@ -145,6 +191,10 @@ class DatabaseStatusDisplay extends StatelessWidget {
                 return DatabaseStatusItem(
                   title: 'Expression Database',
                   status: status,
+                  backend: context
+                      .read<ExpressionCubit>()
+                      .databaseInterface
+                      .backend,
                   kanjiChar: '言',
                 );
               },
@@ -164,6 +214,10 @@ class DatabaseStatusDisplay extends StatelessWidget {
                 return DatabaseStatusItem(
                   title: 'Kanji Database',
                   status: status,
+                  backend: context
+                      .read<KanjiCubit>()
+                      .databaseInterface
+                      .backend,
                   kanjiChar: '漢',
                 );
               },

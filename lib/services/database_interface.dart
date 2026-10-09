@@ -1,40 +1,27 @@
-import 'package:sqflite_common_ffi/sqflite_ffi.dart';
-
 import '../models/entry.dart';
+import '../models/states/search_options_state.dart';
 
 enum DatabaseStatus { ok, pathNotSet, noResults, error, loading }
 
+enum DatabaseBackend { sqlite, postgres }
+
 abstract class DatabaseInterface {
-  Database? database;
   DatabaseStatus? status;
-  String? log;
-  static bool useRegexp = false;
+  String? logMessage;
 
-  DatabaseInterface({this.database});
+  DatabaseBackend get backend;
 
-  Future<void> open(String path) async {
-    try {
-      if (const bool.fromEnvironment('FFI', defaultValue: false)) {
-        database = await databaseFactoryFfi.openDatabase(path);
-      } else {
-        database = await openDatabase(path, readOnly: true);
-      }
-    } catch (e) {
-      database = null;
-      status = DatabaseStatus.noResults;
-      log = e.toString();
-    }
-  }
+  bool get isOpen;
 
-  Future<void> dispose() async {
-    database?.close();
-  }
+  Future<void> open(String path);
+
+  Future<void> dispose();
 
   Future<List<Entry>> search(
     String input,
     int resultsPerPage,
     int currentPage,
-    bool useRegexp,
+    SearchMode mode,
     List<String> langs,
   );
 
@@ -43,18 +30,22 @@ abstract class DatabaseInterface {
   Future<int> count();
 
   Future<void> setStatus() async {
-    if (database == null) {
+    if (!isOpen) {
       status = DatabaseStatus.pathNotSet;
-      log = 'No services selected';
+      logMessage = 'No services selected';
     } else {
       int nbEntries = await count();
       if (nbEntries == 0) {
         status = DatabaseStatus.noResults;
-        log = 'No entry found in services';
+        logMessage = 'No entry found in services';
       } else {
         status = DatabaseStatus.ok;
-        log = 'Database loaded';
+        logMessage = 'Database loaded';
       }
     }
   }
+
+  Future<bool> isRegexpAvailable() async => true;
+
+  Future<bool> isGlobAvailable() async => true;
 }

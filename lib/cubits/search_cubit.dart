@@ -2,6 +2,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:fujiten/services/database_interface.dart';
 
 import '../models/search.dart';
+import '../models/states/search_options_state.dart';
 
 class SearchCubit extends Cubit<Search> {
   SearchCubit() : super(Search());
@@ -30,7 +31,7 @@ class SearchCubit extends Cubit<Search> {
     DatabaseInterface databaseInterface,
     String formattedInput,
     int resultsPerPage,
-    bool useRegexp,
+    SearchMode mode,
     List<String> langs,
   ) {
     // Don't run search if we know there are no more results
@@ -47,7 +48,7 @@ class SearchCubit extends Cubit<Search> {
     );
 
     databaseInterface
-        .search(formattedInput, resultsPerPage, state.page, useRegexp, langs)
+        .search(formattedInput, resultsPerPage, state.page, mode, langs)
         .then((searchResults) {
           // Check if we got fewer results than requested, indicating end of results
           final hasMoreResults = searchResults.length == resultsPerPage;

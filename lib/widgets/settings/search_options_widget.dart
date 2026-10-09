@@ -17,8 +17,9 @@ class SearchOptionsWidget extends StatefulWidget {
 }
 
 class _SearchOptionsWidgetState extends State<SearchOptionsWidget> {
-  bool _isTestingRegexp = true; // Start as testing
-  bool _isRegexpAvailable = false;
+  bool _isTestingModes = true; // Start as testing
+  Set<SearchMode> _expressionAvailableModes = {SearchMode.raw};
+  Set<SearchMode> _kanjiAvailableModes = {SearchMode.raw};
   List<String> _availableLangsExpression = [];
   List<String> _availableLangsKanji = [];
 
@@ -38,8 +39,8 @@ class _SearchOptionsWidgetState extends State<SearchOptionsWidget> {
       text: state.resultsPerPageExpression.toString(),
     );
 
-    // Automatically test regexp availability when widget initializes
-    _testRegexpAvailability();
+    // Automatically test mode availability when widget initializes
+    _testModeAvailability();
     _loadAvailableLangs();
   }
 
@@ -71,34 +72,64 @@ class _SearchOptionsWidgetState extends State<SearchOptionsWidget> {
     super.dispose();
   }
 
-  Future<void> _testRegexpAvailability() async {
+  Future<void> _testModeAvailability() async {
     setState(() {
-      _isTestingRegexp = true;
+      _isTestingModes = true;
     });
 
     try {
-      final database = context
+      final expressionInterface = context
           .read<ExpressionCubit>()
-          .databaseInterface
-          .database;
-      await database!.rawQuery(
-        "SELECT id FROM gloss WHERE content REGEXP '.*' LIMIT 1",
-      );
+          .databaseInterface;
+      final kanjiInterface = context.read<KanjiCubit>().databaseInterface;
+
+      final expRegexp = await expressionInterface.isRegexpAvailable();
+      final expGlob = await expressionInterface.isGlobAvailable();
+      final kanRegexp = await kanjiInterface.isRegexpAvailable();
+      final kanGlob = await kanjiInterface.isGlobAvailable();
+
+      if (!mounted) return;
 
       setState(() {
-        _isRegexpAvailable = true;
-        _isTestingRegexp = false;
+        _expressionAvailableModes = {
+          SearchMode.raw,
+          if (expRegexp) SearchMode.regexp,
+          if (expGlob) SearchMode.glob,
+        };
+        _kanjiAvailableModes = {
+          SearchMode.raw,
+          if (kanRegexp) SearchMode.regexp,
+          if (kanGlob) SearchMode.glob,
+        };
+        _isTestingModes = false;
       });
+
+      _resetUnavailableModes();
     } catch (e) {
+      if (!mounted) return;
       setState(() {
-        _isRegexpAvailable = false;
-        _isTestingRegexp = false;
+        _expressionAvailableModes = {SearchMode.raw};
+        _kanjiAvailableModes = {SearchMode.raw};
+        _isTestingModes = false;
       });
+      _resetUnavailableModes();
+    }
+  }
 
-      // Disable regexp if it's not available and currently enabled
-      if (mounted && context.read<SearchOptionsCubit>().state.useRegexp) {
-        context.read<SearchOptionsCubit>().setUseRegexp(false);
-      }
+  SearchMode _preferredMode(Set<SearchMode> available) {
+    if (available.contains(SearchMode.regexp)) return SearchMode.regexp;
+    if (available.contains(SearchMode.glob)) return SearchMode.glob;
+    return SearchMode.raw;
+  }
+
+  void _resetUnavailableModes() {
+    final cubit = context.read<SearchOptionsCubit>();
+    final st = cubit.state;
+    if (!_expressionAvailableModes.contains(st.expressionSearchMode)) {
+      cubit.setExpressionSearchMode(_preferredMode(_expressionAvailableModes));
+    }
+    if (!_kanjiAvailableModes.contains(st.kanjiSearchMode)) {
+      cubit.setKanjiSearchMode(_preferredMode(_kanjiAvailableModes));
     }
   }
 
@@ -121,13 +152,31 @@ class _SearchOptionsWidgetState extends State<SearchOptionsWidget> {
             return ListView(
           padding: const EdgeInsets.all(16),
           children: [
-            // Regular Expressions Section
-            if (_isTestingRegexp || _isRegexpAvailable) ...[
-              _buildSectionHeader(context, 'Advanced Options'),
-              const SizedBox(height: 8),
-              _buildRegexpTile(context, state),
-              const SizedBox(height: 24),
-            ],
+            // Search Mode Section
+            _buildSectionHeader(context, 'Search Mode'),
+            const SizedBox(height: 8),
+            _buildModeSelector(
+              context,
+              title: 'Expression Search Mode',
+              availableModes: _expressionAvailableModes,
+              selectedMode: state.expressionSearchMode,
+              onChanged: (mode) {
+                context
+                    .read<SearchOptionsCubit>()
+                    .setExpressionSearchMode(mode);
+              },
+            ),
+            const SizedBox(height: 8),
+            _buildModeSelector(
+              context,
+              title: 'Kanji Search Mode',
+              availableModes: _kanjiAvailableModes,
+              selectedMode: state.kanjiSearchMode,
+              onChanged: (mode) {
+                context.read<SearchOptionsCubit>().setKanjiSearchMode(mode);
+              },
+            ),
+            const SizedBox(height: 24),
 
             // Results Per Page Section
             _buildSectionHeader(context, 'Results Per Page'),
@@ -193,34 +242,66 @@ class _SearchOptionsWidgetState extends State<SearchOptionsWidget> {
     );
   }
 
-  Widget _buildRegexpTile(BuildContext context, SearchOptionsState state) {
+  String _modeLabel(SearchMode mode) {
+    switch (mode) {
+      case SearchMode.raw:
+        return 'Raw';
+      case SearchMode.regexp:
+        return 'Regexp';
+      case SearchMode.glob:
+        return 'Glob';
+    }
+  }
+
+  Widget _buildModeSelector(
+    BuildContext context, {
+    required String title,
+    required Set<SearchMode> availableModes,
+    required SearchMode selectedMode,
+    required ValueChanged<SearchMode> onChanged,
+  }) {
     return Card(
       elevation: 0,
       color: Theme.of(context).colorScheme.surfaceContainerLow,
-      child: SwitchListTile(
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-        title: Row(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Expanded(child: Text('Use Regular Expressions')),
-            if (_isTestingRegexp)
-              const SizedBox(
-                width: 16,
-                height: 16,
-                child: CircularProgressIndicator(strokeWidth: 2),
+            Text(
+              title,
+              style: Theme.of(
+                context,
+              ).textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.w500),
+            ),
+            const SizedBox(height: 8),
+            if (_isTestingModes)
+              const Row(
+                children: [
+                  SizedBox(
+                    width: 16,
+                    height: 16,
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  ),
+                  SizedBox(width: 8),
+                  Text('Checking availability...'),
+                ],
+              )
+            else
+              SegmentedButton<SearchMode>(
+                segments: availableModes
+                    .map(
+                      (m) => ButtonSegment(
+                        value: m,
+                        label: Text(_modeLabel(m)),
+                      ),
+                    )
+                    .toList(),
+                selected: {selectedMode},
+                onSelectionChanged: (selection) => onChanged(selection.first),
               ),
           ],
         ),
-        subtitle: Text(
-          _isTestingRegexp
-              ? 'Checking regexp availability...'
-              : 'Enable regexp pattern matching',
-        ),
-        value: state.useRegexp && _isRegexpAvailable,
-        onChanged: _isTestingRegexp
-            ? null
-            : (bool value) {
-                context.read<SearchOptionsCubit>().setUseRegexp(value);
-              },
       ),
     );
   }

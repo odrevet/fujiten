@@ -1,11 +1,6 @@
-import 'dart:io';
-
-import 'package:archive/archive_io.dart';
-import 'package:dio/dio.dart';
-import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:path_provider/path_provider.dart';
+import 'package:fujiten/services/kanjivg_ops.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class KanjiVGSettingsWidget extends StatefulWidget {
@@ -40,6 +35,29 @@ class _KanjiVGSettingsWidgetState extends State<KanjiVGSettingsWidget> {
 
   @override
   Widget build(BuildContext context) {
+    if (kIsWeb) {
+      return Card(
+        elevation: 4,
+        margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Row(
+            children: [
+              Icon(
+                Icons.info_outline,
+                color: Theme.of(context).colorScheme.primary,
+              ),
+              const SizedBox(width: 12),
+              const Expanded(
+                child: Text('KanjiVG is not supported on web'),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
     return FutureBuilder<String>(
       future: pathKanjiVG,
       builder: (BuildContext context, AsyncSnapshot<String> snapshot) {
@@ -145,79 +163,25 @@ class _KanjiVGSettingsWidgetState extends State<KanjiVGSettingsWidget> {
                             onPressed: downloadLog.isNotEmpty
                                 ? null
                                 : () async {
-                                    Directory appDocDir =
-                                        await getApplicationDocumentsDirectory();
-                                    String appDocPath = appDocDir.path;
-                                    String downloadTo =
-                                        "$appDocPath/kanjivg.zip";
-                                    Dio()
-                                        .download(
-                                          'https://github.com/KanjiVG/kanjivg/releases/download/r20250816/kanjivg-20250816-all.zip',
-                                          downloadTo,
-                                          onReceiveProgress: (received, total) {
-                                            if (total != -1) {
-                                              setState(
-                                                () => downloadLog =
-                                                    ("Downloading... ${(received / total * 100).toStringAsFixed(0)}%"),
-                                              );
-                                            }
-                                          },
-                                        )
-                                        .then((_) async {
-                                          String path = "$appDocPath/kanjivg";
-
-                                          // Extract zip
-                                          try {
-                                            // Read the Zip file from disk.
-                                            final bytes = File(
-                                              downloadTo,
-                                            ).readAsBytesSync();
-
-                                            // Decode the Zip file
-                                            final archive = ZipDecoder()
-                                                .decodeBytes(bytes);
-
-                                            // Extract to kanjivg directory
-                                            Directory kanjiVgDir = Directory(
-                                              path,
-                                            );
-                                            if (!kanjiVgDir.existsSync()) {
-                                              kanjiVgDir.createSync(
-                                                recursive: true,
-                                              );
-                                            }
-
-                                            // Extract all files
-                                            for (final file in archive) {
-                                              final filename = file.name;
-                                              if (file.isFile) {
-                                                final data =
-                                                    file.content as List<int>;
-                                                File('$path/$filename')
-                                                  ..createSync(recursive: true)
-                                                  ..writeAsBytesSync(data);
-                                              } else {
-                                                Directory(
-                                                  '$path/$filename',
-                                                ).createSync(recursive: true);
-                                              }
-                                            }
-
-                                            // Delete the zip file
-                                            File(downloadTo).deleteSync();
-
-                                            // Set path
-                                            await setPath(path);
-                                            setState(() {
-                                              downloadLog = "";
-                                            });
-                                          } catch (e) {
-                                            setState(
-                                              () => downloadLog =
-                                                  "Error ${e.toString()}",
-                                            );
-                                          }
-                                        });
+                                    try {
+                                      final String path =
+                                          await downloadAndExtractKanjivg(
+                                        onProgress: (msg) {
+                                          setState(() {
+                                            downloadLog = msg;
+                                          });
+                                        },
+                                      );
+                                      await setPath(path);
+                                      setState(() {
+                                        downloadLog = "";
+                                      });
+                                    } catch (e) {
+                                      setState(
+                                        () => downloadLog =
+                                            "Error ${e.toString()}",
+                                      );
+                                    }
                                   },
                             icon: const Icon(Icons.download),
                             label: const Text('Download'),
@@ -231,14 +195,16 @@ class _KanjiVGSettingsWidgetState extends State<KanjiVGSettingsWidget> {
                           OutlinedButton.icon(
                             onPressed: downloadLog.isNotEmpty
                                 ? null
-                                : () => _pickDirectory().then((path) async {
+                                : () async {
+                                    final String? path =
+                                        await pickKanjivgDirectory();
                                     if (path != null) {
                                       await setPath(path);
                                       setState(() {
                                         downloadLog = '';
                                       });
                                     }
-                                  }),
+                                  },
                             icon: const Icon(Icons.folder_open),
                             label: const Text('Pick Directory'),
                             style: OutlinedButton.styleFrom(
@@ -338,17 +304,5 @@ class _KanjiVGSettingsWidgetState extends State<KanjiVGSettingsWidget> {
         }
       },
     );
-  }
-
-  Future<String?> _pickDirectory() async {
-    try {
-      String? selectedDirectory = await FilePicker.getDirectoryPath();
-      return selectedDirectory;
-    } catch (e) {
-      if (kDebugMode) {
-        print(e.toString());
-      }
-    }
-    return null;
   }
 }

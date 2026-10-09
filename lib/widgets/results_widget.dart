@@ -58,13 +58,24 @@ class _ResultsWidgetState extends State<ResultsWidget>
     }
   }
 
-  String _getWildcardSequence() {
+  String? _getWildcardSequence() {
     final searchOptions = context.read<SearchOptionsCubit>().state;
-    return searchOptions.useRegexp ? ".*" : "*";
+    final mode = searchOptions.searchType == SearchType.kanji
+        ? searchOptions.kanjiSearchMode
+        : searchOptions.expressionSearchMode;
+    switch (mode) {
+      case SearchMode.regexp:
+        return ".*";
+      case SearchMode.glob:
+        return "*";
+      case SearchMode.raw:
+        return null;
+    }
   }
 
   List<Widget> _buildResearchOptions(String currentInput) {
     final wildcard = _getWildcardSequence();
+    if (wildcard == null) return [];
     List<Widget> options = [];
 
     bool startsWithWildcard = currentInput.startsWith(wildcard);

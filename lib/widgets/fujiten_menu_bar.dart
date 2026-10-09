@@ -9,6 +9,7 @@ import '../models/states/search_options_state.dart';
 import '../string_utils.dart';
 import 'radical_page.dart';
 import 'search_input.dart';
+import 'session_menu.dart';
 
 class FujitenMenuBar extends StatefulWidget {
   final Search? search;
@@ -59,6 +60,13 @@ class _FujitenMenuBarState extends State<FujitenMenuBar> {
 
     return BlocBuilder<SearchOptionsCubit, SearchOptionsState>(
       builder: (context, searchOptionsState) {
+        final currentMode = widget.currentSearchType == SearchType.expression
+            ? searchOptionsState.expressionSearchMode
+            : searchOptionsState.kanjiSearchMode;
+        final wildcard = currentMode == SearchMode.regexp
+            ? '.*'
+            : (currentMode == SearchMode.glob ? '*' : null);
+
         var popupMenuButtonInsert = PopupMenuButton(
           icon: const Icon(Icons.input),
           onSelected: (dynamic result) {
@@ -73,9 +81,7 @@ class _FujitenMenuBarState extends State<FujitenMenuBar> {
                 addStringInController(charKana);
                 break;
               case 3:
-                addStringInController(
-                  searchOptionsState.useRegexp ? '.*' : '*',
-                );
+                if (wildcard != null) addStringInController(wildcard);
                 break;
             }
             context.read<InputCubit>().setInput(
@@ -88,99 +94,17 @@ class _FujitenMenuBarState extends State<FujitenMenuBar> {
             const PopupMenuItem(value: 2, child: Text('$charKana Kana')),
             PopupMenuItem(
               value: 3,
+              enabled: wildcard != null,
               child: Text(
-                '${searchOptionsState.useRegexp ? ".*" : "*"} Anything',
+                wildcard == null ? 'Anything' : '$wildcard Anything',
               ),
             ),
           ],
         );
 
-        var popupMenuButtonInputs = PopupMenuButton(
-          icon: const Icon(Icons.list),
-          onSelected: (dynamic result) {
-            if (result == "add") {
-              context.read<InputCubit>().addInput();
-              int searchIndex =
-                  context.read<InputCubit>().state.inputs.length - 1;
-              context.read<InputCubit>().setSearchIndex(searchIndex);
-              widget.textEditingController!.text = context
-                  .read<InputCubit>()
-                  .state
-                  .inputs[searchIndex];
-            } else if (result == "remove") {
-              context.read<InputCubit>().removeInput();
-              widget.textEditingController!.text = context
-                  .read<InputCubit>()
-                  .state
-                  .inputs[context.read<InputCubit>().state.searchIndex];
-            } else if (result == "clear") {
-              widget.textEditingController!.clear();
-              context.read<InputCubit>().state.inputs[context
-                      .read<InputCubit>()
-                      .state
-                      .searchIndex] =
-                  "";
-              widget.focusNode.requestFocus();
-            } else {
-              context.read<InputCubit>().setSearchIndex(result);
-              widget.textEditingController!.text = context
-                  .read<InputCubit>()
-                  .state
-                  .inputs[result];
-            }
-          },
-          itemBuilder: (itemBuilderContext) =>
-              context
-                  .read<InputCubit>()
-                  .state
-                  .inputs
-                  .asMap()
-                  .entries
-                  .map<PopupMenuEntry<dynamic>>(
-                    (entry) => PopupMenuItem(
-                      value: entry.key,
-                      child: ListTile(
-                        leading: Text(entry.key.toString()),
-                        title: Text(entry.value),
-                        selected:
-                            entry.key ==
-                            context.read<InputCubit>().state.searchIndex,
-                      ),
-                    ),
-                  )
-                  .toList()
-                ..add(
-                  const PopupMenuItem(
-                    value: "add",
-                    child: ListTile(
-                      leading: Icon(Icons.add),
-                      title: Text('Add'),
-                    ),
-                  ),
-                )
-                ..add(
-                  PopupMenuItem(
-                    value: "remove",
-                    enabled: context.read<InputCubit>().state.inputs.length > 1,
-                    child: ListTile(
-                      enabled:
-                          context.read<InputCubit>().state.inputs.length > 1,
-                      leading: const Icon(Icons.remove),
-                      title: const Text('Remove'),
-                    ),
-                  ),
-                )
-                ..add(
-                  PopupMenuItem(
-                    value: "clear",
-                    enabled: widget.textEditingController!.text != "",
-                    child: ListTile(
-                      enabled: widget.textEditingController!.text != "",
-                      leading: const Icon(Icons.clear),
-                      title: const Text('Clear'),
-                    ),
-                  ),
-                ),
+        var popupMenuButtonInputs = SessionMenu(
+          textEditingController: widget.textEditingController!,
+          onSearch: widget.onSearch,
         );
 
         Widget searchTypeToggle = IconButton(
