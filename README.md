@@ -7,13 +7,9 @@ Dictionary data is sourced from the **EDICT** project, compiled as a database vi
 
 ---
 
-| F-Droid | Google Play | GitHub Releases |
-|:---:|:---:|:---:|
-| [<img src="https://fdroid.gitlab.io/artwork/badge/get-it-on.png" alt="Get it on F-Droid" height="80">](https://f-droid.org/packages/fr.odrevet.fujiten/) | [<img src="https://play.google.com/intl/en_us/badges/images/generic/en-play-badge.png" alt="Get it on Google Play" height="80">](https://play.google.com/store/apps/details?id=fr.odrevet.fujiten) | [<img src="assets/badge-github.svg" alt="Download the APK on GitHub Releases" height="80">](https://github.com/odrevet/fujiten/releases/latest) |
-
-* Download the latest APK from the [**Releases Section**](https://github.com/odrevet/fujiten/releases/latest).
-* [<img src="assets/badge-web.svg" alt="Use it online" height="80">](https://odrevet.github.io/fujiten/)
-
+| F-Droid | Google Play | GitHub Releases | Web |
+|:---:|:---:|:---:|:---:|
+| [<img src="https://fdroid.gitlab.io/artwork/badge/get-it-on.png" alt="Get it on F-Droid" height="80">](https://f-droid.org/packages/fr.odrevet.fujiten/) | [<img src="https://play.google.com/intl/en_us/badges/images/generic/en-play-badge.png" alt="Get it on Google Play" height="80">](https://play.google.com/store/apps/details?id=fr.odrevet.fujiten) | [<img src="assets/badge-github.svg" alt="Download the APK on GitHub Releases" height="80">](https://github.com/odrevet/fujiten/releases/latest) | [<img src="assets/badge-web.svg" alt="Use it online" height="80">](https://odrevet.github.io/fujiten/) |
 
 ---
 
