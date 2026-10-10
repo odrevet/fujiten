@@ -11,7 +11,15 @@ Dictionary data is sourced from the **EDICT** project, compiled as a database vi
 [<img src="https://play.google.com/intl/en_us/badges/images/generic/en-play-badge.png" alt="Get it on Google Play" height="80">](https://play.google.com/store/apps/details?id=fr.odrevet.fujiten)
 [<img src="https://img.shields.io/badge/Use%20it%20online-odrevet.github.io%2Ffujiten-blue?style=for-the-badge" alt="Use it online" height="80">](https://odrevet.github.io/fujiten/)
 
-Or download the latest APK from the [**Releases Section**](https://github.com/odrevet/fujiten/releases/latest).
+
+
+| F-Droid | Google Play | GitHub Releases |
+|:---:|:---:|:---:|
+| [<img src="https://fdroid.gitlab.io/artwork/badge/get-it-on.png" alt="Get it on F-Droid" height="80">](https://f-droid.org/packages/fr.odrevet.fujiten/) | [<img src="https://play.google.com/intl/en_us/badges/images/generic/en-play-badge.png" alt="Get it on Google Play" height="80">](https://play.google.com/store/apps/details?id=fr.odrevet.fujiten) | [<img src="assets/badge-github.svg" alt="Download the APK on GitHub Releases" height="80">](https://github.com/odrevet/fujiten/releases/latest) |
+
+* Download the latest APK from the [**Releases Section**](https://github.com/odrevet/fujiten/releases/latest).
+* [<img src="assets/badge-web.svg" alt="Use it online" height="80">](https://odrevet.github.io/fujiten/)
+
 
 ---
 
