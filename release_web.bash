@@ -1,18 +1,18 @@
 #!/usr/bin/env bash
 set -e
 
-flutter build web --release --base-href /fujiten/
+REPO=$(basename -s .git "$(git remote get-url origin)")
 
-cp -r build/web /tmp/fujiten_web
+flutter build web --release --base-href "/$REPO/"
 
-git switch gh-pages
-rm -rf -- *
-cp -r /tmp/fujiten_web/. .
+WT=$(mktemp -d)
+git worktree add "$WT" gh-pages
+trap 'git worktree remove --force "$WT"' EXIT
 
-git add -A
-git commit -m "update web build"
-git push origin gh-pages
+find "$WT" -mindepth 1 -maxdepth 1 ! -name .git -exec rm -rf {} +
 
-git switch main
+cp -r build/web/. "$WT"/
 
-rm -rf /tmp/fujiten_web
+git -C "$WT" add -A
+git -C "$WT" commit -m "update web build"
+git -C "$WT" push origin gh-pages
