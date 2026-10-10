@@ -20,9 +20,9 @@ dependencies:
   flutter_bloc: ^9.1.1
   path_provider: ^2.1.6
   dio: ^5.11.0
-  archive: ^4.3.0
-  equatable: ^2.1.0
-  ruby_text: ^3.0.3
+  archive: ^4.4.0
+  equatable: ^3.0.0
+  flutter_furigana_text: ^0.0.4
   flutter_kanjivg: ^0.1.1
   dynamic_color: ^2.1.0
   flutter_colorpicker: ^1.1.0
