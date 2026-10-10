@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:ruby_text/ruby_text.dart';
+import 'package:flutter_furigana_text/widgets/furigana_text.dart';
 
 import '../cubits/favorites_cubit.dart';
 import '../cubits/search_options_cubit.dart';
@@ -13,35 +13,69 @@ import 'favorites/favorite_picker_dialog.dart';
 import 'kanji_dialog.dart';
 
 Widget buildRubyText(String mainReading) {
-  List<String> parts = mainReading.split(' ');
-  List<RubyTextData> rubyTextDataList = [];
+  final spans = <FuriganaChar>[];
+  final parts = mainReading.split(' ');
 
-  for (String part in parts) {
-    if (part.contains(':')) {
-      List<String> kanjiReading = part.split(':');
-      if (kanjiReading.length == 2) {
-        rubyTextDataList.add(
-          RubyTextData(kanjiReading[0], ruby: kanjiReading[1]),
-        );
-      } else {
-        rubyTextDataList.add(RubyTextData(part));
-      }
+  for (int i = 0; i < parts.length; i++) {
+    final part = parts[i];
+    final kanjiReading = part.split(':');
+
+    if (part.contains(':') && kanjiReading.length == 2) {
+      spans.add(FuriganaChar(text: kanjiReading[0], furigana: kanjiReading[1]));
     } else {
-      rubyTextDataList.add(RubyTextData(part));
+      spans.add(FuriganaChar(text: part));
     }
 
-    if (part != parts.last) {
-      rubyTextDataList.add(RubyTextData(' '));
+    if (i < parts.length - 1) {
+      spans.add(FuriganaChar(text: ' '));
     }
   }
 
-  return SelectionArea(
-    child: RubyText(
-      rubyTextDataList,
-      style: const TextStyle(fontSize: 24.0, fontWeight: FontWeight.w500),
-      rubyStyle: const TextStyle(fontSize: 12.0),
-      textAlign: TextAlign.center,
-    ),
+  return Builder(
+    builder: (context) {
+      final color = Theme.of(context).colorScheme.onSurface;
+      final style = TextStyle(
+        fontSize: 24.0,
+        fontWeight: FontWeight.w500,
+        height: 1.0,
+        color: color,
+      );
+      final furiganaStyle = TextStyle(fontSize: 12.0, height: 1.0, color: color);
+
+      double measure(String text, TextStyle s) {
+        final painter = TextPainter(
+          text: TextSpan(text: text, style: s),
+          textDirection: TextDirection.ltr,
+        )..layout();
+        return painter.width;
+      }
+
+      // Each span is as wide as the wider of its text and its furigana
+      final contentWidth = spans.fold<double>(0, (sum, span) {
+        final w = measure(span.text, style);
+        final f = span.furigana == null
+            ? 0.0
+            : measure(span.furigana!, furiganaStyle);
+        return sum + (w > f ? w : f);
+      });
+
+      return LayoutBuilder(
+        builder: (context, constraints) {
+          final width = (contentWidth + 4).clamp(0.0, constraints.maxWidth);
+          return Center(
+            child: SizedBox(
+              width: width,
+              child: FuriganaText(
+                spans: spans,
+                onSpanTap: (_) {},
+                style: style,
+                furiganaStyle: furiganaStyle,
+              ),
+            ),
+          );
+        },
+      );
+    },
   );
 }
 
@@ -152,8 +186,10 @@ class _ResultExpressionListState extends State<ResultExpressionList> {
 
     return Container(
       width: double.infinity,
+      constraints: const BoxConstraints(minHeight: kMinInteractiveDimension),
       padding: const EdgeInsets.symmetric(vertical: 8.0),
       child: Stack(
+        alignment: Alignment.center,
         children: [
           Center(
             child: GestureDetector(

@@ -12,7 +12,6 @@ class SettingsPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Menu')),
       body: ListView(
         children: [
           ListTile(
@@ -21,14 +20,6 @@ class SettingsPage extends StatelessWidget {
             onTap: () => Navigator.push(
               context,
               MaterialPageRoute(builder: (context) => DatasetPage()),
-            ),
-          ),
-          ListTile(
-            leading: const Icon(Icons.star),
-            title: const Text("Favorites"),
-            onTap: () => Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) => const FavoritesPage()),
             ),
           ),
           ListTile(
@@ -42,6 +33,14 @@ class SettingsPage extends StatelessWidget {
                   body: SearchOptionsWidget(),
                 ),
               ),
+            ),
+          ),
+          ListTile(
+            leading: const Icon(Icons.star),
+            title: const Text("Favorites"),
+            onTap: () => Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => const FavoritesPage()),
             ),
           ),
           ListTile(
