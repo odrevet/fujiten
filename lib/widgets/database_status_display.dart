@@ -135,7 +135,7 @@ class BackendBadge extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isPostgres = backend == DatabaseBackend.postgres;
-    final label = isPostgres ? 'Postgres' : 'SQLite';
+    final label = isPostgres ? 'Online' : 'Local';
     final icon = isPostgres ? Icons.cloud_outlined : Icons.storage_outlined;
     final scheme = Theme.of(context).colorScheme;
 

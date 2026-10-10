@@ -44,6 +44,8 @@ class _DatabaseSettingsWidgetState extends State<DatabaseSettingsWidget> {
 
     pathDb = _prefs.then((SharedPreferences prefs) {
       _selectedLang = prefs.getString('${widget.type}_lang') ?? 'eng';
+      // The stored value stays 'postgres' / 'sqlite' so existing settings
+      // keep working. Only the labels shown in the UI are 'Online' / 'Local'.
       _backend = kIsWeb
           ? DatabaseBackend.postgres
           : prefs.getString('${widget.type}_backend') == 'postgres'
@@ -140,7 +142,7 @@ class _DatabaseSettingsWidgetState extends State<DatabaseSettingsWidget> {
   }
 
   Future<void> _onBackendChanged(DatabaseBackend backend) async {
-    // On web only the Postgres backend is available.
+    // On web only the online backend is available.
     if (kIsWeb && backend == DatabaseBackend.sqlite) return;
 
     final prefs = await _prefs;
@@ -184,7 +186,7 @@ class _DatabaseSettingsWidgetState extends State<DatabaseSettingsWidget> {
     if (url.isEmpty || anonKey.isEmpty) {
       _updateLocalStatus(DatabaseStatus.error);
       setState(() {
-        downloadLog = 'Please enter the Postgres URL and anon key';
+        downloadLog = 'Please enter the server URL and key under Advanced';
       });
       return;
     }
@@ -295,37 +297,51 @@ class _DatabaseSettingsWidgetState extends State<DatabaseSettingsWidget> {
     }
   }
 
-  Widget _buildPostgresSection(BuildContext context) {
+  Widget _buildOnlineSection(BuildContext context) {
+    final bool credentialsMissing =
+        _urlController.text.isEmpty || _anonKeyController.text.isEmpty;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        TextField(
-          controller: _urlController,
-          keyboardType: TextInputType.url,
-          decoration: const InputDecoration(
-            labelText: 'Supabase URL',
-            hintText: 'https://xxxx.supabase.co',
-            prefixIcon: Icon(Icons.link),
-            border: OutlineInputBorder(),
-          ),
-        ),
-        const SizedBox(height: 12),
-        TextField(
-          controller: _anonKeyController,
-          obscureText: _obscureKey,
-          decoration: InputDecoration(
-            labelText: 'Anon / Publishable key',
-            prefixIcon: const Icon(Icons.key),
-            border: const OutlineInputBorder(),
-            suffixIcon: IconButton(
-              icon: Icon(
-                _obscureKey ? Icons.visibility : Icons.visibility_off,
+        ExpansionTile(
+          title: const Text('Advanced'),
+          leading: const Icon(Icons.tune),
+          tilePadding: EdgeInsets.zero,
+          childrenPadding: const EdgeInsets.only(top: 8, bottom: 12),
+          shape: const Border(),
+          collapsedShape: const Border(),
+          initiallyExpanded: credentialsMissing,
+          children: [
+            TextField(
+              controller: _urlController,
+              keyboardType: TextInputType.url,
+              decoration: const InputDecoration(
+                labelText: 'Supabase URL',
+                hintText: 'https://xxxx.supabase.co',
+                prefixIcon: Icon(Icons.link),
+                border: OutlineInputBorder(),
               ),
-              onPressed: () => setState(() => _obscureKey = !_obscureKey),
             ),
-          ),
+            const SizedBox(height: 12),
+            TextField(
+              controller: _anonKeyController,
+              obscureText: _obscureKey,
+              decoration: InputDecoration(
+                labelText: 'Anon / Publishable key',
+                prefixIcon: const Icon(Icons.key),
+                border: const OutlineInputBorder(),
+                suffixIcon: IconButton(
+                  icon: Icon(
+                    _obscureKey ? Icons.visibility : Icons.visibility_off,
+                  ),
+                  onPressed: () => setState(() => _obscureKey = !_obscureKey),
+                ),
+              ),
+            ),
+          ],
         ),
-        const SizedBox(height: 16),
+        const SizedBox(height: 8),
         Align(
           alignment: Alignment.centerRight,
           child: FilledButton.icon(
@@ -338,7 +354,7 @@ class _DatabaseSettingsWidgetState extends State<DatabaseSettingsWidget> {
     );
   }
 
-  Widget _buildSqliteSection(
+  Widget _buildLocalSection(
       BuildContext context,
       AsyncSnapshot<String> snapshot,
       DatabaseInterface databaseInterface,
@@ -548,30 +564,32 @@ class _DatabaseSettingsWidgetState extends State<DatabaseSettingsWidget> {
                       kanjiChar: widget.type == 'kanji' ? '漢' : '言',
                     ),
                     const SizedBox(height: 20),
-                    SegmentedButton<DatabaseBackend>(
-                      expandedInsets: EdgeInsets.zero,
-                      showSelectedIcon: false,
-                      segments: [
-                        if (!kIsWeb)
-                          const ButtonSegment(
+                    // On web only 'Online' exists, so no selector is needed.
+                    if (!kIsWeb) ...[
+                      SegmentedButton<DatabaseBackend>(
+                        expandedInsets: EdgeInsets.zero,
+                        showSelectedIcon: false,
+                        segments: const [
+                          ButtonSegment(
                             value: DatabaseBackend.sqlite,
-                            label: Text('Local SQLite'),
+                            label: Text('Local'),
                             icon: Icon(Icons.storage),
                           ),
-                        const ButtonSegment(
-                          value: DatabaseBackend.postgres,
-                          label: Text('Postgres'),
-                          icon: Icon(Icons.cloud),
-                        ),
-                      ],
-                      selected: {_backend},
-                      onSelectionChanged: (s) => _onBackendChanged(s.first),
-                    ),
-                    const SizedBox(height: 20),
+                          ButtonSegment(
+                            value: DatabaseBackend.postgres,
+                            label: Text('Online'),
+                            icon: Icon(Icons.cloud),
+                          ),
+                        ],
+                        selected: {_backend},
+                        onSelectionChanged: (s) => _onBackendChanged(s.first),
+                      ),
+                      const SizedBox(height: 20),
+                    ],
                     if (_backend == DatabaseBackend.postgres)
-                      _buildPostgresSection(context)
+                      _buildOnlineSection(context)
                     else
-                      _buildSqliteSection(context, snapshot, databaseInterface),
+                      _buildLocalSection(context, snapshot, databaseInterface),
                     if (downloadLog.isNotEmpty) _buildLog(context),
                   ],
                 ),
