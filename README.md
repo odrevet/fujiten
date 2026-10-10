@@ -16,9 +16,10 @@ Dictionary data is sourced from the **EDICT** project, compiled as a database vi
 # Screenshots
 
 <p align="center">
-  <img src="fastlane/metadata/android/en-US/images/phoneScreenshots/search.jpg" width="250" alt="Search"/>
-  <img src="fastlane/metadata/android/en-US/images/phoneScreenshots/radicals.jpg" width="250" alt="Radicals"/>
-  <img src="fastlane/metadata/android/en-US/images/phoneScreenshots/databases_settings.jpg" width="250" alt="Database Settings"/>
+  <img src="fastlane/metadata/android/en-US/images/phoneScreenshots/search.png" width="200" alt="Search"/>
+  <img src="fastlane/metadata/android/en-US/images/phoneScreenshots/search_dark.png" width="200" alt="Search (dark)"/>
+  <img src="fastlane/metadata/android/en-US/images/phoneScreenshots/search_options.png" width="200" alt="Search options"/>
+  <img src="fastlane/metadata/android/en-US/images/phoneScreenshots/theme.png" width="200" alt="Theme"/>
 </p>
 
 ---
