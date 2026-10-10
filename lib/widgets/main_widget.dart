@@ -443,18 +443,38 @@ class _MainWidgetState extends State<MainWidget> with TickerProviderStateMixin {
     _tabController.animateTo(newSearchType == SearchType.expression ? 0 : 1);
   }
 
-  void convert() {
-    String? input = widget._textEditingController.text;
-    String convertedInput;
-    if (kanaKit.isRomaji(input)) {
-      convertedInput = kanaKit.toKana(input);
-    } else if (kanaKit.isHiragana(input)) {
-      convertedInput = kanaKit.toKatakana(input);
-    } else if (kanaKit.isKatakana(input)) {
-      convertedInput = kanaKit.toRomaji(input);
-    } else {
-      convertedInput = kanaKit.toKana(input);
+  // Regexp/glob syntax and digits that must never be converted
+  static final _protected = RegExp(r'\{\d*,?\d*\}|[.*+?^$|\\()\[\]{}\d]');
+
+  String _convertSegments(String input, String Function(String) convert) {
+    final buffer = StringBuffer();
+    var last = 0;
+    for (final m in _protected.allMatches(input)) {
+      if (m.start > last) buffer.write(convert(input.substring(last, m.start)));
+      buffer.write(m.group(0)); // keep syntax as is
+      last = m.end;
     }
+    if (last < input.length) buffer.write(convert(input.substring(last)));
+    return buffer.toString();
+  }
+
+  void convert() {
+    final input = widget._textEditingController.text;
+
+    // Detect the current script on the text without syntax or digits
+    final core = input.replaceAll(_protected, '').replaceAll(' ', '');
+    if (core.isEmpty) return;
+
+    final String Function(String) converter;
+    if (kanaKit.isHiragana(core)) {
+      converter = kanaKit.toKatakana;
+    } else if (kanaKit.isKatakana(core)) {
+      converter = kanaKit.toRomaji;
+    } else {
+      converter = kanaKit.toKana; // romaji (or anything else) -> hiragana
+    }
+
+    final convertedInput = _convertSegments(input, converter);
 
     widget._textEditingController.text = convertedInput;
     context.read<InputCubit>().setInput(convertedInput);
