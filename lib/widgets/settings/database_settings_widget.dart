@@ -345,6 +345,25 @@ class _DatabaseSettingsWidgetState extends State<DatabaseSettingsWidget> {
       ) {
     final theme = Theme.of(context);
     final bool isEmpty = snapshot.data!.isEmpty;
+    final bool busy = downloadLog.isNotEmpty;
+
+    final ButtonStyle buttonStyle = FilledButton.styleFrom(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 12),
+      visualDensity: VisualDensity.compact,
+    );
+
+    final ButtonStyle clearStyle = buttonStyle.copyWith(
+      foregroundColor: WidgetStateProperty.resolveWith(
+            (states) => states.contains(WidgetState.disabled)
+            ? null
+            : theme.colorScheme.error,
+      ),
+    );
+
+    Widget buttonLabel(String text) => FittedBox(
+      fit: BoxFit.scaleDown,
+      child: Text(text, maxLines: 1),
+    );
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -401,7 +420,7 @@ class _DatabaseSettingsWidgetState extends State<DatabaseSettingsWidget> {
             DropdownMenuItem(value: 'all', child: Text('All languages')),
             DropdownMenuItem(value: 'eng', child: Text('English')),
           ],
-          onChanged: downloadLog.isNotEmpty
+          onChanged: busy
               ? null
               : (value) {
             if (value != null) {
@@ -410,34 +429,36 @@ class _DatabaseSettingsWidgetState extends State<DatabaseSettingsWidget> {
           },
         ),
         const SizedBox(height: 16),
-        Wrap(
-          alignment: WrapAlignment.end,
-          spacing: 8,
-          runSpacing: 8,
+        Row(
           children: [
-            TextButton.icon(
-              onPressed: isEmpty || downloadLog.isNotEmpty
-                  ? null
-                  : () => _clearPath(databaseInterface),
-              icon: const Icon(Icons.clear),
-              label: const Text('Clear'),
-              style: TextButton.styleFrom(
-                foregroundColor: theme.colorScheme.error,
+            Expanded(
+              child: FilledButton.tonalIcon(
+                onPressed:
+                isEmpty || busy ? null : () => _clearPath(databaseInterface),
+                icon: const Icon(Icons.clear, size: 18),
+                label: buttonLabel('Clear'),
+                style: clearStyle,
               ),
             ),
-            FilledButton.tonalIcon(
-              onPressed: downloadLog.isNotEmpty
-                  ? null
-                  : () => _pickFile(databaseInterface),
-              icon: const Icon(Icons.folder_open),
-              label: const Text('Pick File'),
+            const SizedBox(width: 8),
+            Expanded(
+              child: FilledButton.tonalIcon(
+                onPressed: busy ? null : () => _pickFile(databaseInterface),
+                icon: const Icon(Icons.folder_open, size: 18),
+                label: buttonLabel('Pick File'),
+                style: buttonStyle,
+              ),
             ),
-            FilledButton.icon(
-              onPressed: downloadLog.isNotEmpty
-                  ? null
-                  : () => _downloadDatabase(context, databaseInterface),
-              icon: const Icon(Icons.download),
-              label: const Text('Download'),
+            const SizedBox(width: 8),
+            Expanded(
+              child: FilledButton.tonalIcon(
+                onPressed: busy
+                    ? null
+                    : () => _downloadDatabase(context, databaseInterface),
+                icon: const Icon(Icons.download, size: 18),
+                label: buttonLabel('Download'),
+                style: buttonStyle,
+              ),
             ),
           ],
         ),
@@ -450,7 +471,8 @@ class _DatabaseSettingsWidgetState extends State<DatabaseSettingsWidget> {
     final bool isError =
         downloadLog.contains('Error') || downloadLog.contains('failed');
     final bool isBusy =
-        downloadLog.contains('Downloading') || downloadLog.contains('Extracting');
+        downloadLog.contains('Downloading') ||
+            downloadLog.contains('Extracting');
 
     final Color foreground = isError
         ? theme.colorScheme.onErrorContainer
