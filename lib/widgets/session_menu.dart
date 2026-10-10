@@ -16,7 +16,6 @@ class SessionMenu extends StatelessWidget {
 
   String _sessionLabel(SearchSession session, int index) {
     if (session.name.isNotEmpty) return session.name;
-    if (session.currentInput.isNotEmpty) return session.currentInput;
     return 'Session ${index + 1}';
   }
 
@@ -44,7 +43,7 @@ class SessionMenu extends StatelessWidget {
         content: TextField(
           controller: controller,
           autofocus: true,
-          decoration: const InputDecoration(hintText: 'Session name'),
+          decoration: InputDecoration(hintText: 'Session ${index + 1}'),
           onSubmitted: (value) => Navigator.of(context).pop(value),
         ),
         actions: [
@@ -59,8 +58,9 @@ class SessionMenu extends StatelessWidget {
         ],
       ),
     );
+    controller.dispose();
     if (name != null) {
-      inputCubit.renameSession(index, name);
+      inputCubit.renameSession(index, name.trim());
     }
   }
 
@@ -68,6 +68,9 @@ class SessionMenu extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocBuilder<InputCubit, Input>(
       builder: (context, input) {
+        final scheme = Theme.of(context).colorScheme;
+        final currentIndex = input.searchIndex;
+
         return MenuAnchor(
           menuChildren: [
             for (var i = 0; i < input.sessions.length; i++) ...[
@@ -85,7 +88,8 @@ class SessionMenu extends StatelessWidget {
                       child: Text('No history'),
                     )
                   else
-                    for (final term in input.sessions[i].history)
+                  // Newest first
+                    for (final term in input.sessions[i].history.reversed)
                       MenuItemButton(
                         onPressed: () => _selectHistory(context, term),
                         child: Text(term),
@@ -107,7 +111,25 @@ class SessionMenu extends StatelessWidget {
                     child: const Text('Remove session'),
                   ),
                 ],
-                child: Text(_sessionLabel(input.sessions[i], i)),
+                style: i == currentIndex
+                    ? ButtonStyle(
+                  backgroundColor: WidgetStatePropertyAll(
+                    scheme.primaryContainer,
+                  ),
+                  foregroundColor: WidgetStatePropertyAll(
+                    scheme.onPrimaryContainer,
+                  ),
+                )
+                    : null,
+                leadingIcon: i == currentIndex
+                    ? const Icon(Icons.check, size: 18)
+                    : null,
+                child: Text(
+                  _sessionLabel(input.sessions[i], i),
+                  style: i == currentIndex
+                      ? const TextStyle(fontWeight: FontWeight.bold)
+                      : null,
+                ),
               ),
             ],
             const Divider(),
@@ -124,7 +146,7 @@ class SessionMenu extends StatelessWidget {
               icon: const Icon(Icons.list),
               tooltip: 'Sessions',
               onPressed: () =>
-                  controller.isOpen ? controller.close() : controller.open(),
+              controller.isOpen ? controller.close() : controller.open(),
             );
           },
         );
