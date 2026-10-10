@@ -63,11 +63,14 @@ class _FujitenMenuBarState extends State<FujitenMenuBar> {
         final currentMode = widget.currentSearchType == SearchType.expression
             ? searchOptionsState.expressionSearchMode
             : searchOptionsState.kanjiSearchMode;
+        final isRaw = currentMode == SearchMode.raw;
         final wildcard = currentMode == SearchMode.regexp
             ? '.*'
             : (currentMode == SearchMode.glob ? '*' : null);
 
         var popupMenuButtonInsert = PopupMenuButton(
+          tooltip: 'Insert',
+          enabled: !isRaw,
           icon: const Icon(Icons.input),
           onSelected: (dynamic result) {
             switch (result) {
@@ -114,7 +117,7 @@ class _FujitenMenuBarState extends State<FujitenMenuBar> {
           ),
           onPressed: () {
             final newSearchType =
-                widget.currentSearchType == SearchType.expression
+            widget.currentSearchType == SearchType.expression
                 ? SearchType.kanji
                 : SearchType.expression;
             context.read<SearchOptionsCubit>().setSearchType(newSearchType);
@@ -129,7 +132,7 @@ class _FujitenMenuBarState extends State<FujitenMenuBar> {
                   child: SearchInput(
                     widget.textEditingController!,
                     widget.onSearch,
-                    (_) {},
+                        (_) {},
                     widget.focusNode,
                     onConvert: widget.onConvert,
                   ),
@@ -195,10 +198,10 @@ class _FujitenMenuBarState extends State<FujitenMenuBar> {
                 .textEditingController!
                 .text
                 .replaceRange(
-                  matchAtCursor.start,
-                  matchAtCursor.end,
-                  '<${selectedRadicalsOrKanji.join()}>',
-                );
+              matchAtCursor.start,
+              matchAtCursor.end,
+              '<${selectedRadicalsOrKanji.join()}>',
+            );
           }
         }
       } else {
@@ -213,10 +216,10 @@ class _FujitenMenuBarState extends State<FujitenMenuBar> {
               .textEditingController!
               .text
               .replaceRange(
-                matchAtCursor.start,
-                matchAtCursor.end,
-                selectedRadicalsOrKanji,
-              );
+            matchAtCursor.start,
+            matchAtCursor.end,
+            selectedRadicalsOrKanji,
+          );
         }
       }
 
