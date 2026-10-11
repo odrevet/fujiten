@@ -93,20 +93,21 @@ class _MainWidgetState extends State<MainWidget> with TickerProviderStateMixin {
     super.dispose();
   }
 
+  /// Online (postgres) is the default backend so the app works before any
+  /// local database is downloaded. SQLite is used only if it was explicitly
+  /// chosen. On web only the online backend is available.
+  bool _usePostgres(SharedPreferences prefs, String type) =>
+      kIsWeb || prefs.getString('${type}_backend') != 'sqlite';
+
   void initDb() async {
     final prefs = await _prefs;
 
-    // On web only the Postgres backend is available.
-    final isWeb = kIsWeb;
+    final url = prefs.getString("postgres_url") ?? SupabaseConfig.url;
+    final anonKey =
+        prefs.getString("postgres_anon_key") ?? SupabaseConfig.anonKey;
 
     // Initialize expression database
-    final expressionBackend = isWeb
-        ? 'postgres'
-        : prefs.getString("expression_backend") ?? 'sqlite';
-    if (expressionBackend == 'postgres') {
-      final url = prefs.getString("postgres_url") ?? SupabaseConfig.url;
-      final anonKey =
-          prefs.getString("postgres_anon_key") ?? SupabaseConfig.anonKey;
+    if (_usePostgres(prefs, 'expression')) {
       if (url.isNotEmpty && anonKey.isNotEmpty && mounted) {
         context.read<ExpressionCubit>().configure(
           DatabaseBackend.postgres,
@@ -122,13 +123,7 @@ class _MainWidgetState extends State<MainWidget> with TickerProviderStateMixin {
     }
 
     // Initialize kanji database
-    final kanjiBackend = isWeb
-        ? 'postgres'
-        : prefs.getString("kanji_backend") ?? 'sqlite';
-    if (kanjiBackend == 'postgres') {
-      final url = prefs.getString("postgres_url") ?? SupabaseConfig.url;
-      final anonKey =
-          prefs.getString("postgres_anon_key") ?? SupabaseConfig.anonKey;
+    if (_usePostgres(prefs, 'kanji')) {
       if (url.isNotEmpty && anonKey.isNotEmpty && mounted) {
         context.read<KanjiCubit>().configure(
           DatabaseBackend.postgres,
@@ -153,7 +148,7 @@ class _MainWidgetState extends State<MainWidget> with TickerProviderStateMixin {
       final name = prefs.getString(key);
       if (name != null) {
         return SearchMode.values.firstWhere(
-          (m) => m.name == name,
+              (m) => m.name == name,
           orElse: () => fallback,
         );
       }
@@ -166,30 +161,27 @@ class _MainWidgetState extends State<MainWidget> with TickerProviderStateMixin {
     final oldUseRegexp = prefs.getBool("search_use_regexp");
 
     // Default to regexp when the backend supports it, otherwise glob.
-    final isWeb = kIsWeb;
-    final expressionBackend = isWeb
+    final expressionBackend = _usePostgres(prefs, 'expression')
         ? 'postgres'
-        : prefs.getString("expression_backend") ?? 'sqlite';
-    final kanjiBackend = isWeb
-        ? 'postgres'
-        : prefs.getString("kanji_backend") ?? 'sqlite';
+        : 'sqlite';
+    final kanjiBackend = _usePostgres(prefs, 'kanji') ? 'postgres' : 'sqlite';
     SearchMode backendDefault(String backend) =>
         backend == 'postgres' ? SearchMode.regexp : SearchMode.glob;
 
     final expressionSearchMode = hasExpressionMode
         ? readMode("search_mode_expression", SearchMode.regexp)
         : (oldUseRegexp == true
-              ? SearchMode.regexp
-              : (oldUseRegexp == false
-                    ? SearchMode.glob
-                    : backendDefault(expressionBackend)));
+        ? SearchMode.regexp
+        : (oldUseRegexp == false
+        ? SearchMode.glob
+        : backendDefault(expressionBackend)));
     final kanjiSearchMode = hasKanjiMode
         ? readMode("search_mode_kanji", SearchMode.regexp)
         : (oldUseRegexp == true
-              ? SearchMode.regexp
-              : (oldUseRegexp == false
-                    ? SearchMode.glob
-                    : backendDefault(kanjiBackend)));
+        ? SearchMode.regexp
+        : (oldUseRegexp == false
+        ? SearchMode.glob
+        : backendDefault(kanjiBackend)));
 
     final resultsPerPageKanji =
         prefs.getInt("search_results_per_page_kanji") ?? 20;
@@ -324,9 +316,9 @@ class _MainWidgetState extends State<MainWidget> with TickerProviderStateMixin {
   }
 
   Future<void> _runSearchForType(
-    SearchType searchType,
-    String formattedInput,
-  ) async {
+      SearchType searchType,
+      String formattedInput,
+      ) async {
     final searchOptions = context.read<SearchOptionsCubit>().state;
     final searchCubit = _getCurrentSearchCubit(searchType);
 
@@ -502,8 +494,8 @@ class _MainWidgetState extends State<MainWidget> with TickerProviderStateMixin {
                         saveSearchOptions(searchOptionsState);
                         // Update tab controller when search type changes externally
                         final newIndex =
-                            searchOptionsState.searchType ==
-                                SearchType.expression
+                        searchOptionsState.searchType ==
+                            SearchType.expression
                             ? 0
                             : 1;
                         if (_tabController.index != newIndex) {
@@ -517,75 +509,76 @@ class _MainWidgetState extends State<MainWidget> with TickerProviderStateMixin {
                         child: Scaffold(
                           key: _scaffoldKey,
                           drawer: Drawer(child: SettingsPage()),
-                        floatingActionButton: search.isLoadingNextPage
-                            ? const FloatingActionButton(
-                                onPressed: null,
-                                backgroundColor: Colors.white,
-                                mini: true,
-                                child: SizedBox(
-                                  height: 10,
-                                  width: 10,
-                                  child: CircularProgressIndicator(),
-                                ),
-                              )
-                            : null,
-                        appBar: PreferredSize(
-                          preferredSize: const Size.fromHeight(56),
-                          child: Builder(
-                            builder: (context) => FujitenMenuBar(
-                              search: search,
-                              textEditingController:
-                                  widget._textEditingController,
-                              onSearch: onSearch,
-                              focusNode: focusNode,
-                              insertPosition: cursorPosition,
-                              onToggleSearchType: _toggleSearchType,
-                              currentSearchType: searchOptionsState.searchType,
-                              onConvert: convert,
+                          floatingActionButton: search.isLoadingNextPage
+                              ? const FloatingActionButton(
+                            onPressed: null,
+                            backgroundColor: Colors.white,
+                            mini: true,
+                            child: SizedBox(
+                              height: 10,
+                              width: 10,
+                              child: CircularProgressIndicator(),
                             ),
-                          ),
-                        ),
-                        body: Column(
-                          children: <Widget>[
-                            if (!isLandscape)
-                              SearchInput(
+                          )
+                              : null,
+                          appBar: PreferredSize(
+                            preferredSize: const Size.fromHeight(56),
+                            child: Builder(
+                              builder: (context) => FujitenMenuBar(
+                                search: search,
+                                textEditingController:
                                 widget._textEditingController,
-                                onSearch,
-                                onFocusChanged,
-                                focusNode,
+                                onSearch: onSearch,
+                                focusNode: focusNode,
+                                insertPosition: cursorPosition,
+                                onToggleSearchType: _toggleSearchType,
+                                currentSearchType:
+                                searchOptionsState.searchType,
                                 onConvert: convert,
                               ),
-                            Expanded(
-                              child: TabBarView(
-                                physics: const NeverScrollableScrollPhysics(),
-                                controller: _tabController,
-                                children: [
-                                  // Expression tab content
-                                  BlocProvider.value(
-                                    value: _expressionSearchCubit,
-                                    child: ResultsWidget(
-                                      onEndReached,
-                                      textEditingController:
-                                          widget._textEditingController,
-                                      onSearch: onSearch,
-                                    ),
-                                  ),
-                                  // Kanji tab content
-                                  BlocProvider.value(
-                                    value: _kanjiSearchCubit,
-                                    child: ResultsWidget(
-                                      onEndReached,
-                                      textEditingController:
-                                          widget._textEditingController,
-                                      onSearch: onSearch,
-                                    ),
-                                  ),
-                                ],
-                              ),
                             ),
-                          ],
+                          ),
+                          body: Column(
+                            children: <Widget>[
+                              if (!isLandscape)
+                                SearchInput(
+                                  widget._textEditingController,
+                                  onSearch,
+                                  onFocusChanged,
+                                  focusNode,
+                                  onConvert: convert,
+                                ),
+                              Expanded(
+                                child: TabBarView(
+                                  physics: const NeverScrollableScrollPhysics(),
+                                  controller: _tabController,
+                                  children: [
+                                    // Expression tab content
+                                    BlocProvider.value(
+                                      value: _expressionSearchCubit,
+                                      child: ResultsWidget(
+                                        onEndReached,
+                                        textEditingController:
+                                        widget._textEditingController,
+                                        onSearch: onSearch,
+                                      ),
+                                    ),
+                                    // Kanji tab content
+                                    BlocProvider.value(
+                                      value: _kanjiSearchCubit,
+                                      child: ResultsWidget(
+                                        onEndReached,
+                                        textEditingController:
+                                        widget._textEditingController,
+                                        onSearch: onSearch,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
-                      ),
                       ),
                     );
                   },

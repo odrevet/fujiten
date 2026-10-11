@@ -23,7 +23,7 @@ class _DatabaseSettingsWidgetState extends State<DatabaseSettingsWidget> {
   String downloadLog = '';
   DatabaseStatus? _localStatus;
   String _selectedLang = 'eng';
-  DatabaseBackend _backend = DatabaseBackend.sqlite;
+  DatabaseBackend _backend = DatabaseBackend.postgres;
   String _postgresUrl = '';
   String _postgresAnonKey = '';
   bool _obscureKey = true;
@@ -46,9 +46,9 @@ class _DatabaseSettingsWidgetState extends State<DatabaseSettingsWidget> {
       _selectedLang = prefs.getString('${widget.type}_lang') ?? 'eng';
       // The stored value stays 'postgres' / 'sqlite' so existing settings
       // keep working. Only the labels shown in the UI are 'Online' / 'Local'.
-      _backend = kIsWeb
-          ? DatabaseBackend.postgres
-          : prefs.getString('${widget.type}_backend') == 'postgres'
+      // Online (postgres) is the default so the app can be used before any
+      // local database is downloaded. SQLite is used only if explicitly chosen.
+      _backend = kIsWeb || prefs.getString('${widget.type}_backend') != 'sqlite'
           ? DatabaseBackend.postgres
           : DatabaseBackend.sqlite;
       _postgresUrl = prefs.getString('postgres_url') ?? SupabaseConfig.url;
@@ -154,10 +154,11 @@ class _DatabaseSettingsWidgetState extends State<DatabaseSettingsWidget> {
     await prefs.setString('${widget.type}_backend', backend.name);
 
     if (backend == DatabaseBackend.postgres) {
-      _updateLocalStatus(DatabaseStatus.pathNotSet);
       setState(() {
         downloadLog = '';
       });
+      // Connect right away, no extra tap on 'Connect' needed.
+      await _connectPostgres();
     } else {
       final path = prefs.getString('${widget.type}_path') ?? '';
       if (!mounted) return;
@@ -342,6 +343,7 @@ class _DatabaseSettingsWidgetState extends State<DatabaseSettingsWidget> {
           ],
         ),
         const SizedBox(height: 8),
+        // Kept to reconnect after changing the URL or the key.
         Align(
           alignment: Alignment.centerRight,
           child: FilledButton.icon(

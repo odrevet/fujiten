@@ -21,10 +21,14 @@ class DatabaseStatusItem extends StatelessWidget {
     super.key,
   });
 
+  bool get _isLoading => status == DatabaseStatus.loading;
+
   String _getDatabaseStatusMessage(DatabaseStatus? status) {
     switch (status) {
       case DatabaseStatus.ok:
         return "Ready";
+      case DatabaseStatus.loading:
+        return "Loading...";
       case DatabaseStatus.noResults:
         return "Invalid database (no entries found)";
       case DatabaseStatus.pathNotSet:
@@ -35,31 +39,48 @@ class DatabaseStatusItem extends StatelessWidget {
   }
 
   Color _getStatusColor(BuildContext context, DatabaseStatus? status) {
-    return status == DatabaseStatus.ok
-        ? Theme.of(context).colorScheme.primary
-        : Theme.of(context).colorScheme.error;
+    final scheme = Theme.of(context).colorScheme;
+    if (status == DatabaseStatus.loading) return scheme.onSurfaceVariant;
+    return status == DatabaseStatus.ok ? scheme.primary : scheme.error;
   }
 
-  IconData _getStatusIcon(DatabaseStatus? status) {
-    return status == DatabaseStatus.ok ? Icons.check_circle : Icons.error;
+  Widget _buildStatusIcon(DatabaseStatus? status, Color color) {
+    if (status == DatabaseStatus.loading) {
+      return SizedBox(
+        width: 16,
+        height: 16,
+        child: CircularProgressIndicator(
+          strokeWidth: 2,
+          valueColor: AlwaysStoppedAnimation<Color>(color),
+        ),
+      );
+    }
+    return Icon(
+      status == DatabaseStatus.ok ? Icons.check_circle : Icons.error,
+      size: 16,
+      color: color,
+    );
+  }
+
+  Color _getBackgroundColor(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    if (_isLoading) {
+      return scheme.surfaceContainerHighest.withValues(alpha: 0.3);
+    }
+    return status == DatabaseStatus.ok
+        ? scheme.primaryContainer.withValues(alpha: 0.3)
+        : scheme.errorContainer.withValues(alpha: 0.3);
   }
 
   @override
   Widget build(BuildContext context) {
     final statusColor = _getStatusColor(context, status);
-    final statusIcon = _getStatusIcon(status);
     final statusMessage = _getDatabaseStatusMessage(status);
 
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: status == DatabaseStatus.ok
-            ? Theme.of(
-          context,
-        ).colorScheme.primaryContainer.withValues(alpha: 0.3)
-            : Theme.of(
-          context,
-        ).colorScheme.errorContainer.withValues(alpha: 0.3),
+        color: _getBackgroundColor(context),
         borderRadius: BorderRadius.circular(12),
         border: Border.all(color: statusColor.withValues(alpha: 0.3), width: 1),
       ),
@@ -87,7 +108,7 @@ class DatabaseStatusItem extends StatelessWidget {
                 const SizedBox(height: 4),
                 Row(
                   children: [
-                    Icon(statusIcon, size: 16, color: statusColor),
+                    _buildStatusIcon(status, statusColor),
                     const SizedBox(width: 6),
                     Expanded(
                       child: Text(
@@ -184,6 +205,8 @@ class DatabaseStatusDisplay extends StatelessWidget {
                 DatabaseStatus status;
                 if (state is ExpressionLoaded || state is ExpressionReady) {
                   status = DatabaseStatus.ok;
+                } else if (state is ExpressionLoading) {
+                  status = DatabaseStatus.loading;
                 } else {
                   status = DatabaseStatus.pathNotSet;
                 }
@@ -208,6 +231,8 @@ class DatabaseStatusDisplay extends StatelessWidget {
                 DatabaseStatus status;
                 if (state is KanjiLoaded || state is KanjiReady) {
                   status = DatabaseStatus.ok;
+                } else if (state is KanjiLoading) {
+                  status = DatabaseStatus.loading;
                 } else {
                   status = DatabaseStatus.pathNotSet;
                 }
